@@ -1,34 +1,35 @@
-/* OM MOVIE BOX - MOBILE DESIGN FIX */
+
+/* OM MOVIE BOX - HEADER AND LOGO FIX */
 @media screen and (max-width: 600px) {
-  .movie-grid,
-  .movies-grid,
-  #movieGrid,
-  .catalog-grid,
-  .movie-list {
-    display: grid !important;
-    grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
-    gap: 12px !important;
+  header {
+    padding: 10px 12px !important;
+    gap: 10px !important;
   }
 
-  .movie-card {
-    width: 100% !important;
+  .logo,
+  .site-logo,
+  .brand,
+  .logo-text {
+    font-size: clamp(23px, 7vw, 34px) !important;
+    line-height: 1.15 !important;
+    max-width: 100% !important;
+    overflow-wrap: anywhere !important;
+    text-align: center !important;
+  }
+
+  .logo img,
+  .site-logo img,
+  .brand img {
+    max-width: 190px !important;
+    height: auto !important;
+    object-fit: contain !important;
+  }
+
+  .header,
+  .site-header,
+  .navbar {
     min-width: 0 !important;
+    max-width: 100% !important;
     box-sizing: border-box !important;
-  }
-
-  .movie-card img {
-    display: block;
-    width: 100%;
-    aspect-ratio: 2 / 3;
-    object-fit: cover;
-  }
-
-  .movie-card h3 {
-    font-size: 14px;
-    overflow-wrap: anywhere;
-  }
-
-  input, button, select {
-    max-width: 100%;
   }
 }
