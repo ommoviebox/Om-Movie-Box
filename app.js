@@ -47,19 +47,21 @@ const sampleTitles = [
   description: "Vibe movie details.",
   poster: "./Vibe.jpg",
 
-  download480: "YOUR_480P_DOWNLOAD_URL",
-  watch480: "YOUR_480P_WATCH_URL",
 
-  download720: "YOUR_720P_DOWNLOAD_URL",
-  watch720: "YOUR_720P_WATCH_URL",
+download480: "https://www.diskwala.com/app/6acb81bf68b5fcba7d46c3fb",
+watch480: "https://www.diskwala.com/app/6acb81bf68b5fcba7d46c3fb",
 
-  download1080: "YOUR_1080P_DOWNLOAD_URL",
-  watch1080: "YOUR_1080P_WATCH_URL",
+download720: "https://www.diskwala.com/app/6acb81bf68b5fcba7d46c3fb",
+watch720: "https://www.diskwala.com/app/6acb81bf68b5fcba7d46c3fb",
 
-  download2160: "YOUR_2160P_DOWNLOAD_URL",
-  watch2160: "YOUR_2160P_WATCH_URL",
+download1080: "https://www.diskwala.com/app/6acb81bf68b5fcba7d46c3fb",
+watch1080: "https://www.diskwala.com/app/6acb81bf68b5fcba7d46c3fb",
 
-  tutorialUrl: "YOUR_TUTORIAL_URL"
+download2160: "https://www.diskwala.com/app/6acb81bf68b5fcba7d46c3fb",
+watch2160: "https://www.diskwala.com/app/6acb81bf68b5fcba7d46c3fb",
+
+tutorialUrl: "https://t.me/c/2456248874/43"
+
 }
 ];
 
