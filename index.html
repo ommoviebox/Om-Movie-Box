@@ -1,79 +1,132 @@
+
 <!doctype html>
 <html lang="en">
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <meta name="theme-color" content="#0d0613">
-  <meta name="description" content="Discover movies and web series, details, languages, and official streaming links on Om Movie Box.">
-  <title>Om Movie Box — Movies & Web Series</title>
+  <meta name="theme-color" content="#100615">
+  <title>Om Movie Box</title>
   <link rel="stylesheet" href="style.css">
 </head>
 <body>
-  <header class="hero">
-    <a class="brand" href="./" aria-label="Om Movie Box home"><span>OM</span> MOVIE BOX</a>
-    <p class="tagline">MOVIES <b>•</b> WEB SERIES <b>•</b> OFFICIAL STREAMING</p>
-    <form class="searchbar" id="searchForm">
-      <input id="searchInput" type="search" placeholder="Search movies or web series..." aria-label="Search movies and web series">
-      <button type="submit">SEARCH</button>
-    </form>
-    <nav class="quick-links" aria-label="Quick links">
-      <a class="pill pink" href="#latest">LATEST TITLES</a>
-      <a class="pill blue" href="#official-links">OFFICIAL LINKS</a>
-      <a class="pill green" href="#how-it-works">HOW TO USE</a>
-    </nav>
-  </header>
 
-  <div class="menu-strip">
-    <button id="menuToggle" class="menu-toggle" aria-expanded="false" aria-controls="siteNav"><span>☰</span> MENU</button>
-    <nav id="siteNav" class="site-nav">
-      <a href="./">Home</a><a href="#latest">Latest</a><a href="#movies">Movies</a><a href="#series">Web Series</a><a href="#official-links">Official Links</a>
-    </nav>
-  </div>
+<header class="hero">
+  <a class="brand" href="./"><span>OM</span> MOVIE BOX</a>
+  <p class="tagline">MOVIES • WEB SERIES • MOVIE DETAILS</p>
 
-  <main class="page-wrap">
-    <section class="intro">
-      <p class="eyebrow">WELCOME TO OM MOVIE BOX</p>
-      <h1>Movies & Web Series — Discover What to Watch</h1>
-      <p>Browse titles, check details, explore languages and genres, and follow official streaming links. Availability may vary by region.</p>
-      <div class="notice"><span aria-hidden="true">✦</span> Discover new releases and find where to watch legally.</div>
-    </section>
+  <form class="searchbar" id="searchForm">
+    <input
+      id="searchInput"
+      type="search"
+      placeholder="Search movies or web series..."
+      aria-label="Search titles"
+    >
+    <button type="submit">SEARCH</button>
+  </form>
 
-    <section id="latest" class="catalog-section">
-      <div class="section-heading">
-        <div><p class="eyebrow">UPDATED COLLECTION</p><h2>Latest Movies & Web Series</h2></div>
-        <span id="resultCount" class="count-chip">Loading…</span>
+  <nav class="quick-links">
+    <a class="pill pink" href="#latest">LATEST TITLES</a>
+    <a class="pill blue" href="#official-links">OFFICIAL LINKS</a>
+    <a class="pill green" href="#how-it-works">HOW TO USE</a>
+  </nav>
+</header>
+
+<div class="menu-strip">
+  <button
+    id="menuToggle"
+    class="menu-toggle"
+    aria-expanded="false"
+    aria-controls="siteNav"
+  >☰ MENU</button>
+
+  <nav id="siteNav">
+    <a href="./">Home</a>
+    <a href="#latest">Latest</a>
+    <a href="#movies">Movies</a>
+    <a href="#series">Web Series</a>
+    <a href="#official-links">Official Links</a>
+  </nav>
+</div>
+
+<main class="page-wrap">
+
+  <section class="intro">
+    <p class="eyebrow">WELCOME TO OM MOVIE BOX</p>
+    <h1>Find Your Next Movie</h1>
+    <p>
+      Search movies and web series, explore languages and genres,
+      and click any poster to open its own details page.
+    </p>
+    <div class="notice">
+      ✦ Beautiful Movie Cards · Separate Details Pages · Mobile Friendly
+    </div>
+  </section>
+
+  <section id="latest" class="catalog-section">
+    <div class="section-heading">
+      <div>
+        <p class="eyebrow">UPDATED COLLECTION</p>
+        <h2>Latest Movies &amp; Web Series</h2>
       </div>
-      <div class="filters">
-        <label class="sr-only" for="typeFilter">Content type</label>
-        <select id="typeFilter"><option value="all">All titles</option><option value="movie">Movies</option><option value="series">Web Series</option></select>
-        <label class="sr-only" for="genreFilter">Genre</label>
-        <select id="genreFilter"><option value="all">All genres</option></select>
-        <label class="sr-only" for="languageFilter">Language</label>
-        <select id="languageFilter"><option value="all">All languages</option></select>
-      </div>
-      <div id="movieGrid" class="movie-grid" aria-live="polite"></div>
-      <p id="emptyState" class="empty-state" hidden>No titles match your search. Try a different title or filter.</p>
-    </section>
+      <span id="resultCount" class="count-chip">Loading...</span>
+    </div>
 
-    <section id="movies" class="info-section">
-      <h2>Movies</h2><p>Explore movie information, including release year, genre, language and official viewing options.</p>
-    </section>
-    <section id="series" class="info-section">
-      <h2>Web Series</h2><p>Find series details and use the official links listed on each title page.</p>
-    </section>
-    <section id="official-links" class="info-section">
-      <h2>Official streaming links</h2><p>Only add links you own or are authorized to share. Links should point to official streaming services, distributors, or rights-holder pages.</p>
-    </section>
-    <section id="how-it-works" class="info-section">
-      <h2>How to use Om Movie Box</h2><ol><li>Search by title, genre, or language.</li><li>Open a card to read the title information.</li><li>Use the official streaming link when one is available.</li></ol></section>
-  </main>
+    <div class="filters">
+      <select id="typeFilter" aria-label="Content type">
+        <option value="all">All Titles</option>
+        <option value="movie">Movies</option>
+        <option value="series">Web Series</option>
+      </select>
 
-  <footer class="footer"><a class="footer-brand" href="./">OM MOVIE BOX</a><p>Movie information and official viewing links. No unauthorized copies are hosted here.</p><a href="admin.html">Admin sign in</a><span>© <span id="year"></span> Om Movie Box</span></footer>
+      <select id="genreFilter" aria-label="Genre">
+        <option value="all">All Genres</option>
+      </select>
 
-  <dialog id="detailsDialog" class="details-dialog">
-    <button class="dialog-close" id="closeDialog" aria-label="Close details">×</button>
-    <div id="dialogContent"></div>
-  </dialog>
-  <script type="module" src="app.js"></script>
+      <select id="languageFilter" aria-label="Language">
+        <option value="all">All Languages</option>
+      </select>
+    </div>
+
+    <div id="movieGrid" class="movie-grid" aria-live="polite"></div>
+
+    <p id="emptyState" class="empty-state" hidden>
+      No titles match your search.
+    </p>
+  </section>
+
+  <section id="movies" class="info-section">
+    <h2>Movies</h2>
+    <p>Click a poster to view movie details and available authorized links.</p>
+  </section>
+
+  <section id="series" class="info-section">
+    <h2>Web Series</h2>
+    <p>Explore series details and official viewing links.</p>
+  </section>
+
+  <section id="official-links" class="info-section">
+    <h2>Official Links</h2>
+    <p>Use links you own or are authorized to share.</p>
+  </section>
+
+  <section id="how-it-works" class="info-section">
+    <h2>How To Use</h2>
+    <ol>
+      <li>Search by movie title, genre, or language.</li>
+      <li>Click a poster to open its details page.</li>
+      <li>Choose an available viewing or download link.</li>
+    </ol>
+  </section>
+
+</main>
+
+<footer class="footer">
+  <a class="footer-brand" href="./">OM MOVIE BOX</a>
+  <p>Movie information and authorized viewing links.</p>
+  <a href="admin.html">Admin Sign In</a>
+  <span>© <span id="year"></span> Om Movie Box</span>
+</footer>
+
+<script type="module" src="app.js"></script>
 </body>
 </html>
