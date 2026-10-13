@@ -1,95 +1,378 @@
+
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.14.1/firebase-app.js";
-import { getFirestore, collection, getDocs, query, where, orderBy } from "https://www.gstatic.com/firebasejs/10.14.1/firebase-firestore.js";
+import {
+  getFirestore,
+  collection,
+  getDocs,
+  query,
+  where,
+  orderBy
+} from "https://www.gstatic.com/firebasejs/10.14.1/firebase-firestore.js";
+
 import { firebaseConfig } from "./firebase-config.js";
 
+// Sample movie data
+// Add your own movies here or use your configured Firebase database.
 const sampleTitles = [
-  {id:"sample-1",title:"The Last Signal",type:"movie",year:2026,genre:"Thriller",language:"Hindi",quality:"HD",description:"A fictional thriller about a mysterious signal that changes a small town.",poster:"",officialUrl:"https://www.netflix.com/",featured:true},
-  {id:"sample-2",title:"City of Secrets",type:"series",year:2026,genre:"Mystery",language:"Hindi",quality:"Full HD",description:"A fictional mystery series following a journalist investigating old city secrets.",poster:"",officialUrl:"https://www.primevideo.com/",featured:true},
-  {id:"sample-3",title:"Beyond the Horizon",type:"movie",year:2025,genre:"Adventure",language:"English",quality:"4K",description:"A fictional adventure story about a team crossing an unexplored landscape.",poster:"",officialUrl:"https://www.disneyplus.com/",featured:false},
-  {id:"sample-4",title:"Midnight Files",type:"series",year:2025,genre:"Crime",language:"Tamil",quality:"HD",description:"A fictional crime drama about a detective reopening a cold case.",poster:"",officialUrl:"https://www.sonyliv.com/",featured:false},
-  {id:"sample-5",title:"Monsoon Letters",type:"movie",year:2024,genre:"Romance",language:"Hindi",quality:"Full HD",description:"A fictional romance told through letters found during the monsoon.",poster:"",officialUrl:"https://www.zee5.com/",featured:false},
-  {id:"sample-6",title:"The Green Room",type:"series",year:2026,genre:"Drama",language:"Malayalam",quality:"HD",description:"A fictional backstage drama about ambition, friendship and second chances.",poster:"",officialUrl:"https://www.sunnxt.com/",featured:false},
-  {id:"sathi-leelavathi",title:"Sathi Leelavathi",type:"movie",year:2025,genre:"Drama",language:"Tamil",quality:"HD",description:"Sathi Leelavathi",poster:"./Sathi.jpg",officialUrl:"https://www.diskwala.com/app/6accba3368b5fcba7d4abb4c",featured:true},
+  {
+    id: "sathi-leelavathi",
+    title: "Sathi Leelavathi",
+    type: "movie",
+    year: 2025,
+    genre: "Drama",
+    language: "Tamil",
+    quality: "HD",
+    description: "Sathi Leelavathi",
+    poster: "./Sathi.jpg",
+    officialUrl: "https://www.diskwala.com/app/6accba3368b5fcba7d4abb4c",
+    download480: "",
+    watch480: "",
+    download720: "",
+    watch720: "",
+    download1080: "",
+    watch1080: "",
+    download2160: "",
+    watch2160: "",
+    tutorialUrl: ""
+  }
 ];
-const grid = document.querySelector("#movieGrid");
-const searchInput = document.querySelector("#searchInput");
-const searchForm = document.querySelector("#searchForm");
-const typeFilter = document.querySelector("#typeFilter");
-const genreFilter = document.querySelector("#genreFilter");
-const languageFilter = document.querySelector("#languageFilter");
-const count = document.querySelector("#resultCount");
-const empty = document.querySelector("#emptyState");
-const dialog = document.querySelector("#detailsDialog");
-const dialogContent = document.querySelector("#dialogContent");
+
+const $ = selector => document.querySelector(selector);
+
 let titles = [...sampleTitles];
 
-function firebaseConfigured() {
-  return firebaseConfig.apiKey && !firebaseConfig.apiKey.startsWith("PASTE_") && firebaseConfig.projectId && firebaseConfig.projectId !== "YOUR_PROJECT_ID";
+function escapeHTML(value = "") {
+  return String(value).replace(/[&<>"']/g, char => ({
+    "&": "&amp;",
+    "<": "&lt;",
+    ">": "&gt;",
+    '"': "&quot;",
+    "'": "&#39;"
+  })[char]);
 }
+
+function safeURL(value) {
+  try {
+    const url = new URL(value);
+    return ["http:", "https:"].includes(url.protocol)
+      ? url.href
+      : "";
+  } catch {
+    return "";
+  }
+}
+
+function firebaseConfigured() {
+  return Boolean(
+    firebaseConfig?.apiKey &&
+    !firebaseConfig.apiKey.startsWith("PASTE_") &&
+    firebaseConfig?.projectId &&
+    firebaseConfig.projectId !== "YOUR_PROJECT_ID"
+  );
+}
+
+function normalizeMovie(movie) {
+  return {
+    ...movie,
+    download480: movie.download480 || "",
+    watch480: movie.watch480 || "",
+    download720: movie.download720 || "",
+    watch720: movie.watch720 || "",
+    download1080: movie.download1080 || "",
+    watch1080: movie.watch1080 || "",
+    download2160: movie.download2160 || "",
+    watch2160: movie.watch2160 || "",
+    tutorialUrl: movie.tutorialUrl || ""
+  };
+}
+
+// Load movie data from Firebase when configured.
 async function loadTitles() {
   if (firebaseConfigured()) {
     try {
       const app = initializeApp(firebaseConfig);
       const db = getFirestore(app);
-      const snapshot = await getDocs(query(collection(db, "titles"), where("published", "==", true), orderBy("createdAt", "desc")));
-      const online = snapshot.docs.map(d => ({id:d.id,...d.data()}));
-      if (online.length) titles = online;
-    } catch (err) {
-      console.warn("Using demo titles; Firebase could not be loaded:", err.message);
+
+      const movieQuery = query(
+        collection(db, "titles"),
+        where("published", "==", true),
+        orderBy("createdAt", "desc")
+      );
+
+      const snapshot = await getDocs(movieQuery);
+      const onlineMovies = snapshot.docs.map(doc => ({
+        id: doc.id,
+        ...doc.data()
+      }));
+
+      if (onlineMovies.length > 0) {
+        titles = onlineMovies.map(normalizeMovie);
+      }
+    } catch (error) {
+      console.warn("Firebase unavailable; using sample movies.", error);
     }
   }
-  fillFilters();
-  render();
+
+  if ($("#movieGrid")) {
+    fillFilters();
+    renderMovies();
+  }
+
+  if ($("#movieDetails")) {
+    renderDetails();
+  }
 }
+
+// Build the poster image or a placeholder.
+function posterHTML(movie) {
+  const posterURL = movie.poster
+    ? (movie.poster.startsWith("./") || movie.poster.startsWith("/")
+        ? movie.poster
+        : safeURL(movie.poster))
+    : "";
+
+  if (posterURL) {
+    return `<img class="poster" src="${escapeHTML(posterURL)}"
+      alt="${escapeHTML(movie.title)} poster"
+      loading="lazy"
+      onerror="this.style.display='none'">`;
+  }
+
+  return `<div class="poster-placeholder">${escapeHTML(movie.title)}</div>`;
+}
+
+// Populate genre and language filters.
 function fillFilters() {
-  const genres = [...new Set(titles.map(t=>t.genre).filter(Boolean))].sort();
-  const languages = [...new Set(titles.map(t=>t.language).filter(Boolean))].sort();
-  genreFilter.innerHTML = '<option value="all">All genres</option>' + genres.map(x=>`<option value="${escapeHtml(x)}">${escapeHtml(x)}</option>`).join("");
-  languageFilter.innerHTML = '<option value="all">All languages</option>' + languages.map(x=>`<option value="${escapeHtml(x)}">${escapeHtml(x)}</option>`).join("");
-}
-function escapeHtml(value="") { return String(value).replace(/[&<>"']/g, c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c])); }
-function safeUrl(value) { try { const u=new URL(value); return ["https:","http:"].includes(u.protocol) ? u.href : ""; } catch { return ""; } }
-function posterMarkup(t) {
-  const raw = (t.poster || "").trim();
-  const src = raw.startsWith("./") || raw.startsWith("/")
-    ? raw
-    : safeUrl(raw);
+  const genreSelect = $("#genreFilter");
+  const languageSelect = $("#languageFilter");
 
-  return src
-    ? `<img class="poster" src="${escapeHtml(src)}" alt="${escapeHtml(t.title)} poster" loading="lazy" onerror="this.style.display='none'">`
-    : `<div class="poster-placeholder"><span>${escapeHtml(t.title)}</span></div>`;
+  if (!genreSelect || !languageSelect) return;
+
+  const genres = [...new Set(titles.map(movie => movie.genre).filter(Boolean))].sort();
+  const languages = [...new Set(titles.map(movie => movie.language).filter(Boolean))].sort();
+
+  genreSelect.innerHTML =
+    '<option value="all">All Genres</option>' +
+    genres.map(genre =>
+      `<option value="${escapeHTML(genre)}">${escapeHTML(genre)}</option>`
+    ).join("");
+
+  languageSelect.innerHTML =
+    '<option value="all">All Languages</option>' +
+    languages.map(language =>
+      `<option value="${escapeHTML(language)}">${escapeHTML(language)}</option>`
+    ).join("");
 }
 
-function render() {
-  const term = searchInput.value.trim().toLowerCase();
-  const filtered = titles.filter(t => {
-    const matchesText = [t.title,t.genre,t.language,String(t.year),t.type].join(" ").toLowerCase().includes(term);
-    return matchesText && (typeFilter.value==="all" || t.type===typeFilter.value) && (genreFilter.value==="all" || t.genre===genreFilter.value) && (languageFilter.value==="all" || t.language===languageFilter.value);
+// Display movie poster cards.
+function renderMovies() {
+  const grid = $("#movieGrid");
+  if (!grid) return;
+
+  const search = ($("#searchInput")?.value || "").trim().toLowerCase();
+  const type = $("#typeFilter")?.value || "all";
+  const genre = $("#genreFilter")?.value || "all";
+  const language = $("#languageFilter")?.value || "all";
+
+  const results = titles.filter(movie => {
+    const searchable = [
+      movie.title,
+      movie.genre,
+      movie.language,
+      movie.year,
+      movie.type
+    ].join(" ").toLowerCase();
+
+    return searchable.includes(search) &&
+      (type === "all" || movie.type === type) &&
+      (genre === "all" || movie.genre === genre) &&
+      (language === "all" || movie.language === language);
   });
-  count.textContent = `${filtered.length} title${filtered.length===1?"":"s"}`;
-  empty.hidden = filtered.length > 0;
-  grid.innerHTML = filtered.map(t => `
-    <article class="movie-card" tabindex="0" role="button" aria-label="View ${escapeHtml(t.title)} details" data-id="${escapeHtml(t.id)}">
-      <div class="poster-wrap">${posterMarkup(t)}<span class="quality-tag">${escapeHtml(t.quality || "HD")}</span></div>
-      <div class="card-body"><h3 class="card-title">${escapeHtml(t.title)} (${escapeHtml(t.year || "N/A")})</h3>
-      <div class="card-meta">${t.type==="series"?"Web Series":"Movie"} · ${escapeHtml(t.language || "Various")}</div>
-      <div class="card-tags"><span class="tag">${escapeHtml(t.genre || "General")}</span><span class="tag">${escapeHtml(t.quality || "HD")}</span></div>
-      <span class="card-link">VIEW DETAILS ↗</span></div>
-    </article>`).join("");
+
+  if ($("#resultCount")) {
+    $("#resultCount").textContent = `${results.length} titles`;
+  }
+
+  if ($("#emptyState")) {
+    $("#emptyState").hidden = results.length !== 0;
+  }
+
+  grid.innerHTML = results.map(movie => `
+    <article class="movie-card"
+      tabindex="0"
+      role="link"
+      data-id="${escapeHTML(movie.id)}"
+      aria-label="View ${escapeHTML(movie.title)} details">
+
+      <div class="poster-wrap">
+        ${posterHTML(movie)}
+        <span class="quality-tag">${escapeHTML(movie.quality || "HD")}</span>
+      </div>
+
+      <div class="card-body">
+        <h3 class="card-title">${escapeHTML(movie.title)}
+          <span>(${escapeHTML(movie.year || "N/A")})</span>
+        </h3>
+
+        <div class="card-meta">
+          ${movie.type === "series" ? "Web Series" : "Movie"}
+          · ${escapeHTML(movie.language || "Various")}
+        </div>
+
+        <div class="card-tags">
+          <span class="tag">${escapeHTML(movie.genre || "General")}</span>
+          <span class="tag">${escapeHTML(movie.quality || "HD")}</span>
+        </div>
+
+        <span class="card-link">VIEW DETAILS ↗</span>
+      </div>
+    </article>
+  `).join("");
 }
-function openDetails(id) {
-  const t = titles.find(x=>x.id===id); if (!t) return;
-  const link = safeUrl(t.officialUrl || "");
-  dialogContent.innerHTML = `<div class="detail-layout"><div>${posterMarkup(t).replace('class="poster"','class="detail-poster"')}</div><div class="detail-copy"><p class="eyebrow">${t.type==="series"?"WEB SERIES":"MOVIE"} · ${escapeHtml(t.year || "Year not listed")}</p><h2>${escapeHtml(t.title)}</h2><p>${escapeHtml(t.description || "More information coming soon.")}</p><p><strong>Genre:</strong> ${escapeHtml(t.genre || "Not listed")}<br><strong>Language:</strong> ${escapeHtml(t.language || "Not listed")}<br><strong>Quality:</strong> ${escapeHtml(t.quality || "Not listed")}</p>${link?`<a class="detail-link" href="${escapeHtml(link)}" target="_blank" rel="noopener noreferrer">OPEN OFFICIAL STREAMING ↗</a>`:"<p>No official viewing link has been added yet.</p>"}</div></div>`;
-  dialog.showModal();
+
+// Open the selected movie's separate page.
+function openMovie(id) {
+  window.location.href = `movie.html?id=${encodeURIComponent(id)}`;
 }
-grid.addEventListener("click", e=>{const card=e.target.closest(".movie-card");if(card)openDetails(card.dataset.id);});
-grid.addEventListener("keydown", e=>{if((e.key==="Enter"||e.key===" ")&&e.target.matches(".movie-card")){e.preventDefault();openDetails(e.target.dataset.id);}});
-searchInput.addEventListener("input", render);
-searchForm.addEventListener("submit", e=>{e.preventDefault();render();document.querySelector("#latest").scrollIntoView({behavior:"smooth"});});
-[typeFilter,genreFilter,languageFilter].forEach(el=>el.addEventListener("change",render));
-document.querySelector("#closeDialog").addEventListener("click",()=>dialog.close());
-dialog.addEventListener("click",e=>{if(e.target===dialog)dialog.close();});
-document.querySelector("#menuToggle").addEventListener("click",()=>{const nav=document.querySelector("#siteNav");const isOpen=nav.classList.toggle("open");document.querySelector("#menuToggle").setAttribute("aria-expanded",String(isOpen));});
-document.querySelector("#year").textContent = new Date().getFullYear();
+
+// Configure a quality button.
+// Empty links stay disabled.
+function setButton(id, url, className) {
+  const button = $("#" + id);
+  if (!button) return;
+
+  const safeLink = safeURL(url || "");
+
+  button.classList.remove("disabled");
+  button.removeAttribute("aria-disabled");
+  button.removeAttribute("target");
+  button.removeAttribute("rel");
+  button.removeAttribute("href");
+
+  if (safeLink) {
+    button.href = safeLink;
+    button.target = "_blank";
+    button.rel = "noopener noreferrer";
+  } else {
+    button.href = "#";
+    button.classList.add("disabled");
+    button.setAttribute("aria-disabled", "true");
+  }
+}
+
+// Show movie details on movie.html.
+function renderDetails() {
+  const id = new URLSearchParams(window.location.search).get("id");
+  const movie = titles.find(item => String(item.id) === id);
+
+  const loading = $("#detailLoading");
+  const details = $("#movieDetails");
+  const error = $("#detailError");
+
+  if (!movie) {
+    if (loading) loading.hidden = true;
+    if (details) details.hidden = true;
+    if (error) error.hidden = false;
+    return;
+  }
+
+  if (loading) loading.hidden = true;
+  if (error) error.hidden = true;
+  if (details) details.hidden = false;
+
+  const image = $("#detailPoster");
+  const posterURL = movie.poster
+    ? (movie.poster.startsWith("./") || movie.poster.startsWith("/")
+        ? movie.poster
+        : safeURL(movie.poster))
+    : "";
+
+  if (image) {
+    image.src = posterURL || "";
+    image.alt = `${movie.title} poster`;
+    image.hidden = !posterURL;
+  }
+
+  if ($("#detailType")) {
+    $("#detailType").textContent =
+      movie.type === "series" ? "WEB SERIES" : "MOVIE DETAILS";
+  }
+
+  if ($("#detailTitle")) {
+    $("#detailTitle").textContent = movie.title || "Untitled";
+  }
+
+  if ($("#detailMeta")) {
+    $("#detailMeta").textContent =
+      `${movie.year || "Year not listed"} · ${movie.quality || "Quality not listed"}`;
+  }
+
+  if ($("#detailDescription")) {
+    $("#detailDescription").textContent =
+      movie.description || "More information coming soon.";
+  }
+
+  if ($("#detailLanguage")) {
+    $("#detailLanguage").textContent = movie.language || "Language not listed";
+  }
+
+  if ($("#detailGenre")) {
+    $("#detailGenre").textContent = movie.genre || "Genre not listed";
+  }
+
+  if ($("#detailYear")) {
+    $("#detailYear").textContent = movie.year || "Year not listed";
+  }
+
+  ["480", "720", "1080", "2160"].forEach(quality => {
+    setButton(`download${quality}`, movie[`download${quality}`]);
+    setButton(`watch${quality}`, movie[`watch${quality}`]);
+  });
+
+  setButton("tutorialLink", movie.tutorialUrl);
+}
+
+// Home page event listeners.
+const grid = $("#movieGrid");
+
+if (grid) {
+  grid.addEventListener("click", event => {
+    const card = event.target.closest(".movie-card");
+    if (card) openMovie(card.dataset.id);
+  });
+
+  grid.addEventListener("keydown", event => {
+    const card = event.target.closest(".movie-card");
+
+    if (card && (event.key === "Enter" || event.key === " ")) {
+      event.preventDefault();
+      openMovie(card.dataset.id);
+    }
+  });
+
+  $("#searchInput")?.addEventListener("input", renderMovies);
+
+  $("#searchForm")?.addEventListener("submit", event => {
+    event.preventDefault();
+    renderMovies();
+    $("#latest")?.scrollIntoView({ behavior: "smooth" });
+  });
+
+  ["#typeFilter", "#genreFilter", "#languageFilter"].forEach(selector => {
+    $(selector)?.addEventListener("change", renderMovies);
+  });
+
+  $("#menuToggle")?.addEventListener("click", () => {
+    const nav = $("#siteNav");
+    if (!nav) return;
+
+    const isOpen = nav.classList.toggle("open");
+    $("#menuToggle").setAttribute("aria-expanded", String(isOpen));
+  });
+}
+
+if ($("#year")) {
+  $("#year").textContent = new Date().getFullYear();
+}
+
 loadTitles();
