@@ -1,5 +1,205 @@
-<!doctype html>
-<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="theme-color" content="#100615"><title>Movie Details — Om Movie Box</title><link rel="stylesheet" href="style.css"></head>
-<body><header class="hero details-hero"><a class="brand" href="./"><span>OM</span> MOVIE BOX</a><p class="tagline">MOVIE DETAILS • AVAILABLE LINKS</p></header>
-<main id="movieDetailsPage" class="detail-page" aria-live="polite"><p class="loading-message">Loading movie details…</p></main>
-<footer class="footer"><a class="footer-brand" href="./">OM MOVIE BOX</a><p>Movie information and authorized viewing links.</p><span>© <span id="year"></span> Om Movie Box</span></footer><script type="module" src="app.js"></script></body></html>
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Movie Details - Om Movie Box</title>
+  <link rel="stylesheet" href="style.css">
+  <style>
+    body { background:#100d1b; color:white; font-family:Arial,sans-serif; }
+    .details { max-width:850px; margin:25px auto; padding:18px; }
+    .poster { width:100%; max-width:300px; border-radius:12px; display:block; margin:auto; }
+    .quality { margin:22px 0; padding:15px; background:#211a32; border-radius:12px; }
+    .buttons { display:flex; flex-wrap:wrap; gap:10px; margin-top:12px; }
+    .btn { display:inline-block; padding:12px 16px; border-radius:8px; color:#111;
+      text-decoration:none; font-weight:bold; }
+    .green { background:#28d66f; }
+    .yellow { background:#ffd43b; }
+    .red { background:#ff5353; }
+    .blue { background:#4da6ff; }
+    .tutorial { background:#a879ff; color:white; }
+    #message { text-align:center; padding:20px; }
+  </style>
+</head>
+<body>
+  <header class="hero">
+    <a class="brand" href="index.html">🎬 OM MOVIE BOX</a>
+  </header>
+
+  <main class="details">
+    <p id="message">Loading movie...</p>
+
+    <section id="movieDetails" hidden>
+      <img id="poster" class="poster" alt="Movie poster">
+      <h1 id="title"></h1>
+      <p id="info"></p>
+      <p id="description"></p>
+
+      <div id="qualityButtons"></div>
+
+      <p>
+        <a id="tutorial" class="btn tutorial" target="_blank"
+           rel="noopener noreferrer" hidden>📘 Tutorial</a>
+      </p>
+    </section>
+  </main>
+
+  <script type="module">
+    import { initializeApp } from
+      "https://www.gstatic.com/firebasejs/10.14.1/firebase-app.js";
+    import { getFirestore, collection, getDocs, query, where }
+      from "https://www.gstatic.com/firebasejs/10.14.1/firebase-firestore.js";
+    import { firebaseConfig } from "./firebase-config.js";
+
+    const diskwala =
+      "https://www.diskwala.com/app/6acb81bf68b5fcba7d46c3fb";
+    const tutorialUrl = "https://t.me/c/2456248874/43";
+
+    const sampleTitles = [
+      {
+        id: "sathi-leelavathi",
+        title: "Sathi Leelavathi",
+        year: 2025,
+        genre: "Drama",
+        language: "Tamil",
+        description: "Sathi Leelavathi",
+        poster: "./Sathi.jpg",
+        download480: diskwala, watch480: diskwala,
+        download720: diskwala, watch720: diskwala,
+        download1080: diskwala, watch1080: diskwala,
+        download2160: diskwala, watch2160: diskwala,
+        tutorialUrl: tutorialUrl
+      },
+      {
+        id: "vibe",
+        title: "Vibe",
+        year: 2026,
+        genre: "Drama",
+        language: "Hindi",
+        description: "Vibe movie details.",
+        poster: "./Vibe.jpg",
+        download480: diskwala, watch480: diskwala,
+        download720: diskwala, watch720: diskwala,
+        download1080: diskwala, watch1080: diskwala,
+        download2160: diskwala, watch2160: diskwala,
+        tutorialUrl: tutorialUrl
+      }
+    ];
+
+    const message = document.getElementById("message");
+    const section = document.getElementById("movieDetails");
+    const params = new URLSearchParams(location.search);
+    const movieId = params.get("id");
+
+    function showMovie(movie) {
+      if (!movie) {
+        message.textContent = "Movie nahi mili. Home page par wapas jao.";
+        return;
+      }
+
+      document.title = movie.title + " - Om Movie Box";
+      document.getElementById("title").textContent = movie.title || "Movie";
+      document.getElementById("info").textContent =
+        [movie.year, movie.language, movie.genre].filter(Boolean).join(" • ");
+      document.getElementById("description").textContent =
+        movie.description || "";
+
+      const poster = document.getElementById("poster");
+      poster.src = movie.poster || "";
+      poster.onerror = () => { poster.hidden = true; };
+
+      const qualities = [
+        ["480p", "480", "green"],
+        ["720p", "720", "yellow"],
+        ["1080p", "1080", "red"],
+        ["4K / 2160p", "2160", "blue"]
+      ];
+
+      const container = document.getElementById("qualityButtons");
+      container.replaceChildren();
+
+      qualities.forEach(([label, key, color]) => {
+        const box = document.createElement("div");
+        box.className = "quality";
+
+        const heading = document.createElement("h3");
+        heading.textContent = label;
+        box.appendChild(heading);
+
+        const buttons = document.createElement("div");
+        buttons.className = "buttons";
+
+        [
+          ["⬇ Download", "download" + key, color],
+          ["▶ Online Watch", "watch" + key, color]
+        ].forEach(([text, field, css]) => {
+          const a = document.createElement("a");
+          a.className = "btn " + css;
+          a.textContent = text;
+          a.href = movie[field] || "#";
+          a.target = "_blank";
+          a.rel = "noopener noreferrer";
+          if (!movie[field]) {
+            a.style.opacity = "0.5";
+            a.onclick = e => {
+              e.preventDefault();
+              alert("Is quality ka link abhi add nahi hai.");
+            };
+          }
+          buttons.appendChild(a);
+        });
+
+        box.appendChild(buttons);
+        container.appendChild(box);
+      });
+
+      const tutorial = document.getElementById("tutorial");
+      if (movie.tutorialUrl) {
+        tutorial.href = movie.tutorialUrl;
+        tutorial.hidden = false;
+      }
+
+      message.hidden = true;
+      section.hidden = false;
+    }
+
+    async function start() {
+      const localMovie = sampleTitles.find(m => m.id === movieId);
+
+      if (localMovie) {
+        showMovie(localMovie);
+        return;
+      }
+
+      try {
+        if (!firebaseConfig.apiKey ||
+            firebaseConfig.apiKey.startsWith("PASTE_") ||
+            !firebaseConfig.projectId ||
+            firebaseConfig.projectId === "YOUR_PROJECT_ID") {
+          throw new Error("Firebase configured nahi hai.");
+        }
+
+        const app = initializeApp(firebaseConfig);
+        const db = getFirestore(app);
+        const q = query(
+          collection(db, "titles"),
+          where("published", "==", true)
+        );
+        const snapshot = await getDocs(q);
+        const movie = snapshot.docs
+          .map(doc => ({ id: doc.id, ...doc.data() }))
+          .find(m => m.id === movieId);
+
+        showMovie(movie);
+      } catch (error) {
+        console.error(error);
+        message.textContent =
+          "Movie load nahi hui. Movie ID aur Firebase settings check karo.";
+      }
+    }
+
+    start();
+  </script>
+</body>
+</html>
