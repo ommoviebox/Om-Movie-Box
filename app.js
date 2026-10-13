@@ -50,9 +50,16 @@ function fillFilters() {
 function escapeHtml(value="") { return String(value).replace(/[&<>"']/g, c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c])); }
 function safeUrl(value) { try { const u=new URL(value); return ["https:","http:"].includes(u.protocol) ? u.href : ""; } catch { return ""; } }
 function posterMarkup(t) {
-  const src = safeUrl(t.poster || "");
-  return src ? `<img class="poster" src="${escapeHtml(src)}" alt="${escapeHtml(t.title)} poster" loading="lazy" onerror="this.remove()">` : `<div class="poster-placeholder"><span>${escapeHtml(t.title)}</span></div>`;
+  const raw = (t.poster || "").trim();
+  const src = raw.startsWith("./") || raw.startsWith("/")
+    ? raw
+    : safeUrl(raw);
+
+  return src
+    ? `<img class="poster" src="${escapeHtml(src)}" alt="${escapeHtml(t.title)} poster" loading="lazy" onerror="this.style.display='none'">`
+    : `<div class="poster-placeholder"><span>${escapeHtml(t.title)}</span></div>`;
 }
+
 function render() {
   const term = searchInput.value.trim().toLowerCase();
   const filtered = titles.filter(t => {
