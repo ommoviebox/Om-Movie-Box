@@ -1,18 +1,16 @@
+import { initializeApp, getApps, getApp } from "https://www.gstatic.com/firebasejs/10.14.1/firebase-app.js";
 
-import { initializeApp } from "https://www.gstatic.com/firebasejs/10.14.1/firebase-app.js";
 import {
   getFirestore,
   collection,
   getDocs,
   query,
-  where,
-  orderBy
+  where
 } from "https://www.gstatic.com/firebasejs/10.14.1/firebase-firestore.js";
 
 import { firebaseConfig } from "./firebase-config.js";
 
-// Sample movie data
-// Add your own movies here or use your configured Firebase database.
+// Sample movies shown only if Firebase cannot be loaded.
 const sampleTitles = [
   {
     id: "sathi-leelavathi",
@@ -35,31 +33,26 @@ const sampleTitles = [
     watch2160: "",
     tutorialUrl: ""
   },
-  
-{
-  id: "vibe",
-  title: "Vibe",
-  type: "movie",
-  year: 2026,
-  genre: "Drama",
-  language: "Hindi",
-  quality: "HD",
-  description: "Vibe movie details.",
-  poster: "./Vibe.jpg",
-download480: "https://www.diskwala.com/app/6acb81bf68b5fcba7d46c3fb",
-watch480: "https://www.diskwala.com/app/6acb81bf68b5fcba7d46c3fb",
-
-download720: "https://www.diskwala.com/app/6acb81bf68b5fcba7d46c3fb",
-watch720: "https://www.diskwala.com/app/6acb81bf68b5fcba7d46c3fb",
-
-download1080: "https://www.diskwala.com/app/6acb81bf68b5fcba7d46c3fb",
-watch1080: "https://www.diskwala.com/app/6acb81bf68b5fcba7d46c3fb",
-
-download2160: "https://www.diskwala.com/app/6acb81bf68b5fcba7d46c3fb",
-watch2160: "https://www.diskwala.com/app/6acb81bf68b5fcba7d46c3fb",
-
-tutorialUrl: "https://t.me/c/2456248874/43"
-}
+  {
+    id: "vibe",
+    title: "Vibe",
+    type: "movie",
+    year: 2026,
+    genre: "Drama",
+    language: "Hindi",
+    quality: "HD",
+    description: "Vibe movie details.",
+    poster: "./Vibe.jpg",
+    download480: "https://www.diskwala.com/app/6acb81bf68b5fcba7d46c3fb",
+    watch480: "https://www.diskwala.com/app/6acb81bf68b5fcba7d46c3fb",
+    download720: "https://www.diskwala.com/app/6acb81bf68b5fcba7d46c3fb",
+    watch720: "https://www.diskwala.com/app/6acb81bf68b5fcba7d46c3fb",
+    download1080: "https://www.diskwala.com/app/6acb81bf68b5fcba7d46c3fb",
+    watch1080: "https://www.diskwala.com/app/6acb81bf68b5fcba7d46c3fb",
+    download2160: "https://www.diskwala.com/app/6acb81bf68b5fcba7d46c3fb",
+    watch2160: "https://www.diskwala.com/app/6acb81bf68b5fcba7d46c3fb",
+    tutorialUrl: "https://t.me/c/2456248874/43"
+  }
 ];
 
 const $ = selector => document.querySelector(selector);
@@ -99,6 +92,14 @@ function firebaseConfigured() {
 function normalizeMovie(movie) {
   return {
     ...movie,
+    title: movie.title || "Untitled",
+    type: movie.type || "movie",
+    year: movie.year || "",
+    genre: movie.genre || "",
+    language: movie.language || "",
+    quality: movie.quality || "HD",
+    description: movie.description || "",
+    poster: movie.poster || "",
     download480: movie.download480 || "",
     watch480: movie.watch480 || "",
     download720: movie.download720 || "",
@@ -111,31 +112,47 @@ function normalizeMovie(movie) {
   };
 }
 
-// Load movie data from Firebase when configured.
+// Load published movies from Firestore.
 async function loadTitles() {
+  let firebaseLoaded = false;
+
   if (firebaseConfigured()) {
     try {
-      const app = initializeApp(firebaseConfig);
+      const app = getApps().length
+        ? getApp()
+        : initializeApp(firebaseConfig);
+
       const db = getFirestore(app);
 
+      // Do not require createdAt to exist.
       const movieQuery = query(
         collection(db, "titles"),
-        where("published", "==", true),
-        orderBy("createdAt", "desc")
+        where("published", "==", true)
       );
 
       const snapshot = await getDocs(movieQuery);
-      const onlineMovies = snapshot.docs.map(doc => ({
-        id: doc.id,
-        ...doc.data()
+
+      const onlineMovies = snapshot.docs.map(document => ({
+        ...document.data(),
+        id: document.id
       }));
 
-      if (onlineMovies.length > 0) {
-        titles = onlineMovies.map(normalizeMovie);
-      }
+      // Use Firestore results, even if the collection is empty.
+      titles = onlineMovies.map(normalizeMovie);
+      firebaseLoaded = true;
+
+      console.log("Firestore movies loaded:", titles.length);
+      console.log("Movie titles:", titles.map(movie => movie.title));
+
     } catch (error) {
-      console.warn("Firebase unavailable; using sample movies.", error);
+      console.error("Firebase movie loading failed:", error);
     }
+  }
+
+  // Use sample movies only when Firebase did not load successfully.
+  if (!firebaseLoaded) {
+    titles = [...sampleTitles];
+    console.warn("Showing sample movies because Firebase did not load.");
   }
 
   if ($("#movieGrid")) {
@@ -148,16 +165,20 @@ async function loadTitles() {
   }
 }
 
-// Build the poster image or a placeholder.
+// Build poster image or placeholder.
 function posterHTML(movie) {
   const posterURL = movie.poster
-    ? (movie.poster.startsWith("./") || movie.poster.startsWith("/")
-        ? movie.poster
-        : safeURL(movie.poster))
+    ? (
+        movie.poster.startsWith("./") ||
+        movie.poster.startsWith("/")
+      )
+      ? movie.poster
+      : safeURL(movie.poster)
     : "";
 
   if (posterURL) {
-    return `<img class="poster" src="${escapeHTML(posterURL)}"
+    return `<img class="poster"
+      src="${escapeHTML(posterURL)}"
       alt="${escapeHTML(movie.title)} poster"
       loading="lazy"
       onerror="this.style.display='none'">`;
@@ -173,8 +194,13 @@ function fillFilters() {
 
   if (!genreSelect || !languageSelect) return;
 
-  const genres = [...new Set(titles.map(movie => movie.genre).filter(Boolean))].sort();
-  const languages = [...new Set(titles.map(movie => movie.language).filter(Boolean))].sort();
+  const genres = [
+    ...new Set(titles.map(movie => movie.genre).filter(Boolean))
+  ].sort();
+
+  const languages = [
+    ...new Set(titles.map(movie => movie.language).filter(Boolean))
+  ].sort();
 
   genreSelect.innerHTML =
     '<option value="all">All Genres</option>' +
@@ -189,12 +215,15 @@ function fillFilters() {
     ).join("");
 }
 
-// Display movie poster cards.
+// Display movie cards.
 function renderMovies() {
   const grid = $("#movieGrid");
   if (!grid) return;
 
-  const search = ($("#searchInput")?.value || "").trim().toLowerCase();
+  const search = ($("#searchInput")?.value || "")
+    .trim()
+    .toLowerCase();
+
   const type = $("#typeFilter")?.value || "all";
   const genre = $("#genreFilter")?.value || "all";
   const language = $("#languageFilter")?.value || "all";
@@ -231,11 +260,12 @@ function renderMovies() {
 
       <div class="poster-wrap">
         ${posterHTML(movie)}
-        <span class="quality-tag">${escapeHTML(movie.quality || "HD")}</span>
+        <span class="quality-tag">${escapeHTML(movie.quality)}</span>
       </div>
 
       <div class="card-body">
-        <h3 class="card-title">${escapeHTML(movie.title)}
+        <h3 class="card-title">
+          ${escapeHTML(movie.title)}
           <span>(${escapeHTML(movie.year || "N/A")})</span>
         </h3>
 
@@ -246,7 +276,7 @@ function renderMovies() {
 
         <div class="card-tags">
           <span class="tag">${escapeHTML(movie.genre || "General")}</span>
-          <span class="tag">${escapeHTML(movie.quality || "HD")}</span>
+          <span class="tag">${escapeHTML(movie.quality)}</span>
         </div>
 
         <span class="card-link">VIEW DETAILS ↗</span>
@@ -255,14 +285,14 @@ function renderMovies() {
   `).join("");
 }
 
-// Open the selected movie's separate page.
+// Open movie details page.
 function openMovie(id) {
-  window.location.href = `movie.html?id=${encodeURIComponent(id)}`;
+  window.location.href =
+    `movie.html?id=${encodeURIComponent(id)}`;
 }
 
-// Configure a quality button.
-// Empty links stay disabled.
-function setButton(id, url, className) {
+// Configure watch/download buttons.
+function setButton(id, url) {
   const button = $("#" + id);
   if (!button) return;
 
@@ -306,10 +336,14 @@ function renderDetails() {
   if (details) details.hidden = false;
 
   const image = $("#detailPoster");
+
   const posterURL = movie.poster
-    ? (movie.poster.startsWith("./") || movie.poster.startsWith("/")
-        ? movie.poster
-        : safeURL(movie.poster))
+    ? (
+        movie.poster.startsWith("./") ||
+        movie.poster.startsWith("/")
+      )
+      ? movie.poster
+      : safeURL(movie.poster)
     : "";
 
   if (image) {
@@ -324,12 +358,12 @@ function renderDetails() {
   }
 
   if ($("#detailTitle")) {
-    $("#detailTitle").textContent = movie.title || "Untitled";
+    $("#detailTitle").textContent = movie.title;
   }
 
   if ($("#detailMeta")) {
     $("#detailMeta").textContent =
-      `${movie.year || "Year not listed"} · ${movie.quality || "Quality not listed"}`;
+      `${movie.year || "Year not listed"} · ${movie.quality}`;
   }
 
   if ($("#detailDescription")) {
@@ -338,20 +372,30 @@ function renderDetails() {
   }
 
   if ($("#detailLanguage")) {
-    $("#detailLanguage").textContent = movie.language || "Language not listed";
+    $("#detailLanguage").textContent =
+      movie.language || "Language not listed";
   }
 
   if ($("#detailGenre")) {
-    $("#detailGenre").textContent = movie.genre || "Genre not listed";
+    $("#detailGenre").textContent =
+      movie.genre || "Genre not listed";
   }
 
   if ($("#detailYear")) {
-    $("#detailYear").textContent = movie.year || "Year not listed";
+    $("#detailYear").textContent =
+      movie.year || "Year not listed";
   }
 
   ["480", "720", "1080", "2160"].forEach(quality => {
-    setButton(`download${quality}`, movie[`download${quality}`]);
-    setButton(`watch${quality}`, movie[`watch${quality}`]);
+    setButton(
+      `download${quality}`,
+      movie[`download${quality}`]
+    );
+
+    setButton(
+      `watch${quality}`,
+      movie[`watch${quality}`]
+    );
   });
 
   setButton("tutorialLink", movie.tutorialUrl);
@@ -392,7 +436,11 @@ if (grid) {
     if (!nav) return;
 
     const isOpen = nav.classList.toggle("open");
-    $("#menuToggle").setAttribute("aria-expanded", String(isOpen));
+
+    $("#menuToggle").setAttribute(
+      "aria-expanded",
+      String(isOpen)
+    );
   });
 }
 
