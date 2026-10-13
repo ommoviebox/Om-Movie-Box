@@ -34,7 +34,33 @@ const sampleTitles = [
     download2160: "",
     watch2160: "",
     tutorialUrl: ""
-  }
+  },
+  
+{
+  id: "vibe",
+  title: "Vibe",
+  type: "movie",
+  year: 2026,
+  genre: "Drama",
+  language: "Hindi",
+  quality: "HD",
+  description: "Vibe movie details.",
+  poster: "./Vibe.jpg",
+
+  download480: "YOUR_480P_DOWNLOAD_URL",
+  watch480: "YOUR_480P_WATCH_URL",
+
+  download720: "YOUR_720P_DOWNLOAD_URL",
+  watch720: "YOUR_720P_WATCH_URL",
+
+  download1080: "YOUR_1080P_DOWNLOAD_URL",
+  watch1080: "YOUR_1080P_WATCH_URL",
+
+  download2160: "YOUR_2160P_DOWNLOAD_URL",
+  watch2160: "YOUR_2160P_WATCH_URL",
+
+  tutorialUrl: "YOUR_TUTORIAL_URL"
+}
 ];
 
 const $ = selector => document.querySelector(selector);
