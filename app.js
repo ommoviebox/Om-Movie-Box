@@ -46,8 +46,6 @@ const sampleTitles = [
   quality: "HD",
   description: "Vibe movie details.",
   poster: "./Vibe.jpg",
-
-
 download480: "https://www.diskwala.com/app/6acb81bf68b5fcba7d46c3fb",
 watch480: "https://www.diskwala.com/app/6acb81bf68b5fcba7d46c3fb",
 
@@ -61,7 +59,6 @@ download2160: "https://www.diskwala.com/app/6acb81bf68b5fcba7d46c3fb",
 watch2160: "https://www.diskwala.com/app/6acb81bf68b5fcba7d46c3fb",
 
 tutorialUrl: "https://t.me/c/2456248874/43"
-
 }
 ];
 
