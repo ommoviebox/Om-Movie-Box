@@ -9,7 +9,7 @@ const sampleTitles = [
   {id:"sample-4",title:"Midnight Files",type:"series",year:2025,genre:"Crime",language:"Tamil",quality:"HD",description:"A fictional crime drama about a detective reopening a cold case.",poster:"",officialUrl:"https://www.sonyliv.com/",featured:false},
   {id:"sample-5",title:"Monsoon Letters",type:"movie",year:2024,genre:"Romance",language:"Hindi",quality:"Full HD",description:"A fictional romance told through letters found during the monsoon.",poster:"",officialUrl:"https://www.zee5.com/",featured:false},
   {id:"sample-6",title:"The Green Room",type:"series",year:2026,genre:"Drama",language:"Malayalam",quality:"HD",description:"A fictional backstage drama about ambition, friendship and second chances.",poster:"",officialUrl:"https://www.sunnxt.com/",featured:false},
-  {id:"sathi-leelavathi",title:"Sathi Leelavathi",type:"movie",year:2025,genre:"Drama",language:"Tamil",quality:"HD",description:"Sathi Leelavathi",poster:"./images/sathi.jpg",officialUrl:"https://www.diskwala.com/app/6accba3368b5fcba7d4abb4c",featured:true}
+  {id:"sathi-leelavathi",title:"Sathi Leelavathi",type:"movie",year:2025,genre:"Drama",language:"Tamil",quality:"HD",description:"Sathi Leelavathi",poster: "./Sathi.jpg/Sathi.jpg",",officialUrl:"https://www.diskwala.com/app/6accba3368b5fcba7d4abb4c",featured:true}
 ];
 const grid = document.querySelector("#movieGrid");
 const searchInput = document.querySelector("#searchInput");
