@@ -1,10 +1,9 @@
-// Create a Firebase project and paste its Web App config below.
-// These values identify your project; never put service-account private keys here.
 export const firebaseConfig = {
-  apiKey: "PASTE_FIREBASE_API_KEY",
-  authDomain: "YOUR_PROJECT.firebaseapp.com",
-  projectId: "YOUR_PROJECT_ID",
-  storageBucket: "YOUR_PROJECT.firebasestorage.app",
-  messagingSenderId: "YOUR_MESSAGING_SENDER_ID",
-  appId: "YOUR_FIREBASE_APP_ID"
+  apiKey: "AIzaSyA9o_v_OtZiNivu57yaHLDZOaRRETXu9Ew",
+  authDomain: "om-movie-box.firebaseapp.com",
+  projectId: "om-movie-box",
+  storageBucket: "om-movie-box.firebasestorage.app",
+  messagingSenderId: "726664420965",
+  appId: "1:726664420965:web:d2fb1c57828a006ac7708c",
+  measurementId: "G-HWZ0318VEH"
 };
