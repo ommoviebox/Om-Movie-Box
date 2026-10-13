@@ -1,45 +1,236 @@
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.14.1/firebase-app.js";
-import { getAuth, signInWithEmailAndPassword, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.14.1/firebase-auth.js";
-import { getFirestore, collection, getDocs, addDoc, updateDoc, deleteDoc, doc, serverTimestamp, query, orderBy } from "https://www.gstatic.com/firebasejs/10.14.1/firebase-firestore.js";
+import {
+  getAuth, signInWithEmailAndPassword,
+  onAuthStateChanged, signOut
+} from "https://www.gstatic.com/firebasejs/10.14.1/firebase-auth.js";
+import {
+  getFirestore, collection, getDocs, addDoc,
+  updateDoc, deleteDoc, doc, serverTimestamp,
+  query, orderBy
+} from "https://www.gstatic.com/firebasejs/10.14.1/firebase-firestore.js";
 import { firebaseConfig } from "./firebase-config.js";
 
-const loginForm=document.querySelector("#loginForm"), dashboard=document.querySelector("#dashboard");
-const authMessage=document.querySelector("#authMessage"), saveMessage=document.querySelector("#saveMessage");
-const titleForm=document.querySelector("#titleForm"), list=document.querySelector("#adminTitles");
-let auth,db,currentUser=null;
-const configured=firebaseConfig.apiKey && !firebaseConfig.apiKey.startsWith("PASTE_") && firebaseConfig.projectId && firebaseConfig.projectId!=="YOUR_PROJECT_ID";
-if(configured){const app=initializeApp(firebaseConfig);auth=getAuth(app);db=getFirestore(app);onAuthStateChanged(auth,user=>{currentUser=user;loginForm.hidden=!!user;dashboard.hidden=!user;if(user)loadAdminTitles();});}
-else {authMessage.textContent="Setup required: add your Firebase Web App config to firebase-config.js.";loginForm.querySelector("button").disabled=true;}
+const ADMIN_UID = "psgRupW3EfRUe61pcJzjqo36dNc2";
 
-loginForm.addEventListener("submit",async e=>{e.preventDefault();if(!auth)return;authMessage.textContent="Signing in…";try{await signInWithEmailAndPassword(auth,document.querySelector("#email").value.trim(),document.querySelector("#password").value);authMessage.textContent="Signed in."; }catch(err){authMessage.textContent="Sign in failed. Check your credentials and Firebase setup.";console.error(err);}});
-document.querySelector("#logoutButton").addEventListener("click",()=>signOut(auth));
-function escapeHtml(value=""){return String(value).replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));}
-function safeUrl(value=""){try{const u=new URL(value);return ["https:","http:"].includes(u.protocol)?u.href:"";}catch{return "";}}
-function val(id){return document.querySelector("#"+id).value.trim();}
-function resetForm(){titleForm.reset();document.querySelector("#editId").value="";document.querySelector("#yearInput").value=new Date().getFullYear();document.querySelector("#publishedInput").checked=true;}
-document.querySelector("#resetForm").addEventListener("click",resetForm);
+const $ = id => document.getElementById(id);
+const loginForm = $("loginForm");
+const dashboard = $("dashboard");
+const authMessage = $("authMessage");
+const saveMessage = $("saveMessage");
+const titleForm = $("titleForm");
+const list = $("adminTitles");
 
-titleForm.addEventListener("submit",async e=>{
- e.preventDefault(); if(!currentUser||!db)return;
- const officialUrl=val("officialUrlInput"),poster=val("posterInput");
- if((officialUrl&&!safeUrl(officialUrl))||(poster&&!safeUrl(poster))){saveMessage.textContent="Please use valid http(s) URLs.";return;}
- const payload={title:val("title"),type:val("contentType"),year:Number(val("yearInput")),genre:val("genreInput"),language:val("languageInput"),quality:val("qualityInput")||"HD",poster,description:val("descriptionInput"),officialUrl,published:document.querySelector("#publishedInput").checked,updatedAt:serverTimestamp(),updatedBy:currentUser.uid};
- try{
-   const id=val("editId");
-   if(id) await updateDoc(doc(db,"titles",id),payload);
-   else await addDoc(collection(db,"titles"),{...payload,createdAt:serverTimestamp(),createdBy:currentUser.uid});
-   saveMessage.textContent="Title saved successfully.";resetForm();await loadAdminTitles();
- }catch(err){saveMessage.textContent="Could not save. Check Firestore rules and admin permissions.";console.error(err);}
-});
-async function loadAdminTitles(){
- if(!db||!currentUser)return;
- try{
-  const snap=await getDocs(query(collection(db,"titles"),orderBy("createdAt","desc")));
-  list.innerHTML=snap.docs.map(d=>{const t=d.data();return `<article class="admin-title-row"><div><strong>${escapeHtml(t.title||"Untitled")}</strong><p>${escapeHtml(t.type||"")} · ${escapeHtml(t.year||"")} · ${t.published?"Published":"Draft"}</p></div><div class="row-actions"><button type="button" data-edit="${d.id}" class="secondary-button">EDIT</button><button type="button" data-delete="${d.id}" class="danger-button">DELETE</button></div></article>`;}).join("")||"<p class='muted'>No titles yet. Add your first title above.</p>";
- }catch(err){list.innerHTML="<p class='muted'>Could not load titles. Verify Firestore rules.</p>";console.error(err);}
+const app = initializeApp(firebaseConfig);
+const auth = getAuth(app);
+const db = getFirestore(app);
+
+let currentUser = null;
+
+function isAdmin(user) {
+  return !!user && user.uid === ADMIN_UID;
 }
-list.addEventListener("click",async e=>{
- const edit=e.target.closest("[data-edit]"),del=e.target.closest("[data-delete]");
- if(edit){const snap=await getDocs(collection(db,"titles"));const found=snap.docs.find(d=>d.id===edit.dataset.edit);if(!found)return;const t=found.data();document.querySelector("#editId").value=found.id;for(const [id,key] of [["title","title"],["contentType","type"],["yearInput","year"],["genreInput","genre"],["languageInput","language"],["qualityInput","quality"],["posterInput","poster"],["descriptionInput","description"],["officialUrlInput","officialUrl"]])document.querySelector("#"+id).value=t[key]??"";document.querySelector("#publishedInput").checked=!!t.published;titleForm.scrollIntoView({behavior:"smooth"});}
- if(del&&confirm("Delete this title permanently?")){try{await deleteDoc(doc(db,"titles",del.dataset.delete));saveMessage.textContent="Title deleted.";await loadAdminTitles();}catch(err){saveMessage.textContent="Delete failed. Check permissions.";console.error(err);}}
+
+onAuthStateChanged(auth, async user => {
+  if (user && !isAdmin(user)) {
+    currentUser = null;
+    loginForm.hidden = false;
+    dashboard.hidden = true;
+    authMessage.textContent = "यह अकाउंट Admin के लिए अधिकृत नहीं है।";
+    await signOut(auth);
+    return;
+  }
+
+  currentUser = user;
+  loginForm.hidden = !!user;
+  dashboard.hidden = !user;
+
+  if (user) {
+    authMessage.textContent = "Admin login सफल।";
+    await loadAdminTitles();
+  }
+});
+
+loginForm.addEventListener("submit", async event => {
+  event.preventDefault();
+  authMessage.textContent = "Login हो रहा है…";
+
+  try {
+    await signInWithEmailAndPassword(
+      auth, $("email").value.trim(), $("password").value
+    );
+  } catch (error) {
+    authMessage.textContent = "Login नहीं हुआ। Email और password जाँचें।";
+    console.error(error);
+  }
+});
+
+$("logoutButton").addEventListener("click", () => signOut(auth));
+
+function escapeHtml(value = "") {
+  return String(value).replace(/[&<>"']/g, char => ({
+    "&": "&amp;", "<": "&lt;", ">": "&gt;",
+    '"': "&quot;", "'": "&#39;"
+  }[char]));
+}
+
+function safeUrl(value = "") {
+  if (!value) return "";
+  try {
+    const url = new URL(value);
+    return ["https:", "http:"].includes(url.protocol) ? url.href : "";
+  } catch {
+    return "";
+  }
+}
+
+function val(id) {
+  return $(id).value.trim();
+}
+
+function resetForm() {
+  titleForm.reset();
+  $("editId").value = "";
+  $("yearInput").value = new Date().getFullYear();
+  $("publishedInput").checked = true;
+}
+
+$("resetForm").addEventListener("click", resetForm);
+
+titleForm.addEventListener("submit", async event => {
+  event.preventDefault();
+
+  if (!isAdmin(currentUser)) {
+    saveMessage.textContent = "पहले अधिकृत Admin से login करें।";
+    return;
+  }
+
+  const poster = val("posterInput");
+  const officialUrl = val("officialUrlInput");
+
+  if ((poster && !safeUrl(poster)) ||
+      (officialUrl && !safeUrl(officialUrl))) {
+    saveMessage.textContent = "कृपया सही HTTP/HTTPS URL डालें।";
+    return;
+  }
+
+  const payload = {
+    title: val("title"),
+    type: val("contentType"),
+    year: Number(val("yearInput")),
+    genre: val("genreInput"),
+    language: val("languageInput"),
+    quality: val("qualityInput") || "HD",
+    poster,
+    description: val("descriptionInput"),
+    officialUrl,
+    published: $("publishedInput").checked,
+    updatedAt: serverTimestamp(),
+    updatedBy: currentUser.uid
+  };
+
+  try {
+    const id = val("editId");
+
+    if (id) {
+      await updateDoc(doc(db, "titles", id), payload);
+    } else {
+      await addDoc(collection(db, "titles"), {
+        ...payload,
+        createdAt: serverTimestamp(),
+        createdBy: currentUser.uid
+      });
+    }
+
+    saveMessage.textContent = "मूवी सफलतापूर्वक सेव हो गई।";
+    resetForm();
+    await loadAdminTitles();
+  } catch (error) {
+    saveMessage.textContent =
+      "सेव नहीं हुआ। Firestore Rules जाँचें।";
+    console.error(error);
+  }
+});
+
+async function loadAdminTitles() {
+  if (!isAdmin(currentUser)) return;
+
+  try {
+    const snapshot = await getDocs(
+      query(collection(db, "titles"), orderBy("createdAt", "desc"))
+    );
+
+    list.innerHTML = snapshot.docs.map(item => {
+      const movie = item.data();
+
+      return `
+        <article class="admin-title-row">
+          <div>
+            <strong>${escapeHtml(movie.title || "Untitled")}</strong>
+            <p>${escapeHtml(movie.type || "")} ·
+              ${escapeHtml(movie.year || "")} ·
+              ${movie.published ? "Published" : "Draft"}
+            </p>
+          </div>
+          <div class="row-actions">
+            <button type="button" data-edit="${item.id}"
+              class="secondary-button">EDIT</button>
+            <button type="button" data-delete="${item.id}"
+              class="danger-button">DELETE</button>
+          </div>
+        </article>`;
+    }).join("") ||
+      "<p class='muted'>अभी कोई मूवी नहीं जोड़ी गई।</p>";
+  } catch (error) {
+    list.textContent = "मूवी लोड नहीं हुई। Firestore Rules जाँचें।";
+    console.error(error);
+  }
+}
+
+list.addEventListener("click", async event => {
+  if (!isAdmin(currentUser)) return;
+
+  const edit = event.target.closest("[data-edit]");
+  const remove = event.target.closest("[data-delete]");
+
+  if (edit) {
+    try {
+      const snapshot = await getDocs(collection(db, "titles"));
+      const found = snapshot.docs.find(item => item.id === edit.dataset.edit);
+      if (!found) return;
+
+      const movie = found.data();
+      $("editId").value = found.id;
+
+      for (const [id, key] of [
+        ["title", "title"],
+        ["contentType", "type"],
+        ["yearInput", "year"],
+        ["genreInput", "genre"],
+        ["languageInput", "language"],
+        ["qualityInput", "quality"],
+        ["posterInput", "poster"],
+        ["descriptionInput", "description"],
+        ["officialUrlInput", "officialUrl"]
+      ]) {
+        $(id).value = movie[key] ?? "";
+      }
+
+      $("publishedInput").checked = !!movie.published;
+      titleForm.scrollIntoView({ behavior: "smooth" });
+    } catch (error) {
+      saveMessage.textContent = "मूवी की जानकारी लोड नहीं हुई।";
+      console.error(error);
+    }
+  }
+
+  if (remove && confirm("क्या इस मूवी को हमेशा के लिए हटाना है?")) {
+    try {
+      await deleteDoc(doc(db, "titles", remove.dataset.delete));
+      saveMessage.textContent = "मूवी डिलीट हो गई।";
+      await loadAdminTitles();
+    } catch (error) {
+      saveMessage.textContent = "Delete नहीं हुआ। Rules जाँचें।";
+      console.error(error);
+    }
+  }
 });
