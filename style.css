@@ -991,3 +991,17 @@ select:focus-visible,
     aspect-ratio: 2 / 3 !important;
   }
 }
+/* FORCE 2 movie posters per row on mobile */
+@media screen and (max-width: 600px) {
+  #movieGrid,
+  .movie-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+    gap: 8px !important;
+  }
+
+  #movieGrid .movie-card,
+  .movie-grid .movie-card {
+    width: 100% !important;
+    min-width: 0 !important;
+  }
+}
