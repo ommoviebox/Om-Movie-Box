@@ -1,46 +1,169 @@
 <!doctype html>
 <html lang="en">
-<head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="theme-color" content="#0d0613"><title>Admin — Om Movie Box</title><link rel="stylesheet" href="style.css"></head>
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <meta name="theme-color" content="#0d0613">
+  <title>Admin — Om Movie Box</title>
+  <link rel="stylesheet" href="style.css">
+</head>
 <body>
-<header class="hero admin-hero"><a class="brand" href="./"><span>OM</span> MOVIE BOX</a><p class="tagline">SECURE CONTENT MANAGEMENT</p></header>
+
+<header class="hero admin-hero">
+  <a class="brand" href="./"><span>OM</span> MOVIE BOX</a>
+  <p class="tagline">SECURE CONTENT MANAGEMENT</p>
+</header>
+
 <main class="admin-wrap">
   <a class="back-link" href="./">← Back to website</a>
+
   <section class="admin-panel">
-    <p class="eyebrow">ADMIN AREA</p><h1>Admin sign in</h1>
-    <p class="muted">Firebase Authentication is required. Create your admin account in Firebase Console first.</p>
+    <p class="eyebrow">ADMIN AREA</p>
+    <h1>Admin sign in</h1>
+    <p class="muted">Sign in with your authorized Firebase admin account.</p>
+
     <form id="loginForm" class="admin-form">
-      <label>Email<input type="email" id="email" required autocomplete="username" placeholder="admin@example.com"></label>
-      <label>Password<input type="password" id="password" required autocomplete="current-password" minlength="6" placeholder="Your password"></label>
+      <label>Email
+        <input type="email" id="email" required autocomplete="username">
+      </label>
+      <label>Password
+        <input type="password" id="password" required
+          autocomplete="current-password" minlength="6">
+      </label>
       <button type="submit" class="primary-button">SIGN IN</button>
     </form>
+
     <p id="authMessage" class="status-message" role="status"></p>
   </section>
+
   <section id="dashboard" class="admin-panel" hidden>
-    <div class="dashboard-heading"><div><p class="eyebrow">CONTENT MANAGEMENT</p><h2>Manage titles</h2></div><button id="logoutButton" class="secondary-button">SIGN OUT</button></div>
+    <div class="dashboard-heading">
+      <div>
+        <p class="eyebrow">CONTENT MANAGEMENT</p>
+        <h2>Manage titles</h2>
+      </div>
+      <button id="logoutButton" type="button"
+        class="secondary-button">SIGN OUT</button>
+    </div>
+
     <form id="titleForm" class="admin-form">
       <input type="hidden" id="editId">
-      <label>Title<input id="title" required maxlength="120" placeholder="Title name"></label>
+
+      <label>Title
+        <input id="title" required maxlength="120">
+      </label>
+
       <div class="admin-two">
-        <label>Type<select id="contentType"><option value="movie">Movie</option><option value="series">Web Series</option></select></label>
-        <label>Year<input id="yearInput" type="number" min="1888" max="2100" required value="2026"></label>
+        <label>Type
+          <select id="contentType">
+            <option value="movie">Movie</option>
+            <option value="series">Web Series</option>
+          </select>
+        </label>
+        <label>Year
+          <input id="yearInput" type="number"
+            min="1888" max="2100" required value="2026">
+        </label>
       </div>
+
       <div class="admin-two">
-        <label>Genre<input id="genreInput" required placeholder="Thriller"></label>
-        <label>Language<input id="languageInput" required placeholder="Hindi"></label>
+        <label>Genre
+          <input id="genreInput" required placeholder="Drama">
+        </label>
+        <label>Language
+          <input id="languageInput" required placeholder="Hindi">
+        </label>
       </div>
+
       <div class="admin-two">
-        <label>Quality<input id="qualityInput" placeholder="HD"></label>
-        <label>Poster image URL<input id="posterInput" type="url" placeholder="https://..."></label>
+        <label>Quality
+          <input id="qualityInput" placeholder="HD">
+        </label>
+        <label>Poster image URL
+          <input id="posterInput" type="url" placeholder="https://...">
+        </label>
       </div>
-      <label>Description<textarea id="descriptionInput" rows="3" maxlength="1500" placeholder="Short synopsis"></textarea></label>
-      <label>Official streaming / rights-holder URL<input id="officialUrlInput" type="url" placeholder="https://official-service.example/title"></label>
-      <label class="check-row"><input id="publishedInput" type="checkbox" checked> Publish publicly</label>
-      <div class="form-actions"><button type="submit" class="primary-button">SAVE TITLE</button><button type="button" id="resetForm" class="secondary-button">CLEAR FORM</button></div>
+
+      <label>Description
+        <textarea id="descriptionInput" rows="3"
+          maxlength="1500"></textarea>
+      </label>
+
+      <label>Official streaming URL
+        <input id="officialUrlInput" type="url"
+          placeholder="https://...">
+      </label>
+
+      <h3>Watch / Download Links</h3>
+      <p class="muted">Enter the authorized URL for each available quality.</p>
+
+      <fieldset>
+        <legend>480p</legend>
+        <label>Watch 480p URL
+          <input id="watch480Input" type="url" placeholder="https://...">
+        </label>
+        <label>Download 480p URL
+          <input id="download480Input" type="url" placeholder="https://...">
+        </label>
+      </fieldset>
+
+      <fieldset>
+        <legend>720p</legend>
+        <label>Watch 720p URL
+          <input id="watch720Input" type="url" placeholder="https://...">
+        </label>
+        <label>Download 720p URL
+          <input id="download720Input" type="url" placeholder="https://...">
+        </label>
+      </fieldset>
+
+      <fieldset>
+        <legend>1080p</legend>
+        <label>Watch 1080p URL
+          <input id="watch1080Input" type="url" placeholder="https://...">
+        </label>
+        <label>Download 1080p URL
+          <input id="download1080Input" type="url" placeholder="https://...">
+        </label>
+      </fieldset>
+
+      <fieldset>
+        <legend>2160p / 4K</legend>
+        <label>Watch 2160p URL
+          <input id="watch2160Input" type="url" placeholder="https://...">
+        </label>
+        <label>Download 2160p URL
+          <input id="download2160Input" type="url" placeholder="https://...">
+        </label>
+      </fieldset>
+
+      <label>Tutorial URL
+        <input id="tutorialUrlInput" type="url" placeholder="https://...">
+      </label>
+
+      <label class="check-row">
+        <input id="publishedInput" type="checkbox" checked>
+        Publish publicly
+      </label>
+
+      <div class="form-actions">
+        <button type="submit" class="primary-button">SAVE TITLE</button>
+        <button type="button" id="resetForm"
+          class="secondary-button">CLEAR FORM</button>
+      </div>
     </form>
+
     <p id="saveMessage" class="status-message" role="status"></p>
-    <h3>Existing titles</h3><div id="adminTitles" class="admin-title-list"></div>
+
+    <h3>Existing titles</h3>
+    <div id="adminTitles" class="admin-title-list"></div>
   </section>
 </main>
-<footer class="footer"><p>Keep admin access private. Use official, authorized viewing links only.</p></footer>
+
+<footer class="footer">
+  <p>Keep admin access private. Use official, authorized viewing links only.</p>
+</footer>
+
 <script type="module" src="admin.js"></script>
-</body></html>
+</body>
+</html>
