@@ -42,7 +42,9 @@ const dashboard = $("dashboard");
 const authMessage = $("authMessage");
 const saveMessage = $("saveMessage");
 const titleForm = $("titleForm");
-const list = $("titleList") || $("list");
+
+// FIX: admin.html mein Existing Titles ka ID adminTitles hai.
+const list = $("adminTitles") || $("titleList") || $("list");
 
 let editId = null;
 let currentUser = null;
@@ -112,11 +114,12 @@ function valueOf(id) {
 
 function showMessage(element, message, isError = false) {
   if (!element) return;
+
   element.textContent = message;
   element.style.color = isError ? "#ff6b6b" : "#55e6a5";
 }
 
-function resetForm() {
+function resetForm(clearMessage = true) {
   if (titleForm) titleForm.reset();
 
   editId = null;
@@ -125,7 +128,7 @@ function resetForm() {
   if (year) year.value = new Date().getFullYear();
 
   const quality = $("qualityInput");
-  if (quality && !quality.value) quality.value = "HD";
+  if (quality) quality.value = "HD";
 
   const submitButton = titleForm?.querySelector(
     'button[type="submit"], input[type="submit"]'
@@ -139,7 +142,7 @@ function resetForm() {
     }
   }
 
-  showMessage(saveMessage, "");
+  if (clearMessage) showMessage(saveMessage, "");
 }
 
 function getPayload() {
@@ -166,7 +169,8 @@ function getPayload() {
       }
     } catch {
       throw new Error(
-        "Galat URL: " + fieldName + ". Sahi image ya link URL daalein."
+        "Galat URL: " + fieldName +
+        ". Sahi image ya link URL daalein."
       );
     }
   }
@@ -218,12 +222,15 @@ function renderTitleCard(id, data) {
   const year = escapeHTML(data.year || "");
   const type = escapeHTML(data.type || data.contentType || "Movie");
   const poster = escapeHTML(data.poster || "");
-  const status = data.published === false ? "Unpublished" : "Published";
+  const status = data.published === false
+    ? "Unpublished"
+    : "Published";
 
   return `
     <article class="admin-title-item" data-id="${escapeHTML(id)}"
       style="display:flex;gap:12px;align-items:center;padding:12px;
       margin:10px 0;border:1px solid #493651;border-radius:12px;">
+
       ${
         poster
           ? `<img src="${poster}" alt=""
@@ -231,14 +238,17 @@ function renderTitleCard(id, data) {
               onerror="this.style.display='none'">`
           : ""
       }
+
       <div style="flex:1;min-width:0;">
         <strong>${title}</strong>
         <div>${type} ${year ? "• " + year : ""}</div>
         <small>${status}</small>
+
         <div style="display:flex;gap:8px;flex-wrap:wrap;margin-top:8px;">
           <button type="button" data-action="edit" data-id="${escapeHTML(id)}">
             Edit
           </button>
+
           <button type="button" data-action="delete" data-id="${escapeHTML(id)}">
             Delete
           </button>
@@ -250,7 +260,9 @@ function renderTitleCard(id, data) {
 
 async function loadTitles() {
   if (!list) {
-    console.warn("Admin HTML mein titleList ya list element nahi mila.");
+    console.error(
+      "Movie list element nahi mila. admin.html mein id='adminTitles' check karein."
+    );
     return;
   }
 
@@ -265,7 +277,7 @@ async function loadTitles() {
     }));
 
     titles.sort((a, b) =>
-      getTitleName(b.data).localeCompare(getTitleName(a.data))
+      getTitleName(a.data).localeCompare(getTitleName(b.data))
     );
 
     if (!titles.length) {
@@ -276,10 +288,16 @@ async function loadTitles() {
     list.innerHTML = titles
       .map((item) => renderTitleCard(item.id, item.data))
       .join("");
+
   } catch (error) {
     console.error("Load titles error:", error);
-    list.innerHTML =
-      "<p>Movies load nahi hui. Firestore Rules aur internet check karein.</p>";
+
+    list.innerHTML = `
+      <p style="color:#ff6b6b;">
+        Movies load nahi hui.
+        Error: ${escapeHTML(error.code || error.message || "Unknown error")}
+      </p>
+    `;
   }
 }
 
@@ -295,6 +313,7 @@ function fillForm(data, id) {
   }
 
   const publishedInput = $("publishedInput") || $("published");
+
   if (publishedInput) {
     publishedInput.checked = data.published !== false;
   }
@@ -312,7 +331,11 @@ function fillForm(data, id) {
   }
 
   showMessage(saveMessage, "Movie edit ho rahi hai.");
-  titleForm?.scrollIntoView({ behavior: "smooth", block: "start" });
+
+  titleForm?.scrollIntoView({
+    behavior: "smooth",
+    block: "start"
+  });
 }
 
 if (loginForm) {
@@ -334,6 +357,7 @@ if (loginForm) {
       await signInWithEmailAndPassword(auth, email, password);
     } catch (error) {
       console.error("Login error:", error);
+
       showMessage(
         authMessage,
         "Login nahi hua. Email, password aur Firebase Auth check karein.",
@@ -372,17 +396,24 @@ if (titleForm) {
 
       if (editId) {
         await updateDoc(doc(db, "titles", editId), payload);
+
+        resetForm(false);
         showMessage(saveMessage, "Movie successfully update ho gayi!");
+
       } else {
         payload.createdAt = serverTimestamp();
+
         await addDoc(collection(db, "titles"), payload);
+
+        resetForm(false);
         showMessage(saveMessage, "Movie successfully upload ho gayi!");
       }
 
-      resetForm();
       await loadTitles();
+
     } catch (error) {
       console.error("Save movie error:", error);
+
       showMessage(
         saveMessage,
         error.message || "Movie save nahi hui. Firestore Rules check karein.",
@@ -414,9 +445,10 @@ if (list) {
         }
 
         fillForm(item.data(), id);
+
       } catch (error) {
         console.error("Edit movie error:", error);
-        alert("Movie edit nahi hui. Firestore Rules check karein.");
+        alert("Movie edit nahi hui: " + (error.code || error.message));
       }
     }
 
@@ -427,13 +459,21 @@ if (list) {
 
       if (!confirmed) return;
 
+      if (!currentUser || currentUser.uid !== ADMIN_UID) {
+        alert("Aapko admin permission nahi hai.");
+        return;
+      }
+
       try {
         await deleteDoc(doc(db, "titles", id));
+
         showMessage(saveMessage, "Movie delete ho gayi.");
+
         await loadTitles();
+
       } catch (error) {
         console.error("Delete movie error:", error);
-        alert("Movie delete nahi hui. Firestore Rules check karein.");
+        alert("Movie delete nahi hui: " + (error.code || error.message));
       }
     }
   });
@@ -475,10 +515,13 @@ onAuthStateChanged(auth, async (user) => {
   if (dashboard) dashboard.hidden = false;
 
   showMessage(authMessage, "");
+
   await loadTitles();
 });
 
-const resetButton = $("resetBtn") || $("clearFormBtn");
+// FIX: aapke admin.html mein button ka ID resetForm hai.
+const resetButton =
+  $("resetForm") || $("resetBtn") || $("clearFormBtn");
 
 if (resetButton) {
   resetButton.addEventListener("click", resetForm);
