@@ -162,11 +162,11 @@ button:focus-visible,a:focus-visible,input:focus-visible,select:focus-visible,.m
 @media (prefers-reduced-motion:reduce){
   *,*::before,*::after{scroll-behavior:auto!important;transition-duration:.01ms!important;animation-duration:.01ms!important}
 }
-/* Movie title - fixed readable size */
+/* Movie title - bigger size */
 .movie-info .movie-title {
   display: block;
   margin: 0 0 6px;
-  font-size: 15px !important;
+  font-size: 17px !important;
   line-height: 1.45 !important;
   font-weight: 700 !important;
   color: #fff7ff;
@@ -177,7 +177,8 @@ button:focus-visible,a:focus-visible,input:focus-visible,select:focus-visible,.m
 
 @media only screen and (max-width: 600px) {
   .movie-info .movie-title {
-    font-size: 14px !important;
+    font-size: 16px !important;
     line-height: 1.4 !important;
   }
 }
+
