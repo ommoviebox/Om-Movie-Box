@@ -949,3 +949,46 @@ select:focus-visible,
     animation-duration: .01ms !important;
   }
 }
+/* Home page: make movie posters smaller */
+#movieGrid {
+  display: grid !important;
+  grid-template-columns: repeat(4, minmax(0, 1fr)) !important;
+  gap: 12px !important;
+}
+
+#movieGrid .movie-card {
+  min-width: 0;
+  width: 100%;
+}
+
+#movieGrid .movie-poster-link img {
+  display: block;
+  width: 100%;
+  height: auto;
+  aspect-ratio: 2 / 3;
+  object-fit: cover;
+}
+
+#movieGrid .movie-info {
+  padding: 8px;
+}
+
+#movieGrid .movie-title {
+  font-size: 12px;
+  line-height: 1.4;
+}
+
+@media (max-width: 600px) {
+  #movieGrid {
+    grid-template-columns: repeat(3, minmax(0, 1fr)) !important;
+    gap: 8px !important;
+  }
+
+  #movieGrid .movie-info {
+    padding: 6px;
+  }
+
+  #movieGrid .movie-title {
+    font-size: 11px;
+  }
+}
