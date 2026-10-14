@@ -18,13 +18,9 @@
       --telegram: #229ed9;
     }
 
-    * {
-      box-sizing: border-box;
-    }
+    * { box-sizing: border-box; }
 
-    html {
-      scroll-behavior: smooth;
-    }
+    html { scroll-behavior: smooth; }
 
     body {
       margin: 0;
@@ -95,9 +91,7 @@
       flex-shrink: 0;
     }
 
-    .hero-info {
-      min-width: 0;
-    }
+    .hero-info { min-width: 0; }
 
     .hero-info h1 {
       font-size: clamp(17px, 4vw, 25px);
@@ -163,30 +157,29 @@
       overflow-wrap: anywhere;
     }
 
-    /* Full-width screenshot section */
+    /* BIG SCREENSHOT SECTION */
     .screenshots {
-      background: var(--panel);
-      padding: 18px 2px;
-      margin: 12px -10px 0;
+      display: block;
       width: calc(100% + 20px);
+      margin: 12px -10px 0;
+      padding: 18px 5px;
+      background: var(--panel);
     }
 
     .section-title {
       text-align: center;
-      font-size: 23px;
+      font-size: 24px;
       margin: 0 0 18px;
       font-weight: 800;
     }
 
-    .section-title .accent {
-      color: #27d8c4;
-    }
+    .section-title .accent { color: #27d8c4; }
 
-    /* One large screenshot per row */
+    /* One large screenshot on each row */
     .screenshot-grid {
       display: grid;
       grid-template-columns: minmax(0, 1fr);
-      gap: 14px;
+      gap: 12px;
       width: 100%;
       padding: 0;
       margin: 0;
@@ -197,15 +190,13 @@
       width: 100%;
       max-width: none;
       height: auto;
-      aspect-ratio: 16 / 9;
+      aspect-ratio: auto;
       object-fit: contain;
-      border-radius: 4px;
+      border-radius: 7px;
       background: #172237;
     }
 
-    .links-section {
-      padding: 10px 0 0;
-    }
+    .links-section { padding: 18px 0 0; }
 
     .links-section h2,
     .telegram-section h2 {
@@ -219,27 +210,24 @@
       max-width: 390px;
       margin: 0 auto;
       display: grid;
-      gap: 5px;
+      gap: 7px;
     }
 
     .quality-button {
       display: flex;
       align-items: center;
       justify-content: center;
-      min-height: 43px;
-      padding: 10px 12px;
-      border-radius: 6px;
+      min-height: 48px;
+      padding: 12px;
+      border-radius: 7px;
       color: white;
       font-weight: 800;
-      font-size: 14px;
+      font-size: 15px;
       text-align: center;
       overflow-wrap: anywhere;
-      transition: filter .15s;
     }
 
-    .quality-button:active {
-      filter: brightness(.85);
-    }
+    .quality-button:active { filter: brightness(.85); }
 
     .download-480 { background: #347b48; }
     .watch-480 { background: #ff9e00; color: #171717; }
@@ -250,9 +238,7 @@
     .download-2160 { background: #7b3bd5; }
     .watch-2160 { background: #008f95; }
 
-    .telegram-section {
-      padding: 30px 0 10px;
-    }
+    .telegram-section { padding: 30px 0 10px; }
 
     .telegram-button {
       display: block;
@@ -274,9 +260,7 @@
       padding: 35px 10px;
     }
 
-    .hidden {
-      display: none !important;
-    }
+    .hidden { display: none !important; }
 
     .footer {
       padding: 22px 0 10px;
@@ -296,20 +280,13 @@
         gap: 10px;
       }
 
-      .hero-info h1 {
-        font-size: 16px;
-      }
+      .hero-info h1 { font-size: 16px; }
+      .detail-row { font-size: 12px; }
 
-      .detail-row {
-        font-size: 12px;
-      }
+      .section-title { font-size: 21px; }
 
       .links-section h2,
       .telegram-section h2 {
-        font-size: 21px;
-      }
-
-      .section-title {
         font-size: 21px;
       }
     }
@@ -330,6 +307,7 @@
     <div id="movieDetails" class="hidden">
       <section class="hero-card">
         <img id="poster" class="poster" alt="Movie poster">
+
         <div class="hero-info">
           <h1 id="title"></h1>
           <div class="chips">
@@ -475,6 +453,7 @@
 
         img.onerror = () => {
           img.remove();
+
           if (!grid.children.length) {
             section.classList.add("hidden");
           }
