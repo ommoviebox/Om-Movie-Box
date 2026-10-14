@@ -1,37 +1,140 @@
-
 <!DOCTYPE html>
 <html lang="en">
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="theme-color" content="#100d1b">
   <title>Movie Details - Om Movie Box</title>
   <link rel="stylesheet" href="style.css">
+
   <style>
-    body { background:#100d1b; color:white; font-family:Arial,sans-serif; }
-    .details { max-width:850px; margin:25px auto; padding:18px; }
-    .poster { width:100%; max-width:300px; border-radius:12px; display:block; margin:auto; }
-    .quality { margin:22px 0; padding:15px; background:#211a32; border-radius:12px; }
-    .buttons { display:flex; flex-wrap:wrap; gap:10px; margin-top:12px; }
-    .btn { display:inline-block; padding:12px 16px; border-radius:8px; color:#111;
-      text-decoration:none; font-weight:bold; }
-    .green { background:#28d66f; }
-    .yellow { background:#ffd43b; }
-    .red { background:#ff5353; }
-    .blue { background:#4da6ff; }
-    .tutorial { background:#a879ff; color:white; }
-    #message { text-align:center; padding:20px; }
+    body {
+      background: #100d1b;
+      color: white;
+      font-family: Arial, sans-serif;
+    }
+
+    .details {
+      max-width: 850px;
+      margin: 25px auto;
+      padding: 18px;
+    }
+
+    .movie-nav {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 12px;
+      padding: 12px 18px;
+      max-width: 850px;
+      margin: 0 auto;
+    }
+
+    .movie-nav a {
+      display: inline-block;
+      text-decoration: none;
+      color: white;
+      font-weight: bold;
+      padding: 11px 20px;
+      border-radius: 8px;
+      background: #211a32;
+      text-align: center;
+    }
+
+    .movie-nav .telegram {
+      background: #168bd2;
+    }
+
+    .poster {
+      width: 100%;
+      max-width: 300px;
+      border-radius: 12px;
+      display: block;
+      margin: auto;
+    }
+
+    .quality {
+      margin: 22px 0;
+      padding: 15px;
+      background: #211a32;
+      border-radius: 12px;
+    }
+
+    .buttons {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
+      margin-top: 12px;
+    }
+
+    .btn {
+      display: inline-block;
+      padding: 12px 16px;
+      border-radius: 8px;
+      color: #111;
+      text-decoration: none;
+      font-weight: bold;
+      text-align: center;
+    }
+
+    .green { background: #28d66f; }
+    .yellow { background: #ffd43b; }
+    .red { background: #ff5353; }
+    .blue { background: #4da6ff; }
+    .tutorial { background: #a879ff; color: white; }
+
+    .disabled-link {
+      opacity: 0.5;
+      cursor: not-allowed;
+    }
+
+    #message {
+      text-align: center;
+      padding: 20px;
+    }
+
+    @media (max-width: 480px) {
+      .movie-nav {
+        padding: 10px;
+      }
+
+      .movie-nav a {
+        padding: 10px 15px;
+        font-size: 14px;
+      }
+
+      .details {
+        padding: 12px;
+      }
+
+      .buttons .btn {
+        flex: 1 1 120px;
+      }
+    }
   </style>
 </head>
+
 <body>
   <header class="hero">
     <a class="brand" href="index.html">🎬 OM MOVIE BOX</a>
   </header>
 
+  <nav class="movie-nav" aria-label="Main navigation">
+    <a href="index.html">MENU</a>
+    <a
+      class="telegram"
+      href="https://t.me/+jjwnXEeKgbJkNGE1"
+      target="_blank"
+      rel="noopener noreferrer"
+    >TELEGRAM ↗</a>
+  </nav>
+
   <main class="details">
-    <p id="message">Loading movie...</p>
+    <p id="message" role="status">Loading movie...</p>
 
     <section id="movieDetails" hidden>
       <img id="poster" class="poster" alt="Movie poster">
+
       <h1 id="title"></h1>
       <p id="info"></p>
       <p id="description"></p>
@@ -39,75 +142,106 @@
       <div id="qualityButtons"></div>
 
       <p>
-        <a id="tutorial" class="btn tutorial" target="_blank"
-           rel="noopener noreferrer" hidden>📘 Tutorial</a>
+        <a
+          id="tutorial"
+          class="btn tutorial"
+          target="_blank"
+          rel="noopener noreferrer"
+          hidden
+        >📘 Tutorial</a>
+      </p>
+
+      <p>
+        <a
+          class="btn telegram"
+          href="https://t.me/+jjwnXEeKgbJkNGE1"
+          target="_blank"
+          rel="noopener noreferrer"
+          style="background:#168bd2;color:white"
+        >JOIN TELEGRAM ↗</a>
       </p>
     </section>
   </main>
 
   <script type="module">
-    import { initializeApp } from
-      "https://www.gstatic.com/firebasejs/10.14.1/firebase-app.js";
-    import { getFirestore, collection, getDocs, query, where }
-      from "https://www.gstatic.com/firebasejs/10.14.1/firebase-firestore.js";
+    import {
+      initializeApp,
+      getApps,
+      getApp
+    } from "https://www.gstatic.com/firebasejs/10.14.1/firebase-app.js";
+
+    import {
+      getFirestore,
+      collection,
+      getDocs,
+      query,
+      where
+    } from "https://www.gstatic.com/firebasejs/10.14.1/firebase-firestore.js";
+
     import { firebaseConfig } from "./firebase-config.js";
 
-    const diskwala =
-      "https://www.diskwala.com/app/6acb81bf68b5fcba7d46c3fb";
-    const tutorialUrl = "https://t.me/c/2456248874/43";
-
-    const sampleTitles = [
-      {
-        id: "sathi-leelavathi",
-        title: "Sathi Leelavathi",
-        year: 2025,
-        genre: "Drama",
-        language: "Tamil",
-        description: "Sathi Leelavathi",
-        poster: "./Sathi.jpg",
-        download480: diskwala, watch480: diskwala,
-        download720: diskwala, watch720: diskwala,
-        download1080: diskwala, watch1080: diskwala,
-        download2160: diskwala, watch2160: diskwala,
-        tutorialUrl: tutorialUrl
-      },
-      {
-        id: "vibe",
-        title: "Vibe",
-        year: 2026,
-        genre: "Drama",
-        language: "Hindi",
-        description: "Vibe movie details.",
-        poster: "./Vibe.jpg",
-        download480: diskwala, watch480: diskwala,
-        download720: diskwala, watch720: diskwala,
-        download1080: diskwala, watch1080: diskwala,
-        download2160: diskwala, watch2160: diskwala,
-        tutorialUrl: tutorialUrl
-      }
-    ];
+    const TELEGRAM_URL = "https://t.me/+jjwnXEeKgbJkNGE1";
 
     const message = document.getElementById("message");
     const section = document.getElementById("movieDetails");
     const params = new URLSearchParams(location.search);
     const movieId = params.get("id");
 
+    function safeUrl(value) {
+      if (typeof value !== "string" || !value.trim()) return "";
+
+      try {
+        const url = new URL(value.trim());
+
+        return ["https:", "http:"].includes(url.protocol)
+          ? url.href
+          : "";
+      } catch {
+        return "";
+      }
+    }
+
     function showMovie(movie) {
       if (!movie) {
-        message.textContent = "Movie nahi mili. Home page par wapas jao.";
+        message.hidden = false;
+        message.textContent =
+          "Movie nahi mili. Home page par wapas jao.";
+        section.hidden = true;
         return;
       }
 
-      document.title = movie.title + " - Om Movie Box";
-      document.getElementById("title").textContent = movie.title || "Movie";
-      document.getElementById("info").textContent =
-        [movie.year, movie.language, movie.genre].filter(Boolean).join(" • ");
+      message.hidden = true;
+      section.hidden = false;
+
+      document.title =
+        (movie.title || "Movie") + " - Om Movie Box";
+
+      document.getElementById("title").textContent =
+        movie.title || "Movie";
+
+      document.getElementById("info").textContent = [
+        movie.year,
+        movie.language,
+        movie.genre,
+        movie.quality
+      ].filter(Boolean).join(" • ");
+
       document.getElementById("description").textContent =
         movie.description || "";
 
       const poster = document.getElementById("poster");
-      poster.src = movie.poster || "";
-      poster.onerror = () => { poster.hidden = true; };
+      const posterUrl = safeUrl(movie.poster || "");
+
+      poster.hidden = !posterUrl;
+      poster.onerror = () => {
+        poster.hidden = true;
+      };
+
+      if (posterUrl) {
+        poster.src = posterUrl;
+      } else {
+        poster.removeAttribute("src");
+      }
 
       const qualities = [
         ["480p", "480", "green"],
@@ -116,7 +250,9 @@
         ["4K / 2160p", "2160", "blue"]
       ];
 
-      const container = document.getElementById("qualityButtons");
+      const container =
+        document.getElementById("qualityButtons");
+
       container.replaceChildren();
 
       qualities.forEach(([label, key, color]) => {
@@ -130,23 +266,54 @@
         const buttons = document.createElement("div");
         buttons.className = "buttons";
 
-        [
-          ["⬇ Download", "download" + key, color],
-          ["▶ Online Watch", "watch" + key, color]
-        ].forEach(([text, field, css]) => {
+        const downloadUrl = safeUrl(
+          movie["download" + key] || ""
+        );
+
+        const watchUrl = safeUrl(
+          movie["watch" + key] || ""
+        );
+
+        // If quality-specific links are missing, use the
+        // saved officialUrl as a fallback.
+        const officialUrl = safeUrl(movie.officialUrl || "");
+
+        const links = [
+          [
+            "⬇ Download",
+            downloadUrl || officialUrl,
+            color
+          ],
+          [
+            "▶ Online Watch",
+            watchUrl || officialUrl,
+            color
+          ]
+        ];
+
+        links.forEach(([text, url, css]) => {
           const a = document.createElement("a");
+
           a.className = "btn " + css;
           a.textContent = text;
-          a.href = movie[field] || "#";
-          a.target = "_blank";
-          a.rel = "noopener noreferrer";
-          if (!movie[field]) {
-            a.style.opacity = "0.5";
-            a.onclick = e => {
-              e.preventDefault();
-              alert("Is quality ka link abhi add nahi hai.");
-            };
+
+          if (url) {
+            a.href = url;
+            a.target = "_blank";
+            a.rel = "noopener noreferrer";
+          } else {
+            a.href = "#";
+            a.classList.add("disabled-link");
+            a.setAttribute("aria-disabled", "true");
+
+            a.addEventListener("click", event => {
+              event.preventDefault();
+              alert(
+                "Is quality ka link Admin Panel mein add karein."
+              );
+            });
           }
+
           buttons.appendChild(a);
         });
 
@@ -155,47 +322,63 @@
       });
 
       const tutorial = document.getElementById("tutorial");
-      if (movie.tutorialUrl) {
-        tutorial.href = movie.tutorialUrl;
-        tutorial.hidden = false;
-      }
+      const tutorialUrl = safeUrl(movie.tutorialUrl || "");
 
-      message.hidden = true;
-      section.hidden = false;
+      tutorial.hidden = !tutorialUrl;
+
+      if (tutorialUrl) {
+        tutorial.href = tutorialUrl;
+      } else {
+        tutorial.removeAttribute("href");
+      }
     }
 
     async function start() {
-      const localMovie = sampleTitles.find(m => m.id === movieId);
-
-      if (localMovie) {
-        showMovie(localMovie);
+      if (!movieId) {
+        message.textContent =
+          "Movie ID nahi mili. Home page se movie open karein.";
         return;
       }
 
       try {
-        if (!firebaseConfig.apiKey ||
-            firebaseConfig.apiKey.startsWith("PASTE_") ||
-            !firebaseConfig.projectId ||
-            firebaseConfig.projectId === "YOUR_PROJECT_ID") {
-          throw new Error("Firebase configured nahi hai.");
+        if (
+          !firebaseConfig?.apiKey ||
+          !firebaseConfig?.projectId
+        ) {
+          throw new Error("Firebase configuration missing.");
         }
 
-        const app = initializeApp(firebaseConfig);
+        const app = getApps().length
+          ? getApp()
+          : initializeApp(firebaseConfig);
+
         const db = getFirestore(app);
+
         const q = query(
           collection(db, "titles"),
           where("published", "==", true)
         );
-        const snapshot = await getDocs(q);
-        const movie = snapshot.docs
-          .map(doc => ({ id: doc.id, ...doc.data() }))
-          .find(m => m.id === movieId);
 
-        showMovie(movie);
+        const snapshot = await getDocs(q);
+
+        const movieDoc = snapshot.docs.find(
+          doc => doc.id === movieId
+        );
+
+        if (movieDoc) {
+          showMovie({
+            ...movieDoc.data(),
+            id: movieDoc.id
+          });
+        } else {
+          message.textContent =
+            "Movie Firestore mein nahi mili ya publish nahi hai.";
+        }
       } catch (error) {
-        console.error(error);
+        console.error("Movie loading error:", error);
+
         message.textContent =
-          "Movie load nahi hui. Movie ID aur Firebase settings check karo.";
+          "Movie load nahi hui. Internet, Firebase Rules aur Movie ID check karein.";
       }
     }
 
