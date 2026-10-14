@@ -311,24 +311,75 @@ select:focus-visible,
 .movie-grid {
   display: grid;
   grid-template-columns: repeat(4, minmax(0, 1fr));
-  gap: 20px;
+  gap: 14px;
 }
 
 .movie-card {
   min-width: 0;
   overflow: hidden;
   border: 1px solid var(--border);
-  border-radius: 15px;
+  border-radius: 12px;
   background: linear-gradient(160deg, #251630, #170e20);
   cursor: pointer;
   transition: transform .25s, border-color .25s, box-shadow .25s;
 }
 
 .movie-card:hover {
-  transform: translateY(-5px);
+  transform: translateY(-3px);
   border-color: #ff3d9a70;
   box-shadow: 0 12px 32px #0005;
 }
+
+/* Compatible with app.js poster markup */
+
+.movie-poster-link {
+  display: block;
+  width: 100%;
+  overflow: hidden;
+}
+
+.movie-poster-link > img {
+  display: block;
+  width: 100%;
+  height: auto;
+  aspect-ratio: 2 / 3;
+  object-fit: cover;
+  background: #291a34;
+}
+
+.movie-poster-link .poster-placeholder {
+  display: grid;
+  place-items: center;
+  width: 100%;
+  height: auto;
+  aspect-ratio: 2 / 3;
+  padding: 10px;
+  background: linear-gradient(145deg, #48245b, #170e20);
+  color: white;
+  text-align: center;
+  font-size: 14px;
+  font-weight: 900;
+}
+
+.movie-info {
+  min-width: 0;
+  padding: 9px;
+}
+
+.movie-title {
+  margin: 0 0 5px;
+  overflow-wrap: anywhere;
+  font-size: 13px;
+  line-height: 1.4;
+}
+
+.movie-meta {
+  color: var(--muted);
+  font-size: 11px;
+  overflow-wrap: anywhere;
+}
+
+/* Styles retained for other card layouts */
 
 .poster-wrap {
   position: relative;
@@ -346,7 +397,7 @@ select:focus-visible,
 }
 
 .movie-card:hover .poster {
-  transform: scale(1.045);
+  transform: scale(1.035);
 }
 
 .poster-placeholder {
@@ -427,6 +478,49 @@ select:focus-visible,
   border-radius: 12px;
   color: var(--muted);
   text-align: center;
+}
+
+/* Pagination */
+
+#pagination {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 8px;
+  flex-wrap: wrap;
+  margin: 24px 0;
+}
+
+.page-btn,
+.page-number {
+  padding: 7px 11px;
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  background: var(--panel);
+  color: white;
+  cursor: pointer;
+}
+
+.page-number.active {
+  background: var(--pink);
+  border-color: var(--pink);
+}
+
+.page-btn:disabled {
+  opacity: .45;
+  cursor: not-allowed;
+}
+
+.page-numbers {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 5px;
+}
+
+.page-info {
+  color: var(--muted);
+  font-size: 12px;
 }
 
 /* Information sections */
@@ -695,7 +789,7 @@ select:focus-visible,
 @media (max-width: 900px) {
   .movie-grid {
     grid-template-columns: repeat(3, minmax(0, 1fr));
-    gap: 14px;
+    gap: 12px;
   }
 
   .details-card {
@@ -767,7 +861,19 @@ select:focus-visible,
 
   .movie-grid {
     grid-template-columns: repeat(2, minmax(0, 1fr));
-    gap: 12px;
+    gap: 10px;
+  }
+
+  .movie-info {
+    padding: 8px;
+  }
+
+  .movie-title {
+    font-size: 12px;
+  }
+
+  .movie-meta {
+    font-size: 10px;
   }
 
   .card-body {
