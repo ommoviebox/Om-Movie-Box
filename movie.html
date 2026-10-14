@@ -166,14 +166,14 @@
 
     .screenshots {
       background: var(--panel);
-      padding: 12px;
+      padding: 16px 12px;
       margin: 12px -10px 0;
     }
 
     .section-title {
       text-align: center;
-      font-size: 19px;
-      margin: 0 0 12px;
+      font-size: 23px;
+      margin: 0 0 16px;
       font-weight: 800;
     }
 
@@ -181,18 +181,21 @@
       color: #27d8c4;
     }
 
+    /* FIX: Each screenshot gets its own row and uses the full width. */
     .screenshot-grid {
       display: grid;
-      grid-template-columns: repeat(2, minmax(0, 1fr));
-      gap: 4px;
+      grid-template-columns: minmax(0, 1fr);
+      gap: 12px;
+      width: 100%;
     }
 
     .screenshot-grid img {
       display: block;
       width: 100%;
+      height: auto;
       aspect-ratio: 16 / 9;
-      object-fit: cover;
-      border-radius: 4px;
+      object-fit: contain;
+      border-radius: 8px;
       background: #172237;
     }
 
@@ -299,6 +302,10 @@
 
       .links-section h2,
       .telegram-section h2 {
+        font-size: 21px;
+      }
+
+      .section-title {
         font-size: 21px;
       }
     }
@@ -437,9 +444,8 @@
       const section = $("screenshotsSection");
       const grid = $("screenshotGrid");
 
-      // Supported fields: screenshots array or screenshot1...screenshot8.
       let images = Array.isArray(movie.screenshots)
-        ? movie.screenshots
+        ? [...movie.screenshots]
         : [];
 
       for (let i = 1; i <= 8; i++) {
@@ -450,19 +456,26 @@
 
       images = [...new Set(images.map(safeUrl).filter(Boolean))];
 
+      grid.replaceChildren();
+
       if (!images.length) {
         section.classList.add("hidden");
         return;
       }
-
-      grid.replaceChildren();
 
       images.forEach((url, index) => {
         const img = document.createElement("img");
         img.src = url;
         img.alt = "Movie screenshot " + (index + 1);
         img.loading = "lazy";
-        img.onerror = () => img.remove();
+
+        img.onerror = () => {
+          img.remove();
+          if (!grid.children.length) {
+            section.classList.add("hidden");
+          }
+        };
+
         grid.appendChild(img);
       });
 
@@ -538,17 +551,17 @@
         container.appendChild(link);
       });
 
-      if (!container.children.length) {
-        $("downloadSection").classList.add("hidden");
-      } else {
-        $("downloadSection").classList.remove("hidden");
-      }
+      $("downloadSection").classList.toggle(
+        "hidden",
+        !container.children.length
+      );
     }
 
     function renderMovie(movie) {
       $("title").textContent = text(movie.title) || "Untitled Movie";
 
       const poster = safeUrl(movie.poster);
+
       if (poster) {
         $("poster").src = poster;
         $("poster").classList.remove("hidden");
@@ -574,11 +587,10 @@
       const description = text(movie.description);
       $("description").textContent = description;
 
-      if (!description) {
-        $("descriptionBox").classList.add("hidden");
-      } else {
-        $("descriptionBox").classList.remove("hidden");
-      }
+      $("descriptionBox").classList.toggle(
+        "hidden",
+        !description
+      );
 
       renderScreenshots(movie);
       renderButtons(movie);
