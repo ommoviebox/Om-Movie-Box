@@ -25,18 +25,6 @@ import {
 
 import { firebaseConfig } from "./firebase-config.js";
 
-const ADMIN_UID = "psgRupW3EfRUe61pcJzjqo36dNc2";
-
-const $ = id => document.getElementById(id);
-
-const loginForm = $("loginForm");
-const loginFormFields = $("loginFormFields");
-const dashboard = $("dashboard");
-const authMessage = $("authMessage");
-const saveMessage = $("saveMessage");
-const titleForm = $("titleForm");
-const list = $("adminTitles");
-
 const app = getApps().length
   ? getApp()
   : initializeApp(firebaseConfig);
@@ -44,39 +32,21 @@ const app = getApps().length
 const auth = getAuth(app);
 const db = getFirestore(app);
 
+const ADMIN_UID = "psgRupW3EfRUe61pcJzjqo36dNc2";
+
+const $ = (id) => document.getElementById(id);
+
+const loginPanel = $("loginPanel");
+const loginForm = $("loginForm");
+const dashboard = $("dashboard");
+const authMessage = $("authMessage");
+const saveMessage = $("saveMessage");
+const titleForm = $("titleForm");
+const list = $("titleList") || $("list");
+
+let editId = null;
 let currentUser = null;
-let loadingTitles = false;
 
-function isAdmin(user) {
-  return Boolean(user && user.uid === ADMIN_UID);
-}
-
-function escapeHtml(value = "") {
-  return String(value).replace(/[&<>"']/g, char => ({
-    "&": "&amp;",
-    "<": "&lt;",
-    ">": "&gt;",
-    '"': "&quot;",
-    "'": "&#39;"
-  })[char]);
-}
-
-function val(id) {
-  return $(id).value.trim();
-}
-
-function safeUrl(value = "") {
-  if (!value) return true;
-
-  try {
-    const url = new URL(value);
-    return url.protocol === "https:" || url.protocol === "http:";
-  } catch {
-    return false;
-  }
-}
-
-// Input ID -> Firestore field
 const fields = [
   ["title", "title"],
   ["contentType", "type"],
@@ -91,278 +61,427 @@ const fields = [
   ["watch480Input", "watch480"],
   ["download480Input", "download480"],
   ["watch480TextInput", "watch480Text"],
+  ["watch480SizeInput", "watch480Size"],
   ["download480TextInput", "download480Text"],
   ["download480SizeInput", "download480Size"],
 
   ["watch720Input", "watch720"],
   ["download720Input", "download720"],
   ["watch720TextInput", "watch720Text"],
+  ["watch720SizeInput", "watch720Size"],
   ["download720TextInput", "download720Text"],
   ["download720SizeInput", "download720Size"],
 
   ["watch1080Input", "watch1080"],
   ["download1080Input", "download1080"],
   ["watch1080TextInput", "watch1080Text"],
+  ["watch1080SizeInput", "watch1080Size"],
   ["download1080TextInput", "download1080Text"],
   ["download1080SizeInput", "download1080Size"],
 
   ["watch2160Input", "watch2160"],
   ["download2160Input", "download2160"],
   ["watch2160TextInput", "watch2160Text"],
+  ["watch2160SizeInput", "watch2160Size"],
   ["download2160TextInput", "download2160Text"],
   ["download2160SizeInput", "download2160Size"],
 
+  ["screenshot1Input", "screenshot1"],
   ["tutorialUrlInput", "tutorialUrl"]
 ];
 
-const urlKeys = new Set([
+const urlFields = [
   "poster",
   "officialUrl",
-  "watch480", "download480",
-  "watch720", "download720",
-  "watch1080", "download1080",
-  "watch2160", "download2160",
+  "watch480",
+  "download480",
+  "watch720",
+  "download720",
+  "watch1080",
+  "download1080",
+  "watch2160",
+  "download2160",
+  "screenshot1",
   "tutorialUrl"
-]);
+];
 
-function resetForm() {
-  titleForm.reset();
-  $("editId").value = "";
-  $("yearInput").value = new Date().getFullYear();
-  $("publishedInput").checked = true;
-  saveMessage.textContent = "";
+function valueOf(id) {
+  const element = $(id);
+  return element ? element.value.trim() : "";
 }
 
-$("resetForm").addEventListener("click", resetForm);
+function showMessage(element, message, isError = false) {
+  if (!element) return;
+  element.textContent = message;
+  element.style.color = isError ? "#ff6b6b" : "#55e6a5";
+}
 
-onAuthStateChanged(auth, async user => {
-  if (user && !isAdmin(user)) {
-    currentUser = null;
-    loginForm.hidden = false;
-    dashboard.hidden = true;
-    authMessage.textContent =
-      "यह अकाउंट Admin के लिए अधिकृत नहीं है।";
+function resetForm() {
+  if (titleForm) titleForm.reset();
 
-    try {
-      await signOut(auth);
-    } catch (error) {
-      console.error(error);
+  editId = null;
+
+  const year = $("yearInput");
+  if (year) year.value = new Date().getFullYear();
+
+  const quality = $("qualityInput");
+  if (quality && !quality.value) quality.value = "HD";
+
+  const submitButton = titleForm?.querySelector(
+    'button[type="submit"], input[type="submit"]'
+  );
+
+  if (submitButton) {
+    if (submitButton.tagName === "INPUT") {
+      submitButton.value = "Save Movie";
+    } else {
+      submitButton.textContent = "Save Movie";
     }
-    return;
   }
 
-  currentUser = user;
-  loginForm.hidden = Boolean(user);
-  dashboard.hidden = !user;
+  showMessage(saveMessage, "");
+}
 
-  if (user) {
-    authMessage.textContent = "Admin login सफल।";
-    await loadAdminTitles();
-  }
-});
-
-loginFormFields.addEventListener("submit", async event => {
-  event.preventDefault();
-  authMessage.textContent = "Login हो रहा है…";
-
-  try {
-    await signInWithEmailAndPassword(
-      auth,
-      $("email").value.trim(),
-      $("password").value
-    );
-  } catch (error) {
-    authMessage.textContent =
-      "Login नहीं हुआ। Email और password जाँचें।";
-    console.error("Login error:", error);
-  }
-});
-
-$("logoutButton").addEventListener("click", async () => {
-  try {
-    await signOut(auth);
-  } catch (error) {
-    console.error("Logout error:", error);
-  }
-});
-
-function buildPayload() {
+function getPayload() {
   const payload = {};
 
-  for (const [inputId, key] of fields) {
-    const value = val(inputId);
+  for (const [inputId, fieldName] of fields) {
+    const element = $(inputId);
 
-    if (urlKeys.has(key) && !safeUrl(value)) {
-      throw new Error(`कृपया सही URL डालें: ${key}`);
+    if (element) {
+      payload[fieldName] = element.value.trim();
     }
-
-    payload[key] = value;
   }
 
-  payload.year = Number(val("yearInput"));
-  payload.quality = val("qualityInput") || "HD";
-  payload.published = $("publishedInput").checked;
+  for (const fieldName of urlFields) {
+    const url = payload[fieldName];
+
+    if (!url) continue;
+
+    try {
+      const parsed = new URL(url);
+
+      if (!["http:", "https:"].includes(parsed.protocol)) {
+        throw new Error("Invalid URL");
+      }
+    } catch {
+      throw new Error(
+        "Galat URL: " + fieldName + ". Sahi image ya link URL daalein."
+      );
+    }
+  }
+
+  const yearValue = valueOf("yearInput");
+
+  if (yearValue) {
+    const yearNumber = Number(yearValue);
+
+    if (!Number.isFinite(yearNumber)) {
+      throw new Error("Movie ka year sahi daalein.");
+    }
+
+    payload.year = yearNumber;
+  }
+
+  payload.quality = valueOf("qualityInput") || "HD";
+
+  const publishedInput = $("publishedInput") || $("published");
+  payload.published = publishedInput
+    ? publishedInput.checked
+    : true;
+
   payload.updatedAt = serverTimestamp();
-  payload.updatedBy = currentUser.uid;
+
+  if (currentUser) {
+    payload.updatedBy = currentUser.uid;
+  }
 
   return payload;
 }
 
-titleForm.addEventListener("submit", async event => {
-  event.preventDefault();
+function escapeHTML(value) {
+  return String(value ?? "").replace(/[&<>"']/g, (character) => ({
+    "&": "&amp;",
+    "<": "&lt;",
+    ">": "&gt;",
+    '"': "&quot;",
+    "'": "&#39;"
+  })[character]);
+}
 
-  if (!isAdmin(currentUser)) {
-    saveMessage.textContent =
-      "पहले अधिकृत Admin से login करें।";
+function getTitleName(data) {
+  return data.title || data.name || "Untitled";
+}
+
+function renderTitleCard(id, data) {
+  const title = escapeHTML(getTitleName(data));
+  const year = escapeHTML(data.year || "");
+  const type = escapeHTML(data.type || data.contentType || "Movie");
+  const poster = escapeHTML(data.poster || "");
+  const status = data.published === false ? "Unpublished" : "Published";
+
+  return `
+    <article class="admin-title-item" data-id="${escapeHTML(id)}"
+      style="display:flex;gap:12px;align-items:center;padding:12px;
+      margin:10px 0;border:1px solid #493651;border-radius:12px;">
+      ${
+        poster
+          ? `<img src="${poster}" alt=""
+              style="width:65px;height:90px;object-fit:cover;border-radius:8px;"
+              onerror="this.style.display='none'">`
+          : ""
+      }
+      <div style="flex:1;min-width:0;">
+        <strong>${title}</strong>
+        <div>${type} ${year ? "• " + year : ""}</div>
+        <small>${status}</small>
+        <div style="display:flex;gap:8px;flex-wrap:wrap;margin-top:8px;">
+          <button type="button" data-action="edit" data-id="${escapeHTML(id)}">
+            Edit
+          </button>
+          <button type="button" data-action="delete" data-id="${escapeHTML(id)}">
+            Delete
+          </button>
+        </div>
+      </div>
+    </article>
+  `;
+}
+
+async function loadTitles() {
+  if (!list) {
+    console.warn("Admin HTML mein titleList ya list element nahi mila.");
     return;
   }
 
-  let payload;
-
-  try {
-    payload = buildPayload();
-  } catch (error) {
-    saveMessage.textContent = error.message;
-    return;
-  }
-
-  try {
-    const id = val("editId");
-
-    if (id) {
-      await updateDoc(doc(db, "titles", id), payload);
-      saveMessage.textContent =
-        "मूवी, बटन नाम, लिंक और साइज़ अपडेट हो गए।";
-    } else {
-      await addDoc(collection(db, "titles"), {
-        ...payload,
-        createdAt: serverTimestamp(),
-        createdBy: currentUser.uid
-      });
-      saveMessage.textContent =
-        "मूवी, बटन नाम, लिंक और साइज़ सेव हो गए।";
-    }
-
-    resetForm();
-    await loadAdminTitles();
-
-  } catch (error) {
-    saveMessage.textContent =
-      "सेव नहीं हुआ। Firebase Console और Firestore Rules जाँचें।";
-    console.error("Save error:", error);
-  }
-});
-
-async function loadAdminTitles() {
-  if (!isAdmin(currentUser) || loadingTitles) return;
-
-  loadingTitles = true;
-  list.textContent = "मूवी लोड हो रही हैं…";
+  list.innerHTML = "<p>Movies load ho rahi hain...</p>";
 
   try {
     const snapshot = await getDocs(collection(db, "titles"));
 
-    const items = snapshot.docs.map(item => ({
+    const titles = snapshot.docs.map((item) => ({
       id: item.id,
       data: item.data()
     }));
 
-    items.sort((a, b) => {
-      const aTime = a.data.createdAt?.toMillis?.() || 0;
-      const bTime = b.data.createdAt?.toMillis?.() || 0;
-      return bTime - aTime;
-    });
+    titles.sort((a, b) =>
+      getTitleName(b.data).localeCompare(getTitleName(a.data))
+    );
 
-    list.innerHTML = items.map(item => {
-      const movie = item.data;
+    if (!titles.length) {
+      list.innerHTML = "<p>Abhi koi movie upload nahi hai.</p>";
+      return;
+    }
 
-      return `
-        <article class="admin-title-row">
-          <div>
-            <strong>${escapeHtml(movie.title || "Untitled")}</strong>
-            <p>
-              ${escapeHtml(movie.type || "movie")} ·
-              ${escapeHtml(movie.year || "")} ·
-              ${movie.published === true ? "Published" : "Draft"}
-            </p>
-          </div>
-          <div class="row-actions">
-            <button type="button"
-              data-edit="${escapeHtml(item.id)}"
-              class="secondary-button">EDIT</button>
-            <button type="button"
-              data-delete="${escapeHtml(item.id)}"
-              class="danger-button">DELETE</button>
-          </div>
-        </article>
-      `;
-    }).join("") ||
-      "<p class='muted'>अभी कोई मूवी नहीं जोड़ी गई।</p>";
-
+    list.innerHTML = titles
+      .map((item) => renderTitleCard(item.id, item.data))
+      .join("");
   } catch (error) {
-    list.textContent =
-      "मूवी लोड नहीं हुई। Firestore Rules और Console जाँचें।";
     console.error("Load titles error:", error);
-  } finally {
-    loadingTitles = false;
+    list.innerHTML =
+      "<p>Movies load nahi hui. Firestore Rules aur internet check karein.</p>";
   }
 }
 
-list.addEventListener("click", async event => {
-  if (!isAdmin(currentUser)) return;
+function fillForm(data, id) {
+  editId = id;
 
-  const editButton = event.target.closest("[data-edit]");
-  const deleteButton = event.target.closest("[data-delete]");
+  for (const [inputId, fieldName] of fields) {
+    const element = $(inputId);
 
-  if (editButton) {
-    const id = editButton.dataset.edit;
-
-    try {
-      const snapshot = await getDocs(collection(db, "titles"));
-      const found = snapshot.docs.find(item => item.id === id);
-
-      if (!found) {
-        saveMessage.textContent = "मूवी नहीं मिली।";
-        return;
-      }
-
-      const movie = found.data();
-
-      $("editId").value = found.id;
-
-      for (const [inputId, key] of fields) {
-        $(inputId).value = movie[key] ?? "";
-      }
-
-      $("publishedInput").checked = movie.published === true;
-
-      saveMessage.textContent =
-        "मूवी एडिट करें और SAVE TITLE दबाएँ।";
-
-      titleForm.scrollIntoView({ behavior: "smooth" });
-
-    } catch (error) {
-      saveMessage.textContent = "मूवी की जानकारी लोड नहीं हुई।";
-      console.error("Edit error:", error);
+    if (element) {
+      element.value = data[fieldName] ?? "";
     }
   }
 
-  if (deleteButton) {
-    const id = deleteButton.dataset.delete;
+  const publishedInput = $("publishedInput") || $("published");
+  if (publishedInput) {
+    publishedInput.checked = data.published !== false;
+  }
 
-    if (!confirm("क्या इस मूवी को हमेशा के लिए हटाना है?")) {
+  const submitButton = titleForm?.querySelector(
+    'button[type="submit"], input[type="submit"]'
+  );
+
+  if (submitButton) {
+    if (submitButton.tagName === "INPUT") {
+      submitButton.value = "Update Movie";
+    } else {
+      submitButton.textContent = "Update Movie";
+    }
+  }
+
+  showMessage(saveMessage, "Movie edit ho rahi hai.");
+  titleForm?.scrollIntoView({ behavior: "smooth", block: "start" });
+}
+
+if (loginForm) {
+  loginForm.addEventListener("submit", async (event) => {
+    event.preventDefault();
+
+    const email = valueOf("emailInput") || valueOf("email");
+    const passwordElement = $("passwordInput") || $("password");
+    const password = passwordElement?.value || "";
+
+    if (!email || !password) {
+      showMessage(authMessage, "Email aur password daalein.", true);
+      return;
+    }
+
+    showMessage(authMessage, "Login ho raha hai...");
+
+    try {
+      await signInWithEmailAndPassword(auth, email, password);
+    } catch (error) {
+      console.error("Login error:", error);
+      showMessage(
+        authMessage,
+        "Login nahi hua. Email, password aur Firebase Auth check karein.",
+        true
+      );
+    }
+  });
+}
+
+const logoutButton = $("logoutBtn") || $("logoutButton");
+
+if (logoutButton) {
+  logoutButton.addEventListener("click", async () => {
+    try {
+      await signOut(auth);
+    } catch (error) {
+      console.error("Logout error:", error);
+      alert("Logout nahi hua. Dobara try karein.");
+    }
+  });
+}
+
+if (titleForm) {
+  titleForm.addEventListener("submit", async (event) => {
+    event.preventDefault();
+
+    if (!currentUser || currentUser.uid !== ADMIN_UID) {
+      showMessage(saveMessage, "Aapko admin permission nahi hai.", true);
       return;
     }
 
     try {
-      await deleteDoc(doc(db, "titles", id));
-      saveMessage.textContent = "मूवी डिलीट हो गई।";
-      await loadAdminTitles();
+      const payload = getPayload();
 
+      showMessage(saveMessage, "Movie save ho rahi hai...");
+
+      if (editId) {
+        await updateDoc(doc(db, "titles", editId), payload);
+        showMessage(saveMessage, "Movie successfully update ho gayi!");
+      } else {
+        payload.createdAt = serverTimestamp();
+        await addDoc(collection(db, "titles"), payload);
+        showMessage(saveMessage, "Movie successfully upload ho gayi!");
+      }
+
+      resetForm();
+      await loadTitles();
     } catch (error) {
-      saveMessage.textContent =
-        "Delete नहीं हुआ। Firestore Rules जाँचें।";
-      console.error("Delete error:", error);
+      console.error("Save movie error:", error);
+      showMessage(
+        saveMessage,
+        error.message || "Movie save nahi hui. Firestore Rules check karein.",
+        true
+      );
     }
+  });
+}
+
+if (list) {
+  list.addEventListener("click", async (event) => {
+    const button = event.target.closest("button[data-action]");
+
+    if (!button) return;
+
+    const id = button.dataset.id;
+    const action = button.dataset.action;
+
+    if (!id) return;
+
+    if (action === "edit") {
+      try {
+        const snapshot = await getDocs(collection(db, "titles"));
+        const item = snapshot.docs.find((entry) => entry.id === id);
+
+        if (!item) {
+          alert("Movie nahi mili. List reload karein.");
+          return;
+        }
+
+        fillForm(item.data(), id);
+      } catch (error) {
+        console.error("Edit movie error:", error);
+        alert("Movie edit nahi hui. Firestore Rules check karein.");
+      }
+    }
+
+    if (action === "delete") {
+      const confirmed = confirm(
+        "Kya aap sach mein is movie ko delete karna chahte hain?"
+      );
+
+      if (!confirmed) return;
+
+      try {
+        await deleteDoc(doc(db, "titles", id));
+        showMessage(saveMessage, "Movie delete ho gayi.");
+        await loadTitles();
+      } catch (error) {
+        console.error("Delete movie error:", error);
+        alert("Movie delete nahi hui. Firestore Rules check karein.");
+      }
+    }
+  });
+}
+
+onAuthStateChanged(auth, async (user) => {
+  currentUser = user;
+
+  if (!user) {
+    if (loginPanel) loginPanel.hidden = false;
+    if (loginForm) loginForm.hidden = false;
+    if (dashboard) dashboard.hidden = true;
+
+    showMessage(authMessage, "");
+    return;
   }
+
+  if (user.uid !== ADMIN_UID) {
+    if (dashboard) dashboard.hidden = true;
+    if (loginPanel) loginPanel.hidden = false;
+
+    showMessage(
+      authMessage,
+      "Is account ko admin permission nahi hai. Sahi admin account se login karein.",
+      true
+    );
+
+    try {
+      await signOut(auth);
+    } catch (error) {
+      console.error("Sign out error:", error);
+    }
+
+    return;
+  }
+
+  if (loginPanel) loginPanel.hidden = true;
+  if (loginForm) loginForm.hidden = true;
+  if (dashboard) dashboard.hidden = false;
+
+  showMessage(authMessage, "");
+  await loadTitles();
 });
+
+const resetButton = $("resetBtn") || $("clearFormBtn");
+
+if (resetButton) {
+  resetButton.addEventListener("click", resetForm);
+}
+
+resetForm();
