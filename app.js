@@ -1,545 +1,660 @@
-import {
-  initializeApp,
-  getApps,
-  getApp
-} from "https://www.gstatic.com/firebasejs/10.14.1/firebase-app.js";
 
 import {
-  getFirestore,
   collection,
   getDocs,
   query,
   where
 } from "https://www.gstatic.com/firebasejs/10.14.1/firebase-firestore.js";
 
-import { firebaseConfig } from "./firebase-config.js";
+import { db } from "./firebase-config.js";
 
-// Pagination settings
-const MOVIES_PER_PAGE = 30;
+// ===============================
+// OM MOVIE BOX - MAIN APP
+// ===============================
+
+const $ = (selector) => document.querySelector(selector);
+
+const PAGE_SIZE = 30;
+
+let allMovies = [];
+let filteredMovies = [];
 let currentPage = 1;
 
-// Sample movies shown only if Firebase cannot be loaded.
+// Sample movies are used only if Firestore has no accessible movies.
 const sampleTitles = [
   {
-    id: "sathi-leelavathi",
+    id: "sample-sathi-leelavathi",
+    name: "Sathi Leelavathi",
     title: "Sathi Leelavathi",
-    type: "movie",
-    year: 2025,
+    year: "2025",
+    language: "Hindi",
+    type: "Movie",
     genre: "Drama",
-    language: "Tamil",
-    quality: "HD",
-    description: "Sathi Leelavathi",
-    poster: "./Sathi.jpg",
-    officialUrl: "https://www.diskwala.com/app/6accba3368b5fcba7d4abb4c",
-    download480: "",
-    watch480: "",
-    download720: "",
-    watch720: "",
-    download1080: "",
-    watch1080: "",
-    download2160: "",
-    watch2160: "",
-    tutorialUrl: ""
+    poster: "",
+    description: "Movie details will appear here.",
+    published: true
   },
   {
-    id: "vibe",
+    id: "sample-vibe",
+    name: "Vibe",
     title: "Vibe",
-    type: "movie",
-    year: 2026,
-    genre: "Drama",
+    year: "2025",
     language: "Hindi",
-    quality: "HD",
-    description: "Vibe movie details.",
-    poster: "./Vibe.jpg",
-    download480: "https://www.diskwala.com/app/6acb81bf68b5fcba7d46c3fb",
-    watch480: "https://www.diskwala.com/app/6acb81bf68b5fcba7d46c3fb",
-    download720: "https://www.diskwala.com/app/6acb81bf68b5fcba7d46c3fb",
-    watch720: "https://www.diskwala.com/app/6acb81bf68b5fcba7d46c3fb",
-    download1080: "https://www.diskwala.com/app/6acb81bf68b5fcba7d46c3fb",
-    watch1080: "https://www.diskwala.com/app/6acb81bf68b5fcba7d46c3fb",
-    download2160: "https://www.diskwala.com/app/6acb81bf68b5fcba7d46c3fb",
-    watch2160: "https://www.diskwala.com/app/6acb81bf68b5fcba7d46c3fb",
-    tutorialUrl: "https://t.me/c/2456248874/43"
+    type: "Movie",
+    genre: "Drama",
+    poster: "",
+    description: "Movie details will appear here.",
+    published: true
   }
 ];
 
-const $ = selector => document.querySelector(selector);
+// Get the first available field from a movie document.
+function getField(movie, ...keys) {
+  for (const key of keys) {
+    const value = movie?.[key];
 
-let titles = [...sampleTitles];
+    if (value !== undefined && value !== null && value !== "") {
+      return value;
+    }
+  }
 
-function escapeHTML(value = "") {
-  return String(value).replace(/[&<>"']/g, char => ({
-    "&": "&amp;",
-    "<": "&lt;",
-    ">": "&gt;",
-    '"': "&quot;",
-    "'": "&#39;"
-  })[char]);
+  return "";
 }
 
+// Safely create a valid HTTP/HTTPS URL.
 function safeURL(value) {
+  if (!value || typeof value !== "string") return "";
+
   try {
-    const url = new URL(value);
-    return ["http:", "https:"].includes(url.protocol)
-      ? url.href
-      : "";
+    const url = new URL(value.trim());
+
+    if (url.protocol === "https:" || url.protocol === "http:") {
+      return url.href;
+    }
   } catch {
     return "";
   }
+
+  return "";
 }
 
-function firebaseConfigured() {
-  return Boolean(
-    firebaseConfig?.apiKey &&
-    !firebaseConfig.apiKey.startsWith("PASTE_") &&
-    firebaseConfig?.projectId &&
-    firebaseConfig.projectId !== "YOUR_PROJECT_ID"
+// Create elements without inserting movie text as HTML.
+function createElement(tag, className, text) {
+  const element = document.createElement(tag);
+
+  if (className) element.className = className;
+  if (text !== undefined) element.textContent = text;
+
+  return element;
+}
+
+function getMovieName(movie) {
+  return String(getField(movie, "name", "title", "movieName") || "Untitled Movie");
+}
+
+function getPoster(movie) {
+  return safeURL(
+    getField(movie, "poster", "posterUrl", "image", "imageUrl", "thumbnail")
   );
 }
 
-function normalizeMovie(movie) {
-  return {
-    ...movie,
-    title: movie.title || "Untitled",
-    type: movie.type || "movie",
-    year: movie.year || "",
-    genre: movie.genre || "",
-    language: movie.language || "",
-    quality: movie.quality || "HD",
-    description: movie.description || "",
-    poster: movie.poster || "",
-    download480: movie.download480 || "",
-    watch480: movie.watch480 || "",
-    download720: movie.download720 || "",
-    watch720: movie.watch720 || "",
-    download1080: movie.download1080 || "",
-    watch1080: movie.watch1080 || "",
-    download2160: movie.download2160 || "",
-    watch2160: movie.watch2160 || "",
-    tutorialUrl: movie.tutorialUrl || ""
-  };
+function getMovieId(movie) {
+  return String(movie.id || "");
 }
 
-// Load published movies from Firestore.
-async function loadTitles() {
-  let firebaseLoaded = false;
+// ===============================
+// MOVIE CARD
+// ===============================
 
-  if (firebaseConfigured()) {
-    try {
-      const app = getApps().length
-        ? getApp()
-        : initializeApp(firebaseConfig);
-
-      const db = getFirestore(app);
-
-      const movieQuery = query(
-        collection(db, "titles"),
-        where("published", "==", true)
-      );
-
-      const snapshot = await getDocs(movieQuery);
-
-      titles = snapshot.docs.map(document =>
-        normalizeMovie({
-          ...document.data(),
-          id: document.id
-        })
-      );
-
-      firebaseLoaded = true;
-
-      console.log("Firestore movies loaded:", titles.length);
-
-    } catch (error) {
-      console.error("Firebase movie loading failed:", error);
-    }
-  }
-
-  // Sample movies are only a fallback if Firebase fails.
-  if (!firebaseLoaded) {
-    titles = [...sampleTitles];
-    console.warn("Showing sample movies because Firebase did not load.");
-  }
-
-  currentPage = 1;
-
-  if ($("#movieGrid")) {
-    fillFilters();
-    renderMovies();
-  }
-
-  if ($("#movieDetails")) {
-    renderDetails();
-  }
-}
-
-// Build poster image or placeholder.
 function posterHTML(movie) {
-  const posterURL = movie.poster
-    ? (
-        movie.poster.startsWith("./") ||
-        movie.poster.startsWith("/")
-      )
-      ? movie.poster
-      : safeURL(movie.poster)
-    : "";
+  const card = createElement("article", "movie-card");
+  const link = createElement("a", "movie-poster-link");
+
+  link.href = `movie.html?id=${encodeURIComponent(getMovieId(movie))}`;
+  link.setAttribute("aria-label", `View ${getMovieName(movie)}`);
+
+  const posterURL = getPoster(movie);
 
   if (posterURL) {
-    return `<img class="poster"
-      src="${escapeHTML(posterURL)}"
-      alt="${escapeHTML(movie.title)} poster"
-      loading="lazy"
-      onerror="this.style.display='none'">`;
+    const image = document.createElement("img");
+
+    image.src = posterURL;
+    image.alt = getMovieName(movie);
+    image.loading = "lazy";
+    image.onerror = () => {
+      image.style.display = "none";
+
+      const placeholder = createElement(
+        "div",
+        "poster-placeholder",
+        "Poster unavailable"
+      );
+
+      link.appendChild(placeholder);
+    };
+
+    link.appendChild(image);
+  } else {
+    link.appendChild(
+      createElement("div", "poster-placeholder", "OM MOVIE BOX")
+    );
   }
 
-  return `<div class="poster-placeholder">${escapeHTML(movie.title)}</div>`;
+  const info = createElement("div", "movie-info");
+  const title = createElement("h3", "movie-title", getMovieName(movie));
+
+  const year = getField(movie, "year", "releaseYear");
+  const language = getField(movie, "language", "lang");
+
+  const meta = [year, language].filter(Boolean).join(" • ");
+  const details = createElement("p", "movie-meta", meta);
+
+  info.append(title, details);
+  link.appendChild(info);
+  card.appendChild(link);
+
+  return card;
 }
 
-// Populate genre and language filters.
+// ===============================
+// FILTER OPTIONS
+// ===============================
+
 function fillFilters() {
-  const genreSelect = $("#genreFilter");
-  const languageSelect = $("#languageFilter");
+  const genreFilter = $("#genreFilter");
+  const languageFilter = $("#languageFilter");
+  const typeFilter = $("#typeFilter");
 
-  if (!genreSelect || !languageSelect) return;
-
-  const oldGenre = genreSelect.value || "all";
-  const oldLanguage = languageSelect.value || "all";
-
-  const genres = [
-    ...new Set(titles.map(movie => movie.genre).filter(Boolean))
-  ].sort();
-
-  const languages = [
-    ...new Set(titles.map(movie => movie.language).filter(Boolean))
-  ].sort();
-
-  genreSelect.innerHTML =
-    '<option value="all">All Genres</option>' +
-    genres.map(genre =>
-      `<option value="${escapeHTML(genre)}">${escapeHTML(genre)}</option>`
-    ).join("");
-
-  languageSelect.innerHTML =
-    '<option value="all">All Languages</option>' +
-    languages.map(language =>
-      `<option value="${escapeHTML(language)}">${escapeHTML(language)}</option>`
-    ).join("");
-
-  genreSelect.value = genres.includes(oldGenre) ? oldGenre : "all";
-  languageSelect.value = languages.includes(oldLanguage)
-    ? oldLanguage
-    : "all";
+  fillOneFilter(genreFilter, "genre", "All Genres");
+  fillOneFilter(languageFilter, "language", "All Languages");
+  fillOneFilter(typeFilter, "type", "All Types");
 }
 
-// Create pagination buttons.
-function renderPagination(totalPages) {
-  const pagination = $("#pagination");
-  if (!pagination) return;
+function fillOneFilter(select, field, defaultLabel) {
+  if (!select) return;
 
-  if (totalPages <= 1) {
-    pagination.innerHTML = "";
-    return;
-  }
+  const oldValue = select.value;
+  const values = new Set();
 
-  let html = `
-    <button type="button" data-page="${currentPage - 1}"
-      ${currentPage === 1 ? "disabled" : ""}>
-      Previous
-    </button>
-  `;
+  allMovies.forEach((movie) => {
+    const value = getField(
+      movie,
+      field,
+      field === "language" ? "lang" : field
+    );
 
-  // Show nearby page numbers for large collections.
-  let pages = new Set([1, totalPages]);
-
-  for (
-    let page = Math.max(1, currentPage - 2);
-    page <= Math.min(totalPages, currentPage + 2);
-    page++
-  ) {
-    pages.add(page);
-  }
-
-  const sortedPages = [...pages].sort((a, b) => a - b);
-  let previousPage = 0;
-
-  for (const page of sortedPages) {
-    if (previousPage && page - previousPage > 1) {
-      html += `<span aria-hidden="true">…</span>`;
+    if (value) {
+      String(value)
+        .split(",")
+        .map((item) => item.trim())
+        .filter(Boolean)
+        .forEach((item) => values.add(item));
     }
+  });
 
-    html += `
-      <button type="button" data-page="${page}"
-        ${page === currentPage ? 'aria-current="page"' : ""}
-        ${page === currentPage ? "disabled" : ""}>
-        ${page}
-      </button>
-    `;
+  select.replaceChildren();
 
-    previousPage = page;
+  const firstOption = document.createElement("option");
+  firstOption.value = "";
+  firstOption.textContent = defaultLabel;
+  select.appendChild(firstOption);
+
+  [...values]
+    .sort((a, b) => a.localeCompare(b))
+    .forEach((value) => {
+      const option = document.createElement("option");
+      option.value = value;
+      option.textContent = value;
+      select.appendChild(option);
+    });
+
+  if ([...select.options].some((option) => option.value === oldValue)) {
+    select.value = oldValue;
   }
-
-  html += `
-    <button type="button" data-page="${currentPage + 1}"
-      ${currentPage === totalPages ? "disabled" : ""}>
-      Next
-    </button>
-  `;
-
-  pagination.innerHTML = html;
 }
 
-// Display movie cards with pagination.
-function renderMovies() {
-  const grid = $("#movieGrid");
-  if (!grid) return;
+// ===============================
+// SEARCH AND FILTERS
+// ===============================
 
+function applyFilters() {
   const search = ($("#searchInput")?.value || "")
     .trim()
     .toLowerCase();
 
-  const type = $("#typeFilter")?.value || "all";
-  const genre = $("#genreFilter")?.value || "all";
-  const language = $("#languageFilter")?.value || "all";
+  const selectedType = $("#typeFilter")?.value || "";
+  const selectedGenre = $("#genreFilter")?.value || "";
+  const selectedLanguage = $("#languageFilter")?.value || "";
 
-  const results = titles.filter(movie => {
-    const searchable = [
-      movie.title,
-      movie.genre,
-      movie.language,
-      movie.year,
-      movie.type
-    ].join(" ").toLowerCase();
+  filteredMovies = allMovies.filter((movie) => {
+    const name = getMovieName(movie).toLowerCase();
+    const description = String(
+      getField(movie, "description", "story", "details")
+    ).toLowerCase();
 
-    return searchable.includes(search) &&
-      (type === "all" || movie.type === type) &&
-      (genre === "all" || movie.genre === genre) &&
-      (language === "all" || movie.language === language);
+    const language = String(
+      getField(movie, "language", "lang")
+    ).toLowerCase();
+
+    const genre = String(getField(movie, "genre")).toLowerCase();
+    const type = String(getField(movie, "type")).toLowerCase();
+
+    const matchesSearch =
+      !search ||
+      name.includes(search) ||
+      description.includes(search) ||
+      language.includes(search) ||
+      genre.includes(search);
+
+    const matchesType =
+      !selectedType || type === selectedType.toLowerCase();
+
+    const matchesGenre =
+      !selectedGenre ||
+      genre.split(",").map((v) => v.trim()).includes(selectedGenre.toLowerCase());
+
+    const matchesLanguage =
+      !selectedLanguage ||
+      language.split(",").map((v) => v.trim()).includes(selectedLanguage.toLowerCase());
+
+    return (
+      matchesSearch &&
+      matchesType &&
+      matchesGenre &&
+      matchesLanguage
+    );
   });
 
-  const totalPages = Math.ceil(results.length / MOVIES_PER_PAGE);
-  currentPage = Math.max(1, Math.min(currentPage, totalPages || 1));
-
-  if ($("#resultCount")) {
-    $("#resultCount").textContent = `${results.length} titles`;
-  }
-
-  if ($("#emptyState")) {
-    $("#emptyState").hidden = results.length > 0;
-  }
-
-  const start = (currentPage - 1) * MOVIES_PER_PAGE;
-  const pageMovies = results.slice(start, start + MOVIES_PER_PAGE);
-
-  grid.innerHTML = pageMovies.map(movie => `
-    <article class="movie-card"
-      tabindex="0"
-      role="link"
-      data-id="${escapeHTML(movie.id)}"
-      aria-label="View ${escapeHTML(movie.title)} details">
-
-      <div class="poster-wrap">
-        ${posterHTML(movie)}
-        <span class="quality-tag">${escapeHTML(movie.quality)}</span>
-      </div>
-
-      <div class="card-body">
-        <h3 class="card-title">
-          ${escapeHTML(movie.title)}
-          <span>(${escapeHTML(movie.year || "N/A")})</span>
-        </h3>
-
-        <div class="card-meta">
-          ${movie.type === "series" ? "Web Series" : "Movie"}
-          · ${escapeHTML(movie.language || "Various")}
-        </div>
-
-        <div class="card-tags">
-          <span class="tag">${escapeHTML(movie.genre || "General")}</span>
-          <span class="tag">${escapeHTML(movie.quality)}</span>
-        </div>
-
-        <span class="card-link">VIEW DETAILS ↗</span>
-      </div>
-    </article>
-  `).join("");
-
-  renderPagination(totalPages);
+  currentPage = 1;
+  renderMovies();
 }
 
-// Open movie details page.
-function openMovie(id) {
-  window.location.href =
-    `movie.html?id=${encodeURIComponent(id)}`;
+// ===============================
+// PAGINATION
+// ===============================
+
+function renderPagination() {
+  const pagination = $("#pagination");
+  if (!pagination) return;
+
+  pagination.replaceChildren();
+
+  const totalPages = Math.ceil(filteredMovies.length / PAGE_SIZE);
+
+  if (totalPages <= 1) return;
+
+  const previous = createElement("button", "page-btn", "Previous");
+  previous.type = "button";
+  previous.disabled = currentPage === 1;
+  previous.addEventListener("click", () => {
+    if (currentPage > 1) {
+      currentPage--;
+      renderMovies();
+      scrollToMovies();
+    }
+  });
+
+  const pageInfo = createElement(
+    "span",
+    "page-info",
+    `Page ${currentPage} of ${totalPages}`
+  );
+
+  const next = createElement("button", "page-btn", "Next");
+  next.type = "button";
+  next.disabled = currentPage === totalPages;
+  next.addEventListener("click", () => {
+    if (currentPage < totalPages) {
+      currentPage++;
+      renderMovies();
+      scrollToMovies();
+    }
+  });
+
+  pagination.append(previous, pageInfo, next);
+
+  // Numbered page buttons
+  const numbers = createElement("div", "page-numbers");
+
+  for (let page = 1; page <= totalPages; page++) {
+    const button = createElement("button", "page-number", String(page));
+    button.type = "button";
+    button.setAttribute("aria-label", `Page ${page}`);
+
+    if (page === currentPage) {
+      button.classList.add("active");
+      button.setAttribute("aria-current", "page");
+    }
+
+    button.addEventListener("click", () => {
+      currentPage = page;
+      renderMovies();
+      scrollToMovies();
+    });
+
+    numbers.appendChild(button);
+  }
+
+  pagination.appendChild(numbers);
 }
 
-// Configure watch/download buttons.
-function setButton(id, url) {
-  const button = $("#" + id);
+function scrollToMovies() {
+  $("#movieGrid")?.scrollIntoView({
+    behavior: "smooth",
+    block: "start"
+  });
+}
+
+// ===============================
+// RENDER MOVIES
+// ===============================
+
+function renderMovies() {
+  const grid = $("#movieGrid");
+  if (!grid) return;
+
+  grid.replaceChildren();
+
+  const total = filteredMovies.length;
+  const totalPages = Math.ceil(total / PAGE_SIZE);
+
+  if (totalPages > 0 && currentPage > totalPages) {
+    currentPage = totalPages;
+  }
+
+  const start = (currentPage - 1) * PAGE_SIZE;
+  const pageMovies = filteredMovies.slice(start, start + PAGE_SIZE);
+
+  pageMovies.forEach((movie) => {
+    grid.appendChild(posterHTML(movie));
+  });
+
+  const emptyState = $("#emptyState");
+
+  if (emptyState) {
+    emptyState.hidden = total !== 0;
+  }
+
+  const resultCount = $("#resultCount");
+
+  if (resultCount) {
+    resultCount.textContent = total
+      ? `Showing ${start + 1}–${Math.min(start + PAGE_SIZE, total)} of ${total} movies`
+      : "No movies found";
+  }
+
+  renderPagination();
+}
+
+// ===============================
+// LOAD MOVIES FROM FIRESTORE
+// ===============================
+
+async function loadMovies() {
+  const grid = $("#movieGrid");
+
+  if (grid) {
+    grid.replaceChildren(
+      createElement("p", "loading-message", "Loading movies...")
+    );
+  }
+
+  try {
+    const titlesQuery = query(
+      collection(db, "titles"),
+      where("published", "==", true)
+    );
+
+    const snapshot = await getDocs(titlesQuery);
+
+    allMovies = snapshot.docs.map((document) => ({
+      id: document.id,
+      ...document.data()
+    }));
+
+    // Newest first when createdAt is available.
+    allMovies.sort((a, b) => {
+      const getTime = (movie) => {
+        const date = getField(movie, "createdAt", "created_at");
+
+        if (date && typeof date.toMillis === "function") {
+          return date.toMillis();
+        }
+
+        if (date && typeof date.seconds === "number") {
+          return date.seconds * 1000;
+        }
+
+        const parsed = Date.parse(date);
+        return Number.isNaN(parsed) ? 0 : parsed;
+      };
+
+      return getTime(b) - getTime(a);
+    });
+
+    if (allMovies.length === 0) {
+      allMovies = sampleTitles.map((movie) => ({ ...movie }));
+    }
+  } catch (error) {
+    console.error("Firestore movie loading error:", error);
+
+    allMovies = sampleTitles.map((movie) => ({ ...movie }));
+
+    const errorBox = $("#loadError");
+
+    if (errorBox) {
+      errorBox.hidden = false;
+      errorBox.textContent =
+        "Movies could not be loaded from Firebase. Showing sample movies. Please check Firebase configuration and Firestore rules.";
+    }
+  }
+
+  fillFilters();
+  applyFilters();
+}
+
+// ===============================
+// MOVIE DETAILS PAGE
+// ===============================
+
+function setText(id, value) {
+  const element = document.getElementById(id);
+  if (element) element.textContent = value || "";
+}
+
+function setImage(id, url, alt) {
+  const image = document.getElementById(id);
+  if (!image) return;
+
+  const validURL = safeURL(url);
+
+  if (validURL) {
+    image.src = validURL;
+    image.alt = alt || "Movie poster";
+    image.hidden = false;
+  } else {
+    image.removeAttribute("src");
+    image.alt = alt || "Poster unavailable";
+  }
+}
+
+function setButton(id, value) {
+  const button = document.getElementById(id);
   if (!button) return;
 
-  const safeLink = safeURL(url || "");
+  const url = safeURL(value);
 
-  button.classList.remove("disabled");
-  button.removeAttribute("aria-disabled");
-  button.removeAttribute("target");
-  button.removeAttribute("rel");
-  button.removeAttribute("href");
+  button.hidden = !url;
+  button.disabled = !url;
 
-  if (safeLink) {
-    button.href = safeLink;
-    button.target = "_blank";
-    button.rel = "noopener noreferrer";
+  if (url) {
+    button.onclick = () => window.open(url, "_blank", "noopener,noreferrer");
   } else {
-    button.href = "#";
-    button.classList.add("disabled");
-    button.setAttribute("aria-disabled", "true");
+    button.onclick = null;
   }
 }
 
-// Show movie details on movie.html.
-function renderDetails() {
-  const id = new URLSearchParams(window.location.search).get("id");
-  const movie = titles.find(item => String(item.id) === id);
+function renderDetails(movie) {
+  const name = getMovieName(movie);
+
+  setText("detailTitle", name);
+  setText("detailType", getField(movie, "type"));
+  setText("detailMeta", [
+    getField(movie, "year", "releaseYear"),
+    getField(movie, "language", "lang"),
+    getField(movie, "genre")
+  ].filter(Boolean).join(" • "));
+
+  setText(
+    "detailDescription",
+    getField(movie, "description", "story", "details") || "No description available."
+  );
+
+  setText("detailLanguage", getField(movie, "language", "lang"));
+  setText("detailGenre", getField(movie, "genre"));
+  setText("detailYear", getField(movie, "year", "releaseYear"));
+
+  setImage("detailPoster", getPoster(movie), name);
+
+  for (const quality of ["480", "720", "1080", "2160"]) {
+    setButton(
+      `download${quality}`,
+      getField(movie, `download${quality}`, `download${quality}p`)
+    );
+
+    setButton(
+      `watch${quality}`,
+      getField(movie, `watch${quality}`, `watch${quality}p`)
+    );
+  }
+
+  setButton("tutorialLink", getField(movie, "tutorialLink", "tutorial"));
 
   const loading = $("#detailLoading");
   const details = $("#movieDetails");
   const error = $("#detailError");
 
-  if (!movie) {
+  if (loading) loading.hidden = true;
+  if (details) details.hidden = false;
+  if (error) error.hidden = true;
+}
+
+async function loadMovieDetails() {
+  const params = new URLSearchParams(window.location.search);
+  const movieId = params.get("id");
+
+  const loading = $("#detailLoading");
+  const details = $("#movieDetails");
+  const error = $("#detailError");
+
+  if (loading) loading.hidden = false;
+  if (details) details.hidden = true;
+  if (error) error.hidden = true;
+
+  if (!movieId) {
     if (loading) loading.hidden = true;
-    if (details) details.hidden = true;
-    if (error) error.hidden = false;
+
+    if (error) {
+      error.hidden = false;
+      error.textContent = "Movie ID is missing from the URL.";
+    }
+
     return;
   }
 
-  if (loading) loading.hidden = true;
-  if (error) error.hidden = true;
-  if (details) details.hidden = false;
+  // Reuse the movies already loaded on the home page, if available.
+  let movie = allMovies.find((item) => item.id === movieId);
 
-  const image = $("#detailPoster");
+  if (!movie) {
+    try {
+      const titlesQuery = query(
+        collection(db, "titles"),
+        where("published", "==", true)
+      );
 
-  const posterURL = movie.poster
-    ? (
-        movie.poster.startsWith("./") ||
-        movie.poster.startsWith("/")
-      )
-      ? movie.poster
-      : safeURL(movie.poster)
-    : "";
+      const snapshot = await getDocs(titlesQuery);
 
-  if (image) {
-    image.src = posterURL || "";
-    image.alt = `${movie.title} poster`;
-    image.hidden = !posterURL;
+      movie = snapshot.docs
+        .map((document) => ({
+          id: document.id,
+          ...document.data()
+        }))
+        .find((item) => item.id === movieId);
+    } catch (err) {
+      console.error("Movie details loading error:", err);
+    }
   }
 
-  if ($("#detailType")) {
-    $("#detailType").textContent =
-      movie.type === "series" ? "WEB SERIES" : "MOVIE DETAILS";
+  if (!movie) {
+    if (loading) loading.hidden = true;
+
+    if (error) {
+      error.hidden = false;
+      error.textContent =
+        "Movie not found. Please check that it exists and is published in the Admin Panel.";
+    }
+
+    return;
   }
 
-  if ($("#detailTitle")) {
-    $("#detailTitle").textContent = movie.title;
-  }
-
-  if ($("#detailMeta")) {
-    $("#detailMeta").textContent =
-      `${movie.year || "Year not listed"} · ${movie.quality}`;
-  }
-
-  if ($("#detailDescription")) {
-    $("#detailDescription").textContent =
-      movie.description || "More information coming soon.";
-  }
-
-  if ($("#detailLanguage")) {
-    $("#detailLanguage").textContent =
-      movie.language || "Language not listed";
-  }
-
-  if ($("#detailGenre")) {
-    $("#detailGenre").textContent =
-      movie.genre || "Genre not listed";
-  }
-
-  if ($("#detailYear")) {
-    $("#detailYear").textContent =
-      movie.year || "Year not listed";
-  }
-
-  ["480", "720", "1080", "2160"].forEach(quality => {
-    setButton(`download${quality}`, movie[`download${quality}`]);
-    setButton(`watch${quality}`, movie[`watch${quality}`]);
-  });
-
-  setButton("tutorialLink", movie.tutorialUrl);
+  renderDetails(movie);
 }
 
-// Home page event listeners.
-const grid = $("#movieGrid");
+// ===============================
+// SEARCH FORM AND NAVIGATION
+// ===============================
 
-if (grid) {
-  grid.addEventListener("click", event => {
-    const card = event.target.closest(".movie-card");
-    if (card) openMovie(card.dataset.id);
-  });
+function setupEvents() {
+  const searchForm = $("#searchForm");
 
-  grid.addEventListener("keydown", event => {
-    const card = event.target.closest(".movie-card");
-
-    if (card && (event.key === "Enter" || event.key === " ")) {
+  if (searchForm) {
+    searchForm.addEventListener("submit", (event) => {
       event.preventDefault();
-      openMovie(card.dataset.id);
+      applyFilters();
+    });
+  }
+
+  const searchInput = $("#searchInput");
+
+  if (searchInput) {
+    searchInput.addEventListener("input", applyFilters);
+  }
+
+  ["typeFilter", "genreFilter", "languageFilter"].forEach((id) => {
+    const element = document.getElementById(id);
+    if (element) {
+      element.addEventListener("change", applyFilters);
     }
   });
 
-  $("#pagination")?.addEventListener("click", event => {
-    const button = event.target.closest("button[data-page]");
-    if (!button || button.disabled) return;
+  const menuToggle = $("#menuToggle");
+  const siteNav = $("#siteNav");
 
-    const page = Number(button.dataset.page);
-    if (!Number.isInteger(page) || page < 1) return;
+  if (menuToggle && siteNav) {
+    menuToggle.addEventListener("click", () => {
+      const isOpen = siteNav.classList.toggle("open");
 
-    currentPage = page;
-    renderMovies();
-
-    $("#latest")?.scrollIntoView({ behavior: "smooth" });
-  });
-
-  $("#searchInput")?.addEventListener("input", () => {
-    currentPage = 1;
-    renderMovies();
-  });
-
-  $("#searchForm")?.addEventListener("submit", event => {
-    event.preventDefault();
-    currentPage = 1;
-    renderMovies();
-    $("#latest")?.scrollIntoView({ behavior: "smooth" });
-  });
-
-  ["#typeFilter", "#genreFilter", "#languageFilter"].forEach(selector => {
-    $(selector)?.addEventListener("change", () => {
-      currentPage = 1;
-      renderMovies();
+      menuToggle.setAttribute("aria-expanded", String(isOpen));
     });
-  });
+  }
 
-  $("#menuToggle")?.addEventListener("click", () => {
-    const nav = $("#siteNav");
-    if (!nav) return;
+  const year = $("#year");
 
-    const isOpen = nav.classList.toggle("open");
-
-    $("#menuToggle").setAttribute(
-      "aria-expanded",
-      String(isOpen)
-    );
-  });
+  if (year) {
+    year.textContent = String(new Date().getFullYear());
+  }
 }
 
-if ($("#year")) {
-  $("#year").textContent = new Date().getFullYear();
+// ===============================
+// START APP
+// ===============================
+
+setupEvents();
+
+if ($("#movieGrid")) {
+  loadMovies();
 }
 
-loadTitles();
+if ($("#movieDetails")) {
+  loadMovieDetails();
+}
