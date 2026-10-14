@@ -162,18 +162,22 @@ button:focus-visible,a:focus-visible,input:focus-visible,select:focus-visible,.m
 @media (prefers-reduced-motion:reduce){
   *,*::before,*::after{scroll-behavior:auto!important;transition-duration:.01ms!important;animation-duration:.01ms!important}
 }
-/* Movie title size fix */
-.movie-title {
-  font-size: 14px !important;
-  line-height: 1.4 !important;
-  font-weight: 600 !important;
-  overflow: visible !important;
-  white-space: normal !important;
+/* Movie title - fixed readable size */
+.movie-info .movie-title {
+  display: block;
+  margin: 0 0 6px;
+  font-size: 15px !important;
+  line-height: 1.45 !important;
+  font-weight: 700 !important;
+  color: #fff7ff;
+  overflow-wrap: anywhere;
+  white-space: normal;
+  overflow: visible;
 }
 
-@media (max-width: 600px) {
-  .movie-title {
-    font-size: 13px !important;
+@media only screen and (max-width: 600px) {
+  .movie-info .movie-title {
+    font-size: 14px !important;
     line-height: 1.4 !important;
   }
 }
