@@ -1,3 +1,4 @@
+
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -9,106 +10,177 @@
 
   <style>
     body {
+      margin: 0;
       background: #100d1b;
-      color: white;
+      color: #fff;
       font-family: Arial, sans-serif;
-    }
-
-    .details {
-      max-width: 850px;
-      margin: 25px auto;
-      padding: 18px;
     }
 
     .movie-nav {
       display: flex;
       justify-content: space-between;
       align-items: center;
-      gap: 12px;
-      padding: 12px 18px;
+      flex-wrap: wrap;
+      gap: 10px;
       max-width: 850px;
-      margin: 0 auto;
+      margin: auto;
+      padding: 12px 18px;
     }
 
     .movie-nav a {
       display: inline-block;
-      text-decoration: none;
-      color: white;
-      font-weight: bold;
-      padding: 11px 20px;
+      padding: 10px 16px;
       border-radius: 8px;
       background: #211a32;
-      text-align: center;
+      color: #fff;
+      text-decoration: none;
+      font-size: 13px;
+      font-weight: bold;
     }
 
     .movie-nav .telegram {
       background: #168bd2;
     }
 
+    .movie-nav .admin {
+      background: #a33de2;
+    }
+
+    .details {
+      max-width: 850px;
+      margin: 20px auto;
+      padding: 18px;
+    }
+
     .poster {
+      display: block;
       width: 100%;
       max-width: 300px;
+      aspect-ratio: 2 / 3;
+      object-fit: cover;
+      margin: 0 auto 20px;
       border-radius: 12px;
-      display: block;
-      margin: auto;
+      background: #211a32;
+    }
+
+    #title {
+      font-size: 28px;
+      line-height: 1.35;
+      overflow-wrap: anywhere;
+    }
+
+    #info {
+      color: #c9b8d6;
+      font-size: 13px;
+    }
+
+    #description {
+      white-space: pre-line;
+      line-height: 1.7;
+      color: #e1d8e8;
     }
 
     .quality {
-      margin: 22px 0;
-      padding: 15px;
+      margin: 20px 0;
+      padding: 16px;
       background: #211a32;
+      border: 1px solid #ffffff12;
       border-radius: 12px;
     }
 
+    .quality h3 {
+      margin: 0;
+      font-size: 18px;
+    }
+
     .buttons {
-      display: flex;
-      flex-wrap: wrap;
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
       gap: 10px;
-      margin-top: 12px;
+      margin-top: 13px;
     }
 
     .btn {
-      display: inline-block;
-      padding: 12px 16px;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      flex-wrap: wrap;
+      gap: 5px;
+      min-height: 44px;
+      padding: 11px 12px;
       border-radius: 8px;
       color: #111;
       text-decoration: none;
-      font-weight: bold;
       text-align: center;
+      font-size: 13px;
+      font-weight: 800;
+      overflow-wrap: anywhere;
     }
 
     .green { background: #28d66f; }
     .yellow { background: #ffd43b; }
     .red { background: #ff5353; }
     .blue { background: #4da6ff; }
-    .tutorial { background: #a879ff; color: white; }
+    .tutorial { background: #a879ff; color: #fff; }
 
-    .disabled-link {
-      opacity: 0.5;
-      cursor: not-allowed;
+    .file-size {
+      display: block;
+      width: 100%;
+      font-size: 11px;
+      font-weight: 600;
+      opacity: .85;
+    }
+
+    .telegram-join {
+      display: inline-block;
+      padding: 12px 18px;
+      border-radius: 8px;
+      background: #168bd2;
+      color: #fff;
+      font-weight: bold;
+      text-decoration: none;
     }
 
     #message {
+      padding: 25px 10px;
       text-align: center;
-      padding: 20px;
+      color: #c9b8d6;
     }
 
-    @media (max-width: 480px) {
+    .error-message {
+      color: #ff8b9b !important;
+    }
+
+    [hidden] {
+      display: none !important;
+    }
+
+    @media (max-width: 600px) {
       .movie-nav {
-        padding: 10px;
+        padding: 10px 12px;
       }
 
       .movie-nav a {
-        padding: 10px 15px;
-        font-size: 14px;
+        padding: 10px 12px;
+        font-size: 12px;
       }
 
       .details {
         padding: 12px;
       }
 
+      #title {
+        font-size: 25px;
+      }
+
+      .quality {
+        padding: 13px;
+      }
+
       .buttons .btn {
-        flex: 1 1 120px;
+        min-width: 0;
+        padding: 10px 6px;
+        font-size: 12px;
       }
     }
   </style>
@@ -121,19 +193,22 @@
 
   <nav class="movie-nav" aria-label="Main navigation">
     <a href="index.html">MENU</a>
+
     <a
       class="telegram"
       href="https://t.me/+jjwnXEeKgbJkNGE1"
       target="_blank"
       rel="noopener noreferrer"
     >TELEGRAM ↗</a>
+
+    <a class="admin" href="admin.html">ADMIN SIGN IN</a>
   </nav>
 
   <main class="details">
     <p id="message" role="status">Loading movie...</p>
 
     <section id="movieDetails" hidden>
-      <img id="poster" class="poster" alt="Movie poster">
+      <img id="poster" class="poster" alt="Movie poster" hidden>
 
       <h1 id="title"></h1>
       <p id="info"></p>
@@ -141,23 +216,21 @@
 
       <div id="qualityButtons"></div>
 
-      <p>
+      <p id="tutorialWrap" hidden>
         <a
           id="tutorial"
           class="btn tutorial"
           target="_blank"
           rel="noopener noreferrer"
-          hidden
         >📘 Tutorial</a>
       </p>
 
       <p>
         <a
-          class="btn telegram"
+          class="telegram-join"
           href="https://t.me/+jjwnXEeKgbJkNGE1"
           target="_blank"
           rel="noopener noreferrer"
-          style="background:#168bd2;color:white"
         >JOIN TELEGRAM ↗</a>
       </p>
     </section>
@@ -180,32 +253,40 @@
 
     import { firebaseConfig } from "./firebase-config.js";
 
-    const TELEGRAM_URL = "https://t.me/+jjwnXEeKgbJkNGE1";
-
     const message = document.getElementById("message");
     const section = document.getElementById("movieDetails");
+    const container = document.getElementById("qualityButtons");
+
     const params = new URLSearchParams(location.search);
     const movieId = params.get("id");
 
     function safeUrl(value) {
-      if (typeof value !== "string" || !value.trim()) return "";
+      if (typeof value !== "string" || !value.trim()) {
+        return "";
+      }
 
       try {
         const url = new URL(value.trim());
 
-        return ["https:", "http:"].includes(url.protocol)
-          ? url.href
-          : "";
+        if (url.protocol === "https:" || url.protocol === "http:") {
+          return url.href;
+        }
+
+        return "";
       } catch {
         return "";
       }
+    }
+
+    function setText(id, value) {
+      document.getElementById(id).textContent = value || "";
     }
 
     function showMovie(movie) {
       if (!movie) {
         message.hidden = false;
         message.textContent =
-          "Movie nahi mili. Home page par wapas jao.";
+          "Movie nahi mili ya publish nahi hai.";
         section.hidden = true;
         return;
       }
@@ -216,21 +297,23 @@
       document.title =
         (movie.title || "Movie") + " - Om Movie Box";
 
-      document.getElementById("title").textContent =
-        movie.title || "Movie";
+      setText("title", movie.title || "Movie");
 
-      document.getElementById("info").textContent = [
-        movie.year,
-        movie.language,
-        movie.genre,
-        movie.quality
-      ].filter(Boolean).join(" • ");
+      setText(
+        "info",
+        [
+          movie.year,
+          movie.language,
+          movie.genre,
+          movie.quality
+        ].filter(Boolean).join(" • ")
+      );
 
-      document.getElementById("description").textContent =
-        movie.description || "";
+      setText("description", movie.description || "");
 
+      // Movie poster
       const poster = document.getElementById("poster");
-      const posterUrl = safeUrl(movie.poster || "");
+      const posterUrl = safeUrl(movie.poster);
 
       poster.hidden = !posterUrl;
       poster.onerror = () => {
@@ -243,19 +326,40 @@
         poster.removeAttribute("src");
       }
 
+      // Four qualities, each with Download and Online Watch.
+      // A button appears only when its own link is present.
       const qualities = [
-        ["480p", "480", "green"],
-        ["720p", "720", "yellow"],
-        ["1080p", "1080", "red"],
-        ["4K / 2160p", "2160", "blue"]
+        { label: "480p", key: "480", color: "green" },
+        { label: "720p", key: "720", color: "yellow" },
+        { label: "1080p", key: "1080", color: "red" },
+        { label: "4K / 2160p", key: "2160", color: "blue" }
       ];
-
-      const container =
-        document.getElementById("qualityButtons");
 
       container.replaceChildren();
 
-      qualities.forEach(([label, key, color]) => {
+      qualities.forEach(({ label, key, color }) => {
+        const actions = [
+          {
+            type: "download",
+            defaultText: "⬇ Download",
+            url: safeUrl(movie["download" + key]),
+            color
+          },
+          {
+            type: "watch",
+            defaultText: "▶ Online Watch",
+            url: safeUrl(movie["watch" + key]),
+            color
+          }
+        ];
+
+        // Hide the whole quality if both links are missing.
+        const availableActions = actions.filter(action => action.url);
+
+        if (!availableActions.length) {
+          return;
+        }
+
         const box = document.createElement("div");
         box.className = "quality";
 
@@ -266,52 +370,41 @@
         const buttons = document.createElement("div");
         buttons.className = "buttons";
 
-        const downloadUrl = safeUrl(
-          movie["download" + key] || ""
-        );
-
-        const watchUrl = safeUrl(
-          movie["watch" + key] || ""
-        );
-
-        // If quality-specific links are missing, use the
-        // saved officialUrl as a fallback.
-        const officialUrl = safeUrl(movie.officialUrl || "");
-
-        const links = [
-          [
-            "⬇ Download",
-            downloadUrl || officialUrl,
-            color
-          ],
-          [
-            "▶ Online Watch",
-            watchUrl || officialUrl,
-            color
-          ]
-        ];
-
-        links.forEach(([text, url, css]) => {
+        availableActions.forEach(action => {
           const a = document.createElement("a");
+          a.className = "btn " + action.color;
+          a.href = action.url;
+          a.target = "_blank";
+          a.rel = "noopener noreferrer";
 
-          a.className = "btn " + css;
-          a.textContent = text;
+          // Optional custom button text from the movie document.
+          const textField =
+            action.type + key + "Text";
 
-          if (url) {
-            a.href = url;
-            a.target = "_blank";
-            a.rel = "noopener noreferrer";
-          } else {
-            a.href = "#";
-            a.classList.add("disabled-link");
-            a.setAttribute("aria-disabled", "true");
+          const customText = movie[textField];
 
-            a.addEventListener("click", event => {
-              event.preventDefault();
-              alert(
-                "Is quality ka link Admin Panel mein add karein."
-              );
-            });
+          const buttonText =
+            typeof customText === "string" && customText.trim()
+              ? customText.trim()
+              : action.defaultText;
+
+          a.appendChild(document.createTextNode(buttonText));
+
+          // Optional file size, e.g. 450 MB or 1.2 GB.
+          const sizeField =
+            action.type + key + "Size";
+
+          const size = movie[sizeField];
+
+          if (
+            action.type === "download" &&
+            typeof size === "string" &&
+            size.trim()
+          ) {
+            const sizeElement = document.createElement("span");
+            sizeElement.className = "file-size";
+            sizeElement.textContent = size.trim();
+            a.appendChild(sizeElement);
           }
 
           buttons.appendChild(a);
@@ -321,10 +414,20 @@
         container.appendChild(box);
       });
 
-      const tutorial = document.getElementById("tutorial");
-      const tutorialUrl = safeUrl(movie.tutorialUrl || "");
+      if (!container.children.length) {
+        const noLinks = document.createElement("p");
+        noLinks.className = "quality";
+        noLinks.textContent =
+          "Abhi koi Download ya Online Watch link available nahi hai.";
+        container.appendChild(noLinks);
+      }
 
-      tutorial.hidden = !tutorialUrl;
+      // Tutorial is shown only if its URL exists.
+      const tutorial = document.getElementById("tutorial");
+      const tutorialWrap = document.getElementById("tutorialWrap");
+      const tutorialUrl = safeUrl(movie.tutorialUrl);
+
+      tutorialWrap.hidden = !tutorialUrl;
 
       if (tutorialUrl) {
         tutorial.href = tutorialUrl;
@@ -341,10 +444,7 @@
       }
 
       try {
-        if (
-          !firebaseConfig?.apiKey ||
-          !firebaseConfig?.projectId
-        ) {
+        if (!firebaseConfig?.apiKey || !firebaseConfig?.projectId) {
           throw new Error("Firebase configuration missing.");
         }
 
@@ -377,6 +477,7 @@
       } catch (error) {
         console.error("Movie loading error:", error);
 
+        message.classList.add("error-message");
         message.textContent =
           "Movie load nahi hui. Internet, Firebase Rules aur Movie ID check karein.";
       }
