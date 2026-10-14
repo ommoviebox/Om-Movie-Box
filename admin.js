@@ -1,3 +1,4 @@
+
 import {
   initializeApp,
   getApps,
@@ -29,6 +30,7 @@ const ADMIN_UID = "psgRupW3EfRUe61pcJzjqo36dNc2";
 const $ = id => document.getElementById(id);
 
 const loginForm = $("loginForm");
+const loginFormFields = $("loginFormFields");
 const dashboard = $("dashboard");
 const authMessage = $("authMessage");
 const saveMessage = $("saveMessage");
@@ -74,6 +76,7 @@ function safeUrl(value = "") {
   }
 }
 
+// Input ID -> Firestore field
 const fields = [
   ["title", "title"],
   ["contentType", "type"],
@@ -87,18 +90,40 @@ const fields = [
 
   ["watch480Input", "watch480"],
   ["download480Input", "download480"],
+  ["watch480TextInput", "watch480Text"],
+  ["download480TextInput", "download480Text"],
+  ["download480SizeInput", "download480Size"],
 
   ["watch720Input", "watch720"],
   ["download720Input", "download720"],
+  ["watch720TextInput", "watch720Text"],
+  ["download720TextInput", "download720Text"],
+  ["download720SizeInput", "download720Size"],
 
   ["watch1080Input", "watch1080"],
   ["download1080Input", "download1080"],
+  ["watch1080TextInput", "watch1080Text"],
+  ["download1080TextInput", "download1080Text"],
+  ["download1080SizeInput", "download1080Size"],
 
   ["watch2160Input", "watch2160"],
   ["download2160Input", "download2160"],
+  ["watch2160TextInput", "watch2160Text"],
+  ["download2160TextInput", "download2160Text"],
+  ["download2160SizeInput", "download2160Size"],
 
   ["tutorialUrlInput", "tutorialUrl"]
 ];
+
+const urlKeys = new Set([
+  "poster",
+  "officialUrl",
+  "watch480", "download480",
+  "watch720", "download720",
+  "watch1080", "download1080",
+  "watch2160", "download2160",
+  "tutorialUrl"
+]);
 
 function resetForm() {
   titleForm.reset();
@@ -136,7 +161,7 @@ onAuthStateChanged(auth, async user => {
   }
 });
 
-loginForm.addEventListener("submit", async event => {
+loginFormFields.addEventListener("submit", async event => {
   event.preventDefault();
   authMessage.textContent = "Login हो रहा है…";
 
@@ -161,22 +186,13 @@ $("logoutButton").addEventListener("click", async () => {
   }
 });
 
-// Validate and build the movie data.
 function buildPayload() {
   const payload = {};
 
   for (const [inputId, key] of fields) {
     const value = val(inputId);
 
-    if (value && [
-      "poster",
-      "officialUrl",
-      "watch480", "download480",
-      "watch720", "download720",
-      "watch1080", "download1080",
-      "watch2160", "download2160",
-      "tutorialUrl"
-    ].includes(key) && !safeUrl(value)) {
+    if (urlKeys.has(key) && !safeUrl(value)) {
       throw new Error(`कृपया सही URL डालें: ${key}`);
     }
 
@@ -215,14 +231,16 @@ titleForm.addEventListener("submit", async event => {
 
     if (id) {
       await updateDoc(doc(db, "titles", id), payload);
-      saveMessage.textContent = "मूवी और लिंक अपडेट हो गए।";
+      saveMessage.textContent =
+        "मूवी, बटन नाम, लिंक और साइज़ अपडेट हो गए।";
     } else {
       await addDoc(collection(db, "titles"), {
         ...payload,
         createdAt: serverTimestamp(),
         createdBy: currentUser.uid
       });
-      saveMessage.textContent = "मूवी और लिंक सेव हो गए।";
+      saveMessage.textContent =
+        "मूवी, बटन नाम, लिंक और साइज़ सेव हो गए।";
     }
 
     resetForm();
@@ -235,7 +253,6 @@ titleForm.addEventListener("submit", async event => {
   }
 });
 
-// Load every title, including older documents without createdAt.
 async function loadAdminTitles() {
   if (!isAdmin(currentUser) || loadingTitles) return;
 
@@ -291,7 +308,6 @@ async function loadAdminTitles() {
   }
 }
 
-// Edit and delete existing titles.
 list.addEventListener("click", async event => {
   if (!isAdmin(currentUser)) return;
 
@@ -321,7 +337,7 @@ list.addEventListener("click", async event => {
       $("publishedInput").checked = movie.published === true;
 
       saveMessage.textContent =
-        "मूवी एडिट हो रही है। बदलाव करके SAVE TITLE दबाएँ।";
+        "मूवी एडिट करें और SAVE TITLE दबाएँ।";
 
       titleForm.scrollIntoView({ behavior: "smooth" });
 
