@@ -1,4 +1,8 @@
-import { initializeApp, getApps, getApp } from "https://www.gstatic.com/firebasejs/10.14.1/firebase-app.js";
+import {
+  initializeApp,
+  getApps,
+  getApp
+} from "https://www.gstatic.com/firebasejs/10.14.1/firebase-app.js";
 
 import {
   getFirestore,
@@ -9,6 +13,10 @@ import {
 } from "https://www.gstatic.com/firebasejs/10.14.1/firebase-firestore.js";
 
 import { firebaseConfig } from "./firebase-config.js";
+
+// Pagination settings
+const MOVIES_PER_PAGE = 30;
+let currentPage = 1;
 
 // Sample movies shown only if Firebase cannot be loaded.
 const sampleTitles = [
@@ -124,7 +132,6 @@ async function loadTitles() {
 
       const db = getFirestore(app);
 
-      // Do not require createdAt to exist.
       const movieQuery = query(
         collection(db, "titles"),
         where("published", "==", true)
@@ -132,28 +139,29 @@ async function loadTitles() {
 
       const snapshot = await getDocs(movieQuery);
 
-      const onlineMovies = snapshot.docs.map(document => ({
-        ...document.data(),
-        id: document.id
-      }));
+      titles = snapshot.docs.map(document =>
+        normalizeMovie({
+          ...document.data(),
+          id: document.id
+        })
+      );
 
-      // Use Firestore results, even if the collection is empty.
-      titles = onlineMovies.map(normalizeMovie);
       firebaseLoaded = true;
 
       console.log("Firestore movies loaded:", titles.length);
-      console.log("Movie titles:", titles.map(movie => movie.title));
 
     } catch (error) {
       console.error("Firebase movie loading failed:", error);
     }
   }
 
-  // Use sample movies only when Firebase did not load successfully.
+  // Sample movies are only a fallback if Firebase fails.
   if (!firebaseLoaded) {
     titles = [...sampleTitles];
     console.warn("Showing sample movies because Firebase did not load.");
   }
+
+  currentPage = 1;
 
   if ($("#movieGrid")) {
     fillFilters();
@@ -194,6 +202,9 @@ function fillFilters() {
 
   if (!genreSelect || !languageSelect) return;
 
+  const oldGenre = genreSelect.value || "all";
+  const oldLanguage = languageSelect.value || "all";
+
   const genres = [
     ...new Set(titles.map(movie => movie.genre).filter(Boolean))
   ].sort();
@@ -213,9 +224,71 @@ function fillFilters() {
     languages.map(language =>
       `<option value="${escapeHTML(language)}">${escapeHTML(language)}</option>`
     ).join("");
+
+  genreSelect.value = genres.includes(oldGenre) ? oldGenre : "all";
+  languageSelect.value = languages.includes(oldLanguage)
+    ? oldLanguage
+    : "all";
 }
 
-// Display movie cards.
+// Create pagination buttons.
+function renderPagination(totalPages) {
+  const pagination = $("#pagination");
+  if (!pagination) return;
+
+  if (totalPages <= 1) {
+    pagination.innerHTML = "";
+    return;
+  }
+
+  let html = `
+    <button type="button" data-page="${currentPage - 1}"
+      ${currentPage === 1 ? "disabled" : ""}>
+      Previous
+    </button>
+  `;
+
+  // Show nearby page numbers for large collections.
+  let pages = new Set([1, totalPages]);
+
+  for (
+    let page = Math.max(1, currentPage - 2);
+    page <= Math.min(totalPages, currentPage + 2);
+    page++
+  ) {
+    pages.add(page);
+  }
+
+  const sortedPages = [...pages].sort((a, b) => a - b);
+  let previousPage = 0;
+
+  for (const page of sortedPages) {
+    if (previousPage && page - previousPage > 1) {
+      html += `<span aria-hidden="true">…</span>`;
+    }
+
+    html += `
+      <button type="button" data-page="${page}"
+        ${page === currentPage ? 'aria-current="page"' : ""}
+        ${page === currentPage ? "disabled" : ""}>
+        ${page}
+      </button>
+    `;
+
+    previousPage = page;
+  }
+
+  html += `
+    <button type="button" data-page="${currentPage + 1}"
+      ${currentPage === totalPages ? "disabled" : ""}>
+      Next
+    </button>
+  `;
+
+  pagination.innerHTML = html;
+}
+
+// Display movie cards with pagination.
 function renderMovies() {
   const grid = $("#movieGrid");
   if (!grid) return;
@@ -243,15 +316,21 @@ function renderMovies() {
       (language === "all" || movie.language === language);
   });
 
+  const totalPages = Math.ceil(results.length / MOVIES_PER_PAGE);
+  currentPage = Math.max(1, Math.min(currentPage, totalPages || 1));
+
   if ($("#resultCount")) {
     $("#resultCount").textContent = `${results.length} titles`;
   }
 
   if ($("#emptyState")) {
-    $("#emptyState").hidden = results.length !== 0;
+    $("#emptyState").hidden = results.length > 0;
   }
 
-  grid.innerHTML = results.map(movie => `
+  const start = (currentPage - 1) * MOVIES_PER_PAGE;
+  const pageMovies = results.slice(start, start + MOVIES_PER_PAGE);
+
+  grid.innerHTML = pageMovies.map(movie => `
     <article class="movie-card"
       tabindex="0"
       role="link"
@@ -283,6 +362,8 @@ function renderMovies() {
       </div>
     </article>
   `).join("");
+
+  renderPagination(totalPages);
 }
 
 // Open movie details page.
@@ -387,15 +468,8 @@ function renderDetails() {
   }
 
   ["480", "720", "1080", "2160"].forEach(quality => {
-    setButton(
-      `download${quality}`,
-      movie[`download${quality}`]
-    );
-
-    setButton(
-      `watch${quality}`,
-      movie[`watch${quality}`]
-    );
+    setButton(`download${quality}`, movie[`download${quality}`]);
+    setButton(`watch${quality}`, movie[`watch${quality}`]);
   });
 
   setButton("tutorialLink", movie.tutorialUrl);
@@ -419,16 +493,36 @@ if (grid) {
     }
   });
 
-  $("#searchInput")?.addEventListener("input", renderMovies);
+  $("#pagination")?.addEventListener("click", event => {
+    const button = event.target.closest("button[data-page]");
+    if (!button || button.disabled) return;
+
+    const page = Number(button.dataset.page);
+    if (!Number.isInteger(page) || page < 1) return;
+
+    currentPage = page;
+    renderMovies();
+
+    $("#latest")?.scrollIntoView({ behavior: "smooth" });
+  });
+
+  $("#searchInput")?.addEventListener("input", () => {
+    currentPage = 1;
+    renderMovies();
+  });
 
   $("#searchForm")?.addEventListener("submit", event => {
     event.preventDefault();
+    currentPage = 1;
     renderMovies();
     $("#latest")?.scrollIntoView({ behavior: "smooth" });
   });
 
   ["#typeFilter", "#genreFilter", "#languageFilter"].forEach(selector => {
-    $(selector)?.addEventListener("change", renderMovies);
+    $(selector)?.addEventListener("change", () => {
+      currentPage = 1;
+      renderMovies();
+    });
   });
 
   $("#menuToggle")?.addEventListener("click", () => {
