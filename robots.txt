@@ -1,0 +1,4 @@
+User-agent: *
+Allow: /
+
+Sitemap: https://ommoviebox.github.io/Om-Movie-Box/sitemap.xml
