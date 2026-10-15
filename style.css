@@ -174,11 +174,43 @@ button:focus-visible,a:focus-visible,input:focus-visible,select:focus-visible,.m
   white-space: normal;
   overflow: visible;
 }
-
 @media only screen and (max-width: 600px) {
+
   .movie-info .movie-title {
     font-size: 16px !important;
     line-height: 1.4 !important;
   }
 }
 
+/* Poster display fix */
+#movieGrid .poster-wrap {
+  width: 100%;
+  aspect-ratio: 2 / 3;
+  overflow: hidden;
+  background: #291a34;
+}
+
+#movieGrid .poster,
+#movieGrid .movie-poster {
+  display: block;
+  width: 100%;
+  height: 100%;
+  aspect-ratio: 2 / 3;
+  object-fit: cover;
+  object-position: center;
+}
+
+#movieGrid .poster-placeholder {
+  width: 100%;
+  height: 100%;
+  aspect-ratio: 2 / 3;
+  display: grid;
+  place-items: center;
+}
+
+@media (max-width: 600px) {
+  #movieGrid {
+    grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+    gap: 10px !important;
+  }
+}
