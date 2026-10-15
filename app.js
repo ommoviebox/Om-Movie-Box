@@ -1,3 +1,4 @@
+
 import { initializeApp, getApps, getApp } from "https://www.gstatic.com/firebasejs/10.14.1/firebase-app.js";
 
 import {
@@ -24,22 +25,17 @@ let currentPage = 1;
 const pageSize = 12;
 
 function safeURL(value) {
+  if (!value) return "";
+
   try {
-    const url = new URL(String(value || ""));
-    return ["https:", "http:"].includes(url.protocol) ? url.href : "";
+    const url = new URL(String(value).trim());
+
+    if (!["https:", "http:"].includes(url.protocol)) return "";
+
+    return url.href;
   } catch {
     return "";
   }
-}
-
-function escapeHTML(value) {
-  return String(value ?? "").replace(/[&<>"']/g, (char) => ({
-    "&": "&amp;",
-    "<": "&lt;",
-    ">": "&gt;",
-    '"': "&quot;",
-    "'": "&#39;"
-  })[char]);
 }
 
 function renderCard(movie) {
@@ -47,55 +43,77 @@ function renderCard(movie) {
   card.className = "movie-card";
   card.href = `movie.html?id=${encodeURIComponent(movie.id)}`;
 
-  const poster = safeURL(movie.poster);
-  const title = escapeHTML(movie.title || "Untitled Movie");
-  const year = escapeHTML(movie.year || "");
-  const language = escapeHTML(movie.language || "");
-  const type = escapeHTML(movie.contentType || "Movie");
+  const posterURL = safeURL(movie.poster);
 
-  card.innerHTML = `
-    <div class="poster-wrap">
-      ${poster
-        ? `<img class="movie-poster" src="${escapeHTML(poster)}"
-             alt="${title}" loading="lazy">`
-        : `<div class="movie-poster poster-placeholder">OM</div>`
-      }
-    </div>
-    <div class="movie-info">
-      <h3 class="movie-title">${title}</h3>
-      <div class="movie-meta">
-        ${year ? `<span>${year}</span>` : ""}
-        ${language ? `<span>${language}</span>` : ""}
-        <span>${type}</span>
-      </div>
-    </div>
-  `;
+  const posterWrap = document.createElement("div");
+  posterWrap.className = "poster-wrap";
 
-  const img = card.querySelector("img");
-  if (img) {
-    img.addEventListener("error", () => {
-      const placeholder = document.createElement("div");
-      placeholder.className = "movie-poster poster-placeholder";
-      placeholder.textContent = "OM";
-      img.replaceWith(placeholder);
+  const image = document.createElement("img");
+  image.className = "poster";
+  image.alt = movie.title || "Movie poster";
+  image.loading = "lazy";
+  image.decoding = "async";
+
+  // Poster ki jagah OM placeholder
+  const placeholder = document.createElement("div");
+  placeholder.className = "poster-placeholder";
+  placeholder.textContent = "OM";
+  placeholder.style.display = "none";
+
+  if (posterURL) {
+    image.src = posterURL;
+
+    image.addEventListener("error", () => {
+      image.style.display = "none";
+      placeholder.style.display = "grid";
     }, { once: true });
+
+    posterWrap.append(image, placeholder);
+  } else {
+    placeholder.style.display = "grid";
+    posterWrap.appendChild(placeholder);
   }
+
+  const info = document.createElement("div");
+  info.className = "movie-info";
+
+  const title = document.createElement("h3");
+  title.className = "movie-title";
+  title.textContent = movie.title || "Untitled Movie";
+
+  const meta = document.createElement("div");
+  meta.className = "movie-meta";
+
+  [
+    movie.year,
+    movie.language,
+    movie.contentType || "Movie"
+  ].filter(Boolean).forEach((value) => {
+    const span = document.createElement("span");
+    span.textContent = value;
+    span.style.marginRight = "5px";
+    meta.appendChild(span);
+  });
+
+  info.append(title, meta);
+  card.append(posterWrap, info);
 
   return card;
 }
 
 function getSearchText() {
-  const search = $("searchInput");
-  return (search?.value || "").trim().toLowerCase();
+  return ($("searchInput")?.value || "").trim().toLowerCase();
 }
 
 function getFilterValue(ids) {
   for (const id of ids) {
     const element = $(id);
-    if (element && element.value && element.value !== "all") {
+
+    if (element?.value && element.value !== "all") {
       return element.value.trim().toLowerCase();
     }
   }
+
   return "";
 }
 
@@ -103,7 +121,11 @@ function applyFilters() {
   const query = getSearchText();
   const genre = getFilterValue(["genreFilter", "genreSelect"]);
   const language = getFilterValue(["languageFilter", "languageSelect"]);
-  const type = getFilterValue(["typeFilter", "contentTypeFilter", "typeSelect"]);
+  const type = getFilterValue([
+    "typeFilter",
+    "contentTypeFilter",
+    "typeSelect"
+  ]);
 
   filteredMovies = allMovies.filter((movie) => {
     const searchable = [
@@ -116,9 +138,21 @@ function applyFilters() {
     ].join(" ").toLowerCase();
 
     if (query && !searchable.includes(query)) return false;
-    if (genre && !String(movie.genre || "").toLowerCase().includes(genre)) return false;
-    if (language && !String(movie.language || "").toLowerCase().includes(language)) return false;
-    if (type && !String(movie.contentType || "").toLowerCase().includes(type)) return false;
+
+    if (
+      genre &&
+      !String(movie.genre || "").toLowerCase().includes(genre)
+    ) return false;
+
+    if (
+      language &&
+      !String(movie.language || "").toLowerCase().includes(language)
+    ) return false;
+
+    if (
+      type &&
+      !String(movie.contentType || "").toLowerCase().includes(type)
+    ) return false;
 
     return true;
   });
@@ -134,15 +168,21 @@ function renderMovies() {
 
   const total = filteredMovies.length;
   const totalPages = Math.ceil(total / pageSize);
-  currentPage = Math.max(1, Math.min(currentPage, totalPages || 1));
+
+  currentPage = Math.max(
+    1,
+    Math.min(currentPage, totalPages || 1)
+  );
 
   const start = (currentPage - 1) * pageSize;
-  const pageMovies = filteredMovies.slice(start, start + pageSize);
 
-  pageMovies.forEach((movie) => grid.appendChild(renderCard(movie)));
+  filteredMovies
+    .slice(start, start + pageSize)
+    .forEach((movie) => grid.appendChild(renderCard(movie)));
 
   if (count) {
-    count.textContent = `${total} ${total === 1 ? "title" : "titles"}`;
+    count.textContent =
+      `${total} ${total === 1 ? "title" : "titles"}`;
   }
 
   if (empty) {
@@ -152,73 +192,75 @@ function renderMovies() {
       : "अभी कोई प्रकाशित मूवी उपलब्ध नहीं है।";
   }
 
-  if (pagination) {
-    pagination.replaceChildren();
+  if (!pagination) return;
 
-    if (totalPages > 1) {
-      const makeButton = (label, page, disabled = false) => {
-        const button = document.createElement("button");
-        button.type = "button";
-        button.textContent = label;
-        button.disabled = disabled;
-        button.style.cssText =
-          "margin:4px;padding:9px 13px;border:0;border-radius:7px;background:#7c3aed;color:white;font-weight:bold";
-        button.addEventListener("click", () => {
-          currentPage = page;
-          renderMovies();
-          window.scrollTo({ top: 0, behavior: "smooth" });
-        });
-        return button;
-      };
+  pagination.replaceChildren();
 
-      pagination.appendChild(
-        makeButton("← Previous", currentPage - 1, currentPage === 1)
-      );
+  if (totalPages <= 1) return;
 
-      const pageLabel = document.createElement("span");
-      pageLabel.textContent = ` Page ${currentPage} of ${totalPages} `;
-      pagination.appendChild(pageLabel);
+  function makeButton(label, page, disabled) {
+    const button = document.createElement("button");
+    button.type = "button";
+    button.className = "page-btn";
+    button.textContent = label;
+    button.disabled = disabled;
 
-      pagination.appendChild(
-        makeButton("Next →", currentPage + 1, currentPage === totalPages)
-      );
-    }
+    button.addEventListener("click", () => {
+      currentPage = page;
+      renderMovies();
+      window.scrollTo({ top: 0, behavior: "smooth" });
+    });
+
+    return button;
   }
+
+  pagination.appendChild(
+    makeButton("← Previous", currentPage - 1, currentPage === 1)
+  );
+
+  const label = document.createElement("span");
+  label.className = "page-info";
+  label.textContent = `Page ${currentPage} of ${totalPages}`;
+  pagination.appendChild(label);
+
+  pagination.appendChild(
+    makeButton("Next →", currentPage + 1, currentPage === totalPages)
+  );
 }
 
 function setupFilters() {
   const searchForm = $("searchForm");
-  if (searchForm) {
-    searchForm.addEventListener("submit", (event) => {
-      event.preventDefault();
-      applyFilters();
-    });
-  }
 
-  const search = $("searchInput");
-  if (search) search.addEventListener("input", applyFilters);
+  searchForm?.addEventListener("submit", (event) => {
+    event.preventDefault();
+    applyFilters();
+  });
+
+  $("searchInput")?.addEventListener("input", applyFilters);
 
   [
     "genreFilter", "genreSelect",
     "languageFilter", "languageSelect",
     "typeFilter", "contentTypeFilter", "typeSelect"
   ].forEach((id) => {
-    const element = $(id);
-    if (element) element.addEventListener("change", applyFilters);
+    $(id)?.addEventListener("change", applyFilters);
   });
 }
 
 async function loadMovies() {
   if (!grid) return;
 
-  grid.replaceChildren();
   if (count) count.textContent = "Loading...";
+  if (empty) empty.hidden = true;
 
   try {
     const snapshot = await getDocs(collection(db, "titles"));
 
     allMovies = snapshot.docs
-      .map((item) => ({ id: item.id, ...item.data() }))
+      .map((item) => ({
+        id: item.id,
+        ...item.data()
+      }))
       .filter((movie) => movie.published === true)
       .sort((a, b) => {
         const timeA = a.createdAt?.toMillis?.() || 0;
@@ -235,7 +277,7 @@ async function loadMovies() {
     if (empty) {
       empty.hidden = false;
       empty.textContent =
-        "मूवी लोड नहीं हुई। इंटरनेट, firebase-config.js और Firestore Rules जाँचें।";
+        "Movies load nahi hui. Internet aur Firestore Rules check karein.";
     }
 
     if (pagination) pagination.replaceChildren();
