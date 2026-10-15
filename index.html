@@ -1,11 +1,24 @@
+
 <!doctype html>
 <html lang="en">
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <meta name="theme-color" content="#100615">
+
   <title>Om Movie Box</title>
+  <meta name="description" content="Om Movie Box - Explore movie information, web series details, and authorized viewing links.">
+  <meta name="robots" content="index, follow">
+  <link rel="canonical" href="https://ommoviebox.github.io/Om-Movie-Box/">
+
+  <meta property="og:type" content="website">
+  <meta property="og:site_name" content="Om Movie Box">
+  <meta property="og:title" content="Om Movie Box">
+  <meta property="og:description" content="Explore movie information, web series details, and authorized viewing links.">
+  <meta property="og:url" content="https://ommoviebox.github.io/Om-Movie-Box/">
+
   <link rel="stylesheet" href="style.css">
+
   <style>
     .menu-strip {
       display: flex;
@@ -47,10 +60,14 @@
     }
   </style>
 </head>
+
 <body>
 
 <header class="hero">
-  <a class="brand" href="./"><span>OM</span> MOVIE BOX</a>
+  <a class="brand" href="./">
+    <span>OM</span> MOVIE BOX
+  </a>
+
   <p class="tagline">MOVIES • WEB SERIES • MOVIE DETAILS</p>
 
   <form class="searchbar" id="searchForm">
@@ -91,11 +108,10 @@
 </div>
 
 <main class="page-wrap">
-
   <section id="latest" class="catalog-section">
     <div class="section-heading">
       <div>
-        <h2>Latest Movies &amp; Web Series</h2>
+        <h1>Latest Movies &amp; Web Series</h1>
       </div>
       <span id="resultCount" class="count-chip">Loading...</span>
     </div>
@@ -124,7 +140,6 @@
 
     <div id="pagination"></div>
   </section>
-
 </main>
 
 <footer class="footer">
