@@ -214,3 +214,21 @@ button:focus-visible,a:focus-visible,input:focus-visible,select:focus-visible,.m
     gap: 10px !important;
   }
 }
+/* Laptop 5 movies, tablet 4, mobile 2 */
+@media (min-width: 901px) {
+  #movieGrid {
+    grid-template-columns: repeat(5, minmax(0, 1fr)) !important;
+  }
+}
+
+@media (min-width: 601px) and (max-width: 900px) {
+  #movieGrid {
+    grid-template-columns: repeat(4, minmax(0, 1fr)) !important;
+  }
+}
+
+@media (max-width: 600px) {
+  #movieGrid {
+    grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+  }
+}
