@@ -101,44 +101,26 @@
 
   <nav id="siteNav">
     <a href="./">Home</a>
-    <a href="#latest">Latest</a>
-    <a href="#latest">Movies</a>
-    <a href="#latest">Web Series</a>
+    <a href="#movieGrid">Latest</a>
+    <a href="#movieGrid">Movies</a>
+    <a href="#movieGrid">Web Series</a>
   </nav>
 </div>
 
 <main class="page-wrap">
   <section id="latest" class="catalog-section">
-    <div class="section-heading">
-      <div>
-        <h1>Latest Movies &amp; Web Series</h1>
-      </div>
-      <span id="resultCount" class="count-chip">Loading...</span>
-    </div>
 
-    <div class="filters">
-      <select id="typeFilter" aria-label="Content type">
-        <option value="all">All Titles</option>
-        <option value="movie">Movies</option>
-        <option value="series">Web Series</option>
-      </select>
-
-      <select id="genreFilter" aria-label="Genre">
-        <option value="all">All Genres</option>
-      </select>
-
-      <select id="languageFilter" aria-label="Language">
-        <option value="all">All Languages</option>
-      </select>
-    </div>
-
+    <!-- Movie posters -->
     <div id="movieGrid" class="movie-grid" aria-live="polite"></div>
 
+    <!-- Empty and error message -->
     <p id="emptyState" class="empty-state" hidden>
       No titles match your search.
     </p>
 
+    <!-- Page navigation -->
     <div id="pagination"></div>
+
   </section>
 </main>
 
@@ -148,6 +130,13 @@
   <a href="admin.html">Admin Sign In</a>
   <span>© <span id="year"></span> Om Movie Box</span>
 </footer>
+
+<script>
+  const yearElement = document.getElementById("year");
+  if (yearElement) {
+    yearElement.textContent = new Date().getFullYear();
+  }
+</script>
 
 <script type="module" src="app.js"></script>
 </body>
