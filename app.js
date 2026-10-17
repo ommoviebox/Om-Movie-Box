@@ -4,7 +4,9 @@ import { initializeApp, getApps, getApp } from "https://www.gstatic.com/firebase
 import {
   getFirestore,
   collection,
-  getDocs
+  getDocs,
+  query,
+  where
 } from "https://www.gstatic.com/firebasejs/10.14.1/firebase-firestore.js";
 
 import { firebaseConfig } from "./firebase-config.js";
@@ -29,9 +31,7 @@ function safeURL(value) {
 
   try {
     const url = new URL(String(value).trim());
-
     if (!["https:", "http:"].includes(url.protocol)) return "";
-
     return url.href;
   } catch {
     return "";
@@ -44,7 +44,6 @@ function renderCard(movie) {
   card.href = `movie.html?id=${encodeURIComponent(movie.id)}`;
 
   const posterURL = safeURL(movie.poster);
-
   const posterWrap = document.createElement("div");
   posterWrap.className = "poster-wrap";
 
@@ -54,7 +53,6 @@ function renderCard(movie) {
   image.loading = "lazy";
   image.decoding = "async";
 
-  // Poster ki jagah OM placeholder
   const placeholder = document.createElement("div");
   placeholder.className = "poster-placeholder";
   placeholder.textContent = "OM";
@@ -62,12 +60,10 @@ function renderCard(movie) {
 
   if (posterURL) {
     image.src = posterURL;
-
     image.addEventListener("error", () => {
       image.style.display = "none";
       placeholder.style.display = "grid";
     }, { once: true });
-
     posterWrap.append(image, placeholder);
   } else {
     placeholder.style.display = "grid";
@@ -84,20 +80,17 @@ function renderCard(movie) {
   const meta = document.createElement("div");
   meta.className = "movie-meta";
 
-  [
-    movie.year,
-    movie.language,
-    movie.contentType || "Movie"
-  ].filter(Boolean).forEach((value) => {
-    const span = document.createElement("span");
-    span.textContent = value;
-    span.style.marginRight = "5px";
-    meta.appendChild(span);
-  });
+  [movie.year, movie.language, movie.contentType || "Movie"]
+    .filter(Boolean)
+    .forEach((value) => {
+      const span = document.createElement("span");
+      span.textContent = value;
+      span.style.marginRight = "5px";
+      meta.appendChild(span);
+    });
 
   info.append(title, meta);
   card.append(posterWrap, info);
-
   return card;
 }
 
@@ -108,17 +101,15 @@ function getSearchText() {
 function getFilterValue(ids) {
   for (const id of ids) {
     const element = $(id);
-
     if (element?.value && element.value !== "all") {
       return element.value.trim().toLowerCase();
     }
   }
-
   return "";
 }
 
 function applyFilters() {
-  const query = getSearchText();
+  const queryText = getSearchText();
   const genre = getFilterValue(["genreFilter", "genreSelect"]);
   const language = getFilterValue(["languageFilter", "languageSelect"]);
   const type = getFilterValue([
@@ -137,23 +128,10 @@ function applyFilters() {
       movie.description
     ].join(" ").toLowerCase();
 
-    if (query && !searchable.includes(query)) return false;
-
-    if (
-      genre &&
-      !String(movie.genre || "").toLowerCase().includes(genre)
-    ) return false;
-
-    if (
-      language &&
-      !String(movie.language || "").toLowerCase().includes(language)
-    ) return false;
-
-    if (
-      type &&
-      !String(movie.contentType || "").toLowerCase().includes(type)
-    ) return false;
-
+    if (queryText && !searchable.includes(queryText)) return false;
+    if (genre && !String(movie.genre || "").toLowerCase().includes(genre)) return false;
+    if (language && !String(movie.language || "").toLowerCase().includes(language)) return false;
+    if (type && !String(movie.contentType || "").toLowerCase().includes(type)) return false;
     return true;
   });
 
@@ -165,15 +143,10 @@ function renderMovies() {
   if (!grid) return;
 
   grid.replaceChildren();
-
   const total = filteredMovies.length;
   const totalPages = Math.ceil(total / pageSize);
 
-  currentPage = Math.max(
-    1,
-    Math.min(currentPage, totalPages || 1)
-  );
-
+  currentPage = Math.max(1, Math.min(currentPage, totalPages || 1));
   const start = (currentPage - 1) * pageSize;
 
   filteredMovies
@@ -181,8 +154,7 @@ function renderMovies() {
     .forEach((movie) => grid.appendChild(renderCard(movie)));
 
   if (count) {
-    count.textContent =
-      `${total} ${total === 1 ? "title" : "titles"}`;
+    count.textContent = `${total} ${total === 1 ? "title" : "titles"}`;
   }
 
   if (empty) {
@@ -193,9 +165,7 @@ function renderMovies() {
   }
 
   if (!pagination) return;
-
   pagination.replaceChildren();
-
   if (totalPages <= 1) return;
 
   function makeButton(label, page, disabled) {
@@ -204,13 +174,11 @@ function renderMovies() {
     button.className = "page-btn";
     button.textContent = label;
     button.disabled = disabled;
-
     button.addEventListener("click", () => {
       currentPage = page;
       renderMovies();
       window.scrollTo({ top: 0, behavior: "smooth" });
     });
-
     return button;
   }
 
@@ -254,14 +222,18 @@ async function loadMovies() {
   if (empty) empty.hidden = true;
 
   try {
-    const snapshot = await getDocs(collection(db, "titles"));
+    const publishedMoviesQuery = query(
+      collection(db, "titles"),
+      where("published", "==", true)
+    );
+
+    const snapshot = await getDocs(publishedMoviesQuery);
 
     allMovies = snapshot.docs
       .map((item) => ({
         id: item.id,
         ...item.data()
       }))
-      .filter((movie) => movie.published === true)
       .sort((a, b) => {
         const timeA = a.createdAt?.toMillis?.() || 0;
         const timeB = b.createdAt?.toMillis?.() || 0;
