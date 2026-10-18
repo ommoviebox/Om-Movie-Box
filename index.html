@@ -63,65 +63,35 @@
       margin: 24px 0;
     }
 
-    /* IMAGE-INSPIRED NEON LOGO */
-    header.hero a.brand.rgb-logo {
-      display: inline-flex !important;
-      align-items: center;
-      justify-content: center;
-      flex-wrap: nowrap;
+    /* Reference image logo */
+    header.hero a.brand.image-logo {
+      display: block !important;
+      width: 100%;
+      max-width: 520px;
+      margin: 0 auto 12px;
+      padding: 0;
+      line-height: 0;
+      text-decoration: none;
+      background: none;
+      box-shadow: none;
+    }
+
+    header.hero a.brand.image-logo img {
+      display: block;
+      width: 100%;
       max-width: 100%;
-      box-sizing: border-box;
-      font-family: "Arial Black", Impact, Haettenschweiler, sans-serif !important;
-      font-size: clamp(23px, 5.8vw, 46px) !important;
-      font-weight: 900 !important;
-      font-style: italic !important;
-      letter-spacing: clamp(0.5px, 0.25vw, 2px) !important;
-      line-height: 1.2;
-      white-space: nowrap;
-      text-decoration: none !important;
-      text-transform: uppercase;
-      transform: scaleX(1.02);
-      transform-origin: center;
-    }
-
-    header.hero a.brand.rgb-logo .logo-om,
-    header.hero a.brand.rgb-logo .logo-movie,
-    header.hero a.brand.rgb-logo .logo-box {
-      display: inline-block;
-      -webkit-text-fill-color: currentColor;
-    }
-
-    header.hero a.brand.rgb-logo .logo-om {
-      color: #ff19e6;
-      text-shadow: 0 0 2px #fff, 0 0 7px #ff00e6, 0 0 17px #ff00e6;
-    }
-
-    header.hero a.brand.rgb-logo .logo-movie {
-      color: #00eaff;
-      text-shadow: 0 0 2px #fff, 0 0 7px #00eaff, 0 0 17px #008cff;
-    }
-
-    header.hero a.brand.rgb-logo .logo-box {
-      color: #39ff14;
-      text-shadow: 0 0 2px #fff, 0 0 7px #39ff14, 0 0 17px #20e800;
-    }
-
-    @media (max-width: 380px) {
-      header.hero a.brand.rgb-logo {
-        font-size: 20px !important;
-        letter-spacing: 0.35px !important;
-      }
-    }
-
-    @media (prefers-reduced-motion: reduce) {
-      header.hero a.brand.rgb-logo { transition: none; }
+      height: auto;
+      object-fit: contain;
+      margin: 0 auto;
     }
   </style>
 </head>
 
 <body>
 <header class="hero">
-  <a class="brand rgb-logo" href="./" aria-label="OM MOVIE BOX Home"><span class="logo-om">OM</span>&nbsp;<span class="logo-movie">MOVIE</span>&nbsp;<span class="logo-box">BOX</span></a>
+  <a class="brand image-logo" href="./" aria-label="OM MOVIE BOX Home">
+    <img src="./om-movie-box-logo.jpg" alt="OM MOVIE BOX — Movies, Web Series, Movie Details">
+  </a>
 
   <p class="tagline">MOVIES • WEB SERIES • MOVIE DETAILS</p>
 
