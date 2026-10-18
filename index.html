@@ -15,7 +15,6 @@
   <meta property="og:description" content="Explore movie information, web series details, and authorized viewing links.">
   <meta property="og:url" content="https://ommoviebox.online/">
 
-  <!-- Google Analytics -->
   <script async src="https://www.googletagmanager.com/gtag/js?id=G-22FK01RTWM"></script>
   <script>
     window.dataLayer = window.dataLayer || [];
@@ -25,6 +24,7 @@
   </script>
 
   <link rel="stylesheet" href="style.css">
+
   <style>
     .menu-strip {
       display: flex;
@@ -63,43 +63,62 @@
       margin: 24px 0;
     }
 
-    /* OM MOVIE BOX RGB Neon Logo */
+    /* OM MOVIE BOX RGB NEON LOGO */
+    header.hero a.brand.rgb-logo,
     .hero .brand.rgb-logo {
-      display: inline-block;
+      display: inline-block !important;
       max-width: 100%;
       box-sizing: border-box;
-      color: #fff;
-      font-family: Arial, Helvetica, sans-serif;
-      font-size: clamp(22px, 5.5vw, 42px);
-      font-weight: 900;
-      letter-spacing: clamp(1px, 0.45vw, 3px);
+      color: #ffffff !important;
+      font-family: Arial, Helvetica, sans-serif !important;
+      font-size: clamp(22px, 5.5vw, 42px) !important;
+      font-weight: 900 !important;
+      letter-spacing: clamp(1px, 0.45vw, 3px) !important;
       line-height: 1.2;
       white-space: nowrap;
-      text-decoration: none;
-      animation: omMovieRgbGlow 4s linear infinite;
+      text-decoration: none !important;
+      animation: omMovieRgbGlow 4s linear infinite !important;
+      -webkit-animation: omMovieRgbGlow 4s linear infinite !important;
     }
 
     @keyframes omMovieRgbGlow {
       0%, 100% {
-        text-shadow: 0 0 4px #ff00aa, 0 0 10px #ff00aa, 0 0 22px #ff00aa;
+        text-shadow: 0 0 4px #ff00aa, 0 0 12px #ff00aa, 0 0 25px #ff00aa;
       }
       33% {
-        text-shadow: 0 0 4px #00eaff, 0 0 10px #00eaff, 0 0 22px #00eaff;
+        text-shadow: 0 0 4px #00eaff, 0 0 12px #00eaff, 0 0 25px #00eaff;
       }
       66% {
-        text-shadow: 0 0 4px #39ff14, 0 0 10px #39ff14, 0 0 22px #39ff14;
+        text-shadow: 0 0 4px #39ff14, 0 0 12px #39ff14, 0 0 25px #39ff14;
+      }
+    }
+
+    @-webkit-keyframes omMovieRgbGlow {
+      0%, 100% {
+        text-shadow: 0 0 4px #ff00aa, 0 0 12px #ff00aa, 0 0 25px #ff00aa;
+      }
+      33% {
+        text-shadow: 0 0 4px #00eaff, 0 0 12px #00eaff, 0 0 25px #00eaff;
+      }
+      66% {
+        text-shadow: 0 0 4px #39ff14, 0 0 12px #39ff14, 0 0 25px #39ff14;
       }
     }
 
     @media (max-width: 380px) {
+      header.hero a.brand.rgb-logo,
       .hero .brand.rgb-logo {
-        font-size: 21px;
-        letter-spacing: 0.5px;
+        font-size: 21px !important;
+        letter-spacing: 0.5px !important;
       }
     }
 
     @media (prefers-reduced-motion: reduce) {
-      .hero .brand.rgb-logo { animation: none; }
+      header.hero a.brand.rgb-logo,
+      .hero .brand.rgb-logo {
+        animation: none !important;
+        -webkit-animation: none !important;
+      }
     }
   </style>
 </head>
