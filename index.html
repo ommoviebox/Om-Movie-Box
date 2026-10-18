@@ -9,6 +9,7 @@
   <meta name="description" content="Om Movie Box - Explore movie information, web series details, and authorized viewing links.">
   <meta name="robots" content="index, follow">
   <link rel="canonical" href="https://ommoviebox.online/">
+
   <meta property="og:type" content="website">
   <meta property="og:site_name" content="Om Movie Box">
   <meta property="og:title" content="Om Movie Box">
@@ -52,7 +53,9 @@
       box-sizing: border-box;
     }
 
-    #siteNav { width: 100%; }
+    #siteNav {
+      width: 100%;
+    }
 
     #pagination {
       display: flex;
@@ -63,7 +66,7 @@
       margin: 24px 0;
     }
 
-    /* Reference image logo */
+    /* RGB video logo */
     header.hero a.brand.image-logo {
       display: block !important;
       width: 100%;
@@ -76,13 +79,14 @@
       box-shadow: none;
     }
 
-    header.hero a.brand.image-logo img {
+    header.hero a.brand.image-logo .rgb-logo-video {
       display: block;
       width: 100%;
       max-width: 100%;
       height: auto;
       object-fit: contain;
       margin: 0 auto;
+      background: transparent;
     }
   </style>
 </head>
@@ -90,27 +94,48 @@
 <body>
 <header class="hero">
   <a class="brand image-logo" href="./" aria-label="OM MOVIE BOX Home">
-    <img src="./om-movie-box-logo.jpg" alt="OM MOVIE BOX — Movies, Web Series, Movie Details">
+    <video
+      class="rgb-logo-video"
+      autoplay
+      muted
+      loop
+      playsinline
+      preload="metadata"
+      aria-label="OM MOVIE BOX RGB Logo"
+    >
+      <source src="./om-rgb-logo.mp4" type="video/mp4">
+    </video>
   </a>
 
   <p class="tagline">MOVIES • WEB SERIES • MOVIE DETAILS</p>
 
   <form class="searchbar" id="searchForm">
-    <input id="searchInput" type="search"
+    <input
+      id="searchInput"
+      type="search"
       placeholder="Search movies or web series..."
-      aria-label="Search titles">
+      aria-label="Search titles"
+    >
     <button type="submit">SEARCH</button>
   </form>
 </header>
 
 <div class="menu-strip">
   <div class="home-top-links">
-    <button id="menuToggle" class="menu-toggle"
-      aria-expanded="false" aria-controls="siteNav" type="button">☰ MENU</button>
+    <button
+      id="menuToggle"
+      class="menu-toggle"
+      aria-expanded="false"
+      aria-controls="siteNav"
+      type="button"
+    >☰ MENU</button>
 
-    <a class="pill green"
+    <a
+      class="pill green"
       href="https://t.me/+jjwnXEeKgbJkNGE1"
-      target="_blank" rel="noopener noreferrer">TELEGRAM</a>
+      target="_blank"
+      rel="noopener noreferrer"
+    >TELEGRAM</a>
   </div>
 
   <nav id="siteNav">
@@ -124,9 +149,11 @@
 <main class="page-wrap">
   <section id="latest" class="catalog-section">
     <div id="movieGrid" class="movie-grid" aria-live="polite"></div>
+
     <p id="emptyState" class="empty-state" hidden>
       No titles match your search.
     </p>
+
     <div id="pagination"></div>
   </section>
 </main>
@@ -140,6 +167,7 @@
 
 <script>
   const yearElement = document.getElementById("year");
+
   if (yearElement) {
     yearElement.textContent = new Date().getFullYear();
   }
