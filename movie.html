@@ -19,7 +19,6 @@
     }
 
     * { box-sizing: border-box; }
-
     html { scroll-behavior: smooth; }
 
     body {
@@ -48,26 +47,24 @@
       padding: 10px 0 14px;
     }
 
-    .brand {
-      display: inline-flex;
-      align-items: center;
-      gap: 8px;
-      background: #180d20;
-      padding: 7px 13px;
-      font-weight: 900;
-      letter-spacing: .8px;
-      font-size: 15px;
+    /* IMAGE LOGO */
+    .header .image-logo {
+      display: block;
+      width: 100%;
+      max-width: 520px;
+      margin: 0 auto;
+      padding: 0;
+      background: none;
+      box-shadow: none;
+      line-height: 0;
     }
 
-    .brand-icon {
-      display: grid;
-      place-items: center;
-      width: 32px;
-      height: 32px;
-      color: white;
-      border-radius: 9px;
-      background: linear-gradient(135deg, #f14ce8, #7c36e8);
-      font-size: 17px;
+    .header .image-logo img {
+      display: block;
+      width: 100%;
+      height: auto;
+      object-fit: contain;
+      margin: 0 auto;
     }
 
     .hero-card {
@@ -157,7 +154,6 @@
       overflow-wrap: anywhere;
     }
 
-    /* BIG SCREENSHOT SECTION */
     .screenshots {
       display: block;
       width: calc(100% + 20px);
@@ -175,7 +171,6 @@
 
     .section-title .accent { color: #27d8c4; }
 
-    /* One large screenshot on each row */
     .screenshot-grid {
       display: grid;
       grid-template-columns: minmax(0, 1fr);
@@ -282,7 +277,6 @@
 
       .hero-info h1 { font-size: 16px; }
       .detail-row { font-size: 12px; }
-
       .section-title { font-size: 21px; }
 
       .links-section h2,
@@ -296,9 +290,11 @@
 <body>
   <main class="page">
     <header class="header">
-      <a class="brand" href="./" aria-label="Om Movie Box Home">
-        <span class="brand-icon">OM</span>
-        <span>MOVIE BOX</span>
+      <a class="brand image-logo" href="./" aria-label="OM MOVIE BOX Home">
+        <img
+          src="./om-movie-box-logo.jpg"
+          alt="OM MOVIE BOX"
+        >
       </a>
     </header>
 
