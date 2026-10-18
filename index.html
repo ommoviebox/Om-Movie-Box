@@ -5,12 +5,10 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <meta name="theme-color" content="#100615">
-
   <title>Om Movie Box</title>
   <meta name="description" content="Om Movie Box - Explore movie information, web series details, and authorized viewing links.">
   <meta name="robots" content="index, follow">
   <link rel="canonical" href="https://ommoviebox.online/">
-
   <meta property="og:type" content="website">
   <meta property="og:site_name" content="Om Movie Box">
   <meta property="og:title" content="Om Movie Box">
@@ -25,10 +23,8 @@
     gtag('js', new Date());
     gtag('config', 'G-22FK01RTWM');
   </script>
-  <!-- End Google Analytics -->
 
   <link rel="stylesheet" href="style.css">
-
   <style>
     .menu-strip {
       display: flex;
@@ -56,9 +52,7 @@
       box-sizing: border-box;
     }
 
-    #siteNav {
-      width: 100%;
-    }
+    #siteNav { width: 100%; }
 
     #pagination {
       display: flex;
@@ -68,45 +62,72 @@
       flex-wrap: wrap;
       margin: 24px 0;
     }
+
+    /* OM MOVIE BOX RGB Neon Logo */
+    .hero .brand.rgb-logo {
+      display: inline-block;
+      max-width: 100%;
+      box-sizing: border-box;
+      color: #fff;
+      font-family: Arial, Helvetica, sans-serif;
+      font-size: clamp(22px, 5.5vw, 42px);
+      font-weight: 900;
+      letter-spacing: clamp(1px, 0.45vw, 3px);
+      line-height: 1.2;
+      white-space: nowrap;
+      text-decoration: none;
+      animation: omMovieRgbGlow 4s linear infinite;
+    }
+
+    @keyframes omMovieRgbGlow {
+      0%, 100% {
+        text-shadow: 0 0 4px #ff00aa, 0 0 10px #ff00aa, 0 0 22px #ff00aa;
+      }
+      33% {
+        text-shadow: 0 0 4px #00eaff, 0 0 10px #00eaff, 0 0 22px #00eaff;
+      }
+      66% {
+        text-shadow: 0 0 4px #39ff14, 0 0 10px #39ff14, 0 0 22px #39ff14;
+      }
+    }
+
+    @media (max-width: 380px) {
+      .hero .brand.rgb-logo {
+        font-size: 21px;
+        letter-spacing: 0.5px;
+      }
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+      .hero .brand.rgb-logo { animation: none; }
+    }
   </style>
 </head>
 
 <body>
-
 <header class="hero">
-  <a class="brand" href="./">
-    <span>OM</span> MOVIE BOX
+  <a class="brand rgb-logo" href="./" aria-label="OM MOVIE BOX Home">
+    OM MOVIE BOX
   </a>
 
   <p class="tagline">MOVIES • WEB SERIES • MOVIE DETAILS</p>
 
   <form class="searchbar" id="searchForm">
-    <input
-      id="searchInput"
-      type="search"
+    <input id="searchInput" type="search"
       placeholder="Search movies or web series..."
-      aria-label="Search titles"
-    >
+      aria-label="Search titles">
     <button type="submit">SEARCH</button>
   </form>
 </header>
 
 <div class="menu-strip">
   <div class="home-top-links">
-    <button
-      id="menuToggle"
-      class="menu-toggle"
-      aria-expanded="false"
-      aria-controls="siteNav"
-      type="button"
-    >☰ MENU</button>
+    <button id="menuToggle" class="menu-toggle"
+      aria-expanded="false" aria-controls="siteNav" type="button">☰ MENU</button>
 
-    <a
-      class="pill green"
+    <a class="pill green"
       href="https://t.me/+jjwnXEeKgbJkNGE1"
-      target="_blank"
-      rel="noopener noreferrer"
-    >TELEGRAM</a>
+      target="_blank" rel="noopener noreferrer">TELEGRAM</a>
   </div>
 
   <nav id="siteNav">
@@ -119,15 +140,11 @@
 
 <main class="page-wrap">
   <section id="latest" class="catalog-section">
-
     <div id="movieGrid" class="movie-grid" aria-live="polite"></div>
-
     <p id="emptyState" class="empty-state" hidden>
       No titles match your search.
     </p>
-
     <div id="pagination"></div>
-
   </section>
 </main>
 
