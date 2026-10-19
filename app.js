@@ -1,4 +1,3 @@
-
 import { initializeApp, getApps, getApp } from "https://www.gstatic.com/firebasejs/10.14.1/firebase-app.js";
 
 import {
@@ -24,11 +23,10 @@ const pagination = $("pagination");
 let allMovies = [];
 let filteredMovies = [];
 let currentPage = 1;
-const pageSize = 12;
+const pageSize = 30;
 
 function safeURL(value) {
   if (!value) return "";
-
   try {
     const url = new URL(String(value).trim());
     if (!["https:", "http:"].includes(url.protocol)) return "";
@@ -112,20 +110,12 @@ function applyFilters() {
   const queryText = getSearchText();
   const genre = getFilterValue(["genreFilter", "genreSelect"]);
   const language = getFilterValue(["languageFilter", "languageSelect"]);
-  const type = getFilterValue([
-    "typeFilter",
-    "contentTypeFilter",
-    "typeSelect"
-  ]);
+  const type = getFilterValue(["typeFilter", "contentTypeFilter", "typeSelect"]);
 
   filteredMovies = allMovies.filter((movie) => {
     const searchable = [
-      movie.title,
-      movie.genre,
-      movie.language,
-      movie.year,
-      movie.contentType,
-      movie.description
+      movie.title, movie.genre, movie.language,
+      movie.year, movie.contentType, movie.description
     ].join(" ").toLowerCase();
 
     if (queryText && !searchable.includes(queryText)) return false;
@@ -149,13 +139,10 @@ function renderMovies() {
   currentPage = Math.max(1, Math.min(currentPage, totalPages || 1));
   const start = (currentPage - 1) * pageSize;
 
-  filteredMovies
-    .slice(start, start + pageSize)
+  filteredMovies.slice(start, start + pageSize)
     .forEach((movie) => grid.appendChild(renderCard(movie)));
 
-  if (count) {
-    count.textContent = `${total} ${total === 1 ? "title" : "titles"}`;
-  }
+  if (count) count.textContent = `${total} ${total === 1 ? "title" : "titles"}`;
 
   if (empty) {
     empty.hidden = total !== 0;
@@ -182,23 +169,18 @@ function renderMovies() {
     return button;
   }
 
-  pagination.appendChild(
-    makeButton("← Previous", currentPage - 1, currentPage === 1)
-  );
+  pagination.appendChild(makeButton("← Previous", currentPage - 1, currentPage === 1));
 
   const label = document.createElement("span");
   label.className = "page-info";
   label.textContent = `Page ${currentPage} of ${totalPages}`;
   pagination.appendChild(label);
 
-  pagination.appendChild(
-    makeButton("Next →", currentPage + 1, currentPage === totalPages)
-  );
+  pagination.appendChild(makeButton("Next →", currentPage + 1, currentPage === totalPages));
 }
 
 function setupFilters() {
   const searchForm = $("searchForm");
-
   searchForm?.addEventListener("submit", (event) => {
     event.preventDefault();
     applyFilters();
@@ -207,12 +189,9 @@ function setupFilters() {
   $("searchInput")?.addEventListener("input", applyFilters);
 
   [
-    "genreFilter", "genreSelect",
-    "languageFilter", "languageSelect",
-    "typeFilter", "contentTypeFilter", "typeSelect"
-  ].forEach((id) => {
-    $(id)?.addEventListener("change", applyFilters);
-  });
+    "genreFilter", "genreSelect", "languageFilter",
+    "languageSelect", "typeFilter", "contentTypeFilter", "typeSelect"
+  ].forEach((id) => $(id)?.addEventListener("change", applyFilters));
 }
 
 async function loadMovies() {
@@ -230,10 +209,7 @@ async function loadMovies() {
     const snapshot = await getDocs(publishedMoviesQuery);
 
     allMovies = snapshot.docs
-      .map((item) => ({
-        id: item.id,
-        ...item.data()
-      }))
+      .map((item) => ({ id: item.id, ...item.data() }))
       .sort((a, b) => {
         const timeA = a.createdAt?.toMillis?.() || 0;
         const timeB = b.createdAt?.toMillis?.() || 0;
@@ -243,13 +219,11 @@ async function loadMovies() {
     applyFilters();
   } catch (error) {
     console.error("Homepage movie loading error:", error);
-
     if (count) count.textContent = "Load failed";
 
     if (empty) {
       empty.hidden = false;
-      empty.textContent =
-        "Movies load nahi hui. Internet aur Firestore Rules check karein.";
+      empty.textContent = "Movies load nahi hui. Internet aur Firestore Rules check karein.";
     }
 
     if (pagination) pagination.replaceChildren();
