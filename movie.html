@@ -1,4 +1,3 @@
-
 <!doctype html>
 <html lang="en">
 <head>
@@ -47,24 +46,25 @@
       padding: 10px 0 14px;
     }
 
-    /* IMAGE LOGO */
+    /* RGB LOGO VIDEO */
     .header .image-logo {
       display: block;
       width: 100%;
       max-width: 520px;
       margin: 0 auto;
       padding: 0;
-      background: none;
+      background: transparent;
       box-shadow: none;
       line-height: 0;
     }
 
-    .header .image-logo img {
+    .header .rgb-logo-video {
       display: block;
       width: 100%;
       height: auto;
       object-fit: contain;
       margin: 0 auto;
+      background: transparent;
     }
 
     .hero-card {
@@ -291,10 +291,22 @@
   <main class="page">
     <header class="header">
       <a class="brand image-logo" href="./" aria-label="OM MOVIE BOX Home">
-        <img
-          src="./om-movie-box-logo.jpg"
-          alt="OM MOVIE BOX"
+        <video
+          class="rgb-logo-video"
+          autoplay
+          muted
+          loop
+          playsinline
+          webkit-playsinline
+          preload="auto"
+          aria-label="OM MOVIE BOX RGB Logo"
         >
+          <source
+            src="./om-rgb-logo-transparent-mobile.webm"
+            type="video/webm"
+          >
+          Your browser does not support the video.
+        </video>
       </a>
     </header>
 
