@@ -232,3 +232,116 @@ button:focus-visible,a:focus-visible,input:focus-visible,select:focus-visible,.m
     grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
   }
 }
+/* OM MOVIE BOX - STYLE UPDATE */
+/* Is code ko apni purani style.css ke BILKUL END mein paste karein */
+
+:root {
+  --bg: #000000;
+}
+
+/* Black background */
+html,
+body {
+  background: #000000 !important;
+}
+
+.hero,
+.menu-strip,
+.page-wrap,
+.details-wrap,
+.footer {
+  background-color: #000000 !important;
+}
+
+/* RGB Neon frame */
+#movieGrid .movie-card,
+.movie-grid .movie-card {
+  border: 2px solid transparent !important;
+  border-radius: 13px !important;
+  background:
+    linear-gradient(#000000, #000000) padding-box,
+    linear-gradient(
+      135deg,
+      #d8ff00,
+      #65ff00,
+      #00eaff,
+      #3988ff,
+      #ff00d9,
+      #d8ff00
+    ) border-box !important;
+  box-shadow: 0 0 6px #00eaff70, 0 0 12px #ff00d930 !important;
+  overflow: hidden;
+  min-width: 0;
+  width: 100%;
+}
+
+#movieGrid .movie-card:hover,
+.movie-grid .movie-card:hover {
+  box-shadow: 0 0 10px #00eaff, 0 0 18px #ff00d955 !important;
+}
+
+/* Poster */
+#movieGrid .poster-wrap {
+  width: 100%;
+  aspect-ratio: 2 / 3;
+  overflow: hidden;
+  background: #000000;
+}
+
+#movieGrid .poster {
+  display: block;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  object-position: center;
+}
+
+/* Movie title and information */
+#movieGrid .movie-info {
+  background: #000000;
+  padding: 9px;
+}
+
+#movieGrid .movie-title {
+  color: #ffffff !important;
+  font-size: 17px !important;
+  font-weight: 700 !important;
+  line-height: 1.45 !important;
+  overflow-wrap: anywhere;
+}
+
+#movieGrid .movie-meta {
+  color: #bdbdbd;
+}
+
+/* Laptop: 6 movies */
+@media (min-width: 901px) {
+  html body #movieGrid {
+    grid-template-columns: repeat(6, minmax(0, 1fr)) !important;
+    gap: 14px !important;
+  }
+}
+
+/* Tablet: 4 movies */
+@media (min-width: 601px) and (max-width: 900px) {
+  html body #movieGrid {
+    grid-template-columns: repeat(4, minmax(0, 1fr)) !important;
+    gap: 12px !important;
+  }
+}
+
+/* Mobile: 2 movies */
+@media (max-width: 600px) {
+  html body #movieGrid {
+    grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+    gap: 10px !important;
+  }
+
+  #movieGrid .movie-info {
+    padding: 8px;
+  }
+
+  #movieGrid .movie-title {
+    font-size: 16px !important;
+  }
+}
