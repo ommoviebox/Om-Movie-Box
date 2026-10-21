@@ -46,7 +46,7 @@
       width: 100%;
     }
 
-    /* MENU BUTTON */
+    /* MENU BUTTON — ORIGINAL STYLE PRESERVED */
     #menuToggle {
       display: inline-flex !important;
       visibility: visible !important;
@@ -102,13 +102,13 @@
       display: block !important;
     }
 
-    /* HIDE MOVIES4U AND EXTRA LINKS */
+    /* HIDE EXTRA LINKS */
     #siteNav .category-button[data-category="Movies4u"],
     #siteNav a {
       display: none !important;
     }
 
-    /* CATEGORY BUTTON LAYOUT */
+    /* CATEGORY LAYOUT */
     #siteNav .category-buttons {
       display: flex !important;
       flex-wrap: wrap !important;
@@ -118,7 +118,7 @@
       width: 100%;
     }
 
-    /* BRIGHT LIME GREEN BUTTONS WITH BLACK TEXT */
+    /* PHOTO-STYLE CATEGORY FONT */
     #siteNav .category-button,
     #siteNav .category-buttons .category-button {
       display: inline-flex !important;
@@ -129,11 +129,16 @@
       border: 1px solid #c6ff00 !important;
       border-radius: 8px;
       background: #c6ff00 !important;
+      background-image: none !important;
       color: #000000 !important;
-      font-size: 13px;
-      font-weight: 900 !important;
+      font-family: Arial, Helvetica, sans-serif !important;
+      font-size: 23px !important;
+      font-weight: 500 !important;
+      letter-spacing: 0 !important;
+      line-height: 1.2 !important;
       cursor: pointer;
       box-shadow: none !important;
+      text-shadow: none !important;
       opacity: 1 !important;
       visibility: visible !important;
     }
@@ -223,7 +228,7 @@
       margin: 24px 0;
     }
 
-    /* DESKTOP: SHOW CATEGORIES DIRECTLY */
+    /* DESKTOP: CATEGORIES VISIBLE */
     @media (min-width: 601px) {
       #menuToggle {
         display: inline-flex !important;
@@ -242,7 +247,7 @@
       }
     }
 
-    /* MOBILE: OPEN CATEGORIES WITH MENU */
+    /* MOBILE */
     @media (max-width: 600px) {
       .hero {
         padding: 25px 13px;
@@ -284,10 +289,11 @@
         gap: 8px;
       }
 
-      #siteNav .category-button {
+      #siteNav .category-button,
+      #siteNav .category-buttons .category-button {
         padding: 9px 10px;
         min-height: 38px;
-        font-size: 12px;
+        font-size: 18px !important;
       }
     }
   </style>
@@ -371,24 +377,8 @@
     yearElement.textContent = new Date().getFullYear();
   }
 
-  if (menuToggle && siteNav) {
-    menuToggle.addEventListener("click", function (event) {
-      event.stopImmediatePropagation();
-
-      const isMobile = window.matchMedia("(max-width: 600px)").matches;
-
-      if (!isMobile) {
-        return;
-      }
-
-      const isOpen =
-        menuToggle.getAttribute("aria-expanded") !== "true";
-
-      menuToggle.setAttribute("aria-expanded", String(isOpen));
-      siteNav.classList.toggle("open", isOpen);
-      siteNav.hidden = !isOpen;
-    });
-  }
+  /* MENU is controlled by app.js only.
+     This script updates the footer year. */
 })();
 </script>
 
