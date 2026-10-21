@@ -110,7 +110,7 @@ function matchesCategory(movie, category) {
   return text.includes(cat);
 }
 
-/* CATEGORY BUTTONS — LIME GREEN WITH BLACK TEXT */
+/* CATEGORY BUTTONS — PHOTO-STYLE FONT */
 function setupCategories() {
   if (!siteNav) return;
 
@@ -137,13 +137,24 @@ function setupCategories() {
     button.dataset.category = category;
     button.setAttribute("aria-pressed", "false");
 
-    /* Set color directly on each button */
+    /* Lime green button and black text */
     button.style.setProperty("background-color", "#c6ff00", "important");
     button.style.setProperty("background-image", "none", "important");
     button.style.setProperty("color", "#000000", "important");
     button.style.setProperty("border", "1px solid #c6ff00", "important");
     button.style.setProperty("border-radius", "12px", "important");
-    button.style.setProperty("font-weight", "700", "important");
+
+    /* Font similar to the reference photo */
+    button.style.setProperty(
+      "font-family",
+      "Arial, Helvetica, sans-serif",
+      "important"
+    );
+    button.style.setProperty("font-size", "23px", "important");
+    button.style.setProperty("font-weight", "500", "important");
+    button.style.setProperty("letter-spacing", "0px", "important");
+    button.style.setProperty("line-height", "1.2", "important");
+
     button.style.setProperty("box-shadow", "none", "important");
     button.style.setProperty("text-shadow", "none", "important");
     button.style.setProperty("padding", "10px 13px", "important");
@@ -170,10 +181,14 @@ function setupCategories() {
       item.classList.toggle("active", active);
       item.setAttribute("aria-pressed", String(active));
 
-      /* Reapply colors even for active/selected buttons */
       item.style.setProperty("background-color", "#c6ff00", "important");
+      item.style.setProperty("background-image", "none", "important");
       item.style.setProperty("color", "#000000", "important");
       item.style.setProperty("border-color", "#c6ff00", "important");
+      item.style.setProperty("font-family", "Arial, Helvetica, sans-serif", "important");
+      item.style.setProperty("font-size", "23px", "important");
+      item.style.setProperty("font-weight", "500", "important");
+      item.style.setProperty("letter-spacing", "0px", "important");
     });
 
     applyFilters();
