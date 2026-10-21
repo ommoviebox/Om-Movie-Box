@@ -40,24 +40,24 @@
     .home-top-links {
       display: flex !important;
       align-items: center;
-      justify-content: space-between;
+      justify-content: flex-start !important;
       gap: 10px;
       width: 100%;
     }
 
-    /* MENU BUTTON - REFERENCE SIZE */
+    /* MENU BUTTON - WIDTH FITS TEXT */
     #menuToggle {
       display: inline-flex !important;
       visibility: visible !important;
       opacity: 1 !important;
       align-items: center;
       justify-content: center;
-      flex: 1 1 0;
-      width: 0;
-      min-width: 0;
+      flex: 0 0 auto !important;
+      width: max-content !important;
+      min-width: 0 !important;
       height: 58px !important;
       min-height: 58px !important;
-      padding: 10px 14px !important;
+      padding: 10px 22px !important;
       box-sizing: border-box;
       border: none !important;
       border-radius: 28px !important;
@@ -68,6 +68,7 @@
       font-weight: 900 !important;
       line-height: 1.2 !important;
       text-align: center;
+      white-space: nowrap;
       cursor: pointer;
       touch-action: manipulation;
       position: relative;
@@ -76,13 +77,13 @@
       text-shadow: none !important;
     }
 
-    /* TELEGRAM BUTTON - KEEP ORIGINAL BLUE */
+    /* TELEGRAM BUTTON - BLUE */
     .telegram-button {
       display: inline-flex !important;
       align-items: center;
       justify-content: center;
-      flex: 1 1 0;
-      width: 0;
+      flex: 0 1 auto !important;
+      width: auto !important;
       min-width: 0;
       min-height: 42px;
       box-sizing: border-box;
@@ -95,6 +96,7 @@
       font-weight: 900;
       text-align: center;
       text-decoration: none;
+      white-space: nowrap;
     }
 
     /* CATEGORY PANEL */
@@ -273,14 +275,14 @@
         font-size: 13px;
       }
 
-      /* KEEP MENU AT REFERENCE SIZE ON MOBILE */
+      /* MENU WIDTH FITS TEXT ON MOBILE TOO */
       #menuToggle {
-        flex: 1 1 0;
-        width: 0;
-        min-width: 0;
+        flex: 0 0 auto !important;
+        width: max-content !important;
+        min-width: 0 !important;
         height: 58px !important;
         min-height: 58px !important;
-        padding: 10px 12px !important;
+        padding: 10px 22px !important;
         font-size: 19px !important;
         font-weight: 900 !important;
         border-radius: 28px !important;
@@ -289,8 +291,8 @@
       }
 
       .telegram-button {
-        flex: 1 1 0;
-        width: 0;
+        flex: 0 1 auto !important;
+        width: auto !important;
         min-width: 0;
         min-height: 40px;
         padding: 7px 10px;
