@@ -1,25 +1,17 @@
-
 <!doctype html>
+
 <html lang="en">
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <meta name="theme-color" content="#000000">
-
-  <title>Om Movie Box</title>
+  <meta name="theme-color" content="#000000">  <title>Om Movie Box</title>
   <meta name="description" content="Om Movie Box - Explore movie information, web series details, and authorized viewing links.">
   <meta name="robots" content="index, follow">
-  <link rel="canonical" href="https://ommoviebox.online/">
-
-  <meta property="og:type" content="website">
+  <link rel="canonical" href="https://ommoviebox.online/">  <meta property="og:type" content="website">
   <meta property="og:site_name" content="Om Movie Box">
   <meta property="og:title" content="Om Movie Box">
   <meta property="og:description" content="Explore movie information, web series details, and authorized viewing links.">
-  <meta property="og:url" content="https://ommoviebox.online/">
-
-  <link rel="stylesheet" href="style.css">
-
-  <style>
+  <meta property="og:url" content="https://ommoviebox.online/">  <link rel="stylesheet" href="style.css">  <style>
     html, body {
       background: #000 !important;
     }
@@ -46,34 +38,46 @@
       width: 100%;
     }
 
-    /* MENU BUTTON */
+    /* MENU BUTTON - LIME GREEN */
     #menuToggle {
       display: inline-flex !important;
       visibility: visible !important;
       opacity: 1 !important;
       align-items: center;
       justify-content: center;
-      min-height: 42px;
-      padding: 8px 14px;
-      border: 1px solid var(--border) !important;
-      border-radius: 10px;
-      background: var(--panel) !important;
-      color: var(--text) !important;
-      font-size: 14px;
-      font-weight: 900;
+      flex: 1 1 0;
+      width: 0;
+      min-width: 0;
+      min-height: 42px !important;
+      padding: 8px 12px !important;
+      box-sizing: border-box;
+      border: 0 !important;
+      border-radius: 24px !important;
+      background: #c6ff00 !important;
+      background-image: none !important;
+      color: #000000 !important;
+      font-size: 13px !important;
+      font-weight: 900 !important;
+      line-height: 1.2 !important;
+      text-align: center;
       cursor: pointer;
       touch-action: manipulation;
       position: relative;
       z-index: 100;
+      box-shadow: none !important;
     }
 
-    /* TELEGRAM BUTTON */
+    /* TELEGRAM BUTTON - ORIGINAL DESIGN */
     .telegram-button {
       display: inline-flex !important;
       align-items: center;
       justify-content: center;
+      flex: 1 1 0;
+      width: 0;
+      min-width: 0;
       min-height: 42px;
-      padding: 8px 14px;
+      box-sizing: border-box;
+      padding: 8px 12px;
       border: 0 !important;
       border-radius: 24px;
       background: #079fe0 !important;
@@ -261,14 +265,23 @@
       }
 
       #menuToggle {
-        min-height: 40px;
-        padding: 7px 12px;
-        font-size: 13px;
+        flex: 1 1 0;
+        width: 0;
+        min-width: 0;
+        min-height: 40px !important;
+        padding: 7px 10px !important;
+        font-size: 12px !important;
+        border-radius: 24px !important;
+        background: #c6ff00 !important;
+        color: #000000 !important;
       }
 
       .telegram-button {
+        flex: 1 1 0;
+        width: 0;
+        min-width: 0;
         min-height: 40px;
-        padding: 7px 12px;
+        padding: 7px 10px;
         font-size: 12px;
       }
 
@@ -294,10 +307,7 @@
         line-height: 1.2 !important;
       }
     }
-  </style>
-</head>
-
-<body>
+  </style></head><body>
 <header class="hero">
   <a class="brand image-logo" href="./" aria-label="OM MOVIE BOX Home">
     <video
@@ -309,9 +319,7 @@
       <source src="./om-rgb-logo-transparent-mobile.webm" type="video/webm">
       Your browser does not support the video.
     </video>
-  </a>
-
-  <form class="searchbar" id="searchForm">
+  </a>  <form class="searchbar" id="searchForm">
     <input
       id="searchInput"
       type="search"
@@ -320,9 +328,7 @@
     >
     <button type="submit">SEARCH</button>
   </form>
-</header>
-
-<div class="menu-strip">
+</header><div class="menu-strip">
   <div class="home-top-links">
     <button
       id="menuToggle"
@@ -330,42 +336,29 @@
       aria-expanded="false"
       aria-controls="siteNav"
       type="button"
-    >☰ MENU</button>
+    >☰ MENU</button><a
+  class="pill telegram-button"
+  href="https://t.me/+jjwnXEeKgbJkNGE1"
+  target="_blank"
+  rel="noopener noreferrer"
+>JOIN TELEGRAM</a>
 
-    <a
-      class="pill telegram-button"
-      href="https://t.me/+jjwnXEeKgbJkNGE1"
-      target="_blank"
-      rel="noopener noreferrer"
-    >JOIN TELEGRAM</a>
-  </div>
-
-  <nav id="siteNav" aria-label="Main menu" hidden></nav>
-</div>
-
-<main class="page-wrap">
+  </div>  <nav id="siteNav" aria-label="Main menu" hidden></nav>
+</div><main class="page-wrap">
   <section id="latest" class="catalog-section">
-    <div id="movieGrid" class="movie-grid" aria-live="polite"></div>
+    <div id="movieGrid" class="movie-grid" aria-live="polite"></div><p id="emptyState" class="empty-state" hidden>
+  No titles match your search.
+</p>
 
-    <p id="emptyState" class="empty-state" hidden>
-      No titles match your search.
-    </p>
+<div id="pagination"></div>
 
-    <div id="pagination"></div>
   </section>
-</main>
-
-<footer class="footer">
+</main><footer class="footer">
   <a class="footer-brand" href="./">OM MOVIE BOX</a>
   <p>Movie information and authorized viewing links.</p>
   <span>© <span id="year"></span> Om Movie Box</span>
-</footer>
-
-<script>
+</footer><script>
   document.getElementById("year").textContent =
     new Date().getFullYear();
-</script>
-
-<script type="module" src="app.js"></script>
-</body>
+</script><script type="module" src="app.js"></script></body>
 </html>
