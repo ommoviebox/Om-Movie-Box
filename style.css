@@ -345,3 +345,115 @@ body {
     font-size: 16px !important;
   }
 }
+/* OM MOVIE BOX - FINAL DESIGN UPDATE */
+
+/* 1. Full black background */
+html,
+body {
+  background: #000000 !important;
+}
+
+body {
+  background-image: none !important;
+}
+
+.hero,
+.menu-strip,
+.page-wrap,
+.details-wrap,
+.footer,
+.details-header {
+  background: #000000 !important;
+  background-image: none !important;
+}
+
+/* 2. Search bar - reference image style */
+.searchbar {
+  display: flex !important;
+  align-items: stretch !important;
+  padding: 0 !important;
+  overflow: hidden !important;
+  background: #ffffff !important;
+  border: 0 !important;
+  border-radius: 28px !important;
+}
+
+.searchbar input {
+  flex: 1 !important;
+  min-width: 0 !important;
+  padding: 16px 20px !important;
+  background: #ffffff !important;
+  color: #000000 !important;
+  font-size: 18px !important;
+}
+
+.searchbar input::placeholder {
+  color: #777777 !important;
+  opacity: 1 !important;
+}
+
+.searchbar button {
+  flex-shrink: 0 !important;
+  padding: 16px 24px !important;
+  border: 0 !important;
+  border-radius: 0 !important;
+  background: #c6ff00 !important;
+  color: #000000 !important;
+  font-size: 17px !important;
+  font-weight: 900 !important;
+}
+
+/* 3. Telegram button - blue reference style */
+.menu-strip a[href*="t.me"],
+.quick-links a[href*="t.me"],
+.telegram-btn,
+.telegram-button,
+.telegram-link {
+  display: inline-flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  min-height: 58px !important;
+  padding: 16px 28px !important;
+  border: 0 !important;
+  border-radius: 24px !important;
+  background: #079fe0 !important;
+  color: #000000 !important;
+  font-size: 18px !important;
+  font-weight: 900 !important;
+  text-align: center !important;
+  text-decoration: none !important;
+  box-shadow: none !important;
+}
+
+.menu-strip a[href*="t.me"]:hover,
+.quick-links a[href*="t.me"]:hover,
+.telegram-btn:hover,
+.telegram-button:hover,
+.telegram-link:hover {
+  background: #079fe0 !important;
+  color: #000000 !important;
+  filter: brightness(1.08);
+}
+
+/* Mobile sizing */
+@media (max-width: 600px) {
+  .searchbar input {
+    padding: 14px 15px !important;
+    font-size: 16px !important;
+  }
+
+  .searchbar button {
+    padding: 14px 16px !important;
+    font-size: 14px !important;
+  }
+
+  .menu-strip a[href*="t.me"],
+  .quick-links a[href*="t.me"],
+  .telegram-btn,
+  .telegram-button,
+  .telegram-link {
+    min-height: 54px !important;
+    padding: 14px 20px !important;
+    font-size: 15px !important;
+  }
+}
