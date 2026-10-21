@@ -69,7 +69,9 @@ function safeURL(value) {
 
   try {
     const url = new URL(String(value).trim());
+
     if (!["https:", "http:"].includes(url.protocol)) return "";
+
     return url.href;
   } catch {
     return "";
@@ -160,7 +162,7 @@ function matchesCategory(movie, category) {
   return text.includes(cat);
 }
 
-/* Create category buttons */
+/* CATEGORY BUTTONS */
 function setupCategories() {
   if (!siteNav) return;
 
@@ -170,8 +172,16 @@ function setupCategories() {
     categoryBox = document.createElement("div");
     categoryBox.id = "categoryButtons";
     categoryBox.className = "category-buttons";
-    siteNav.appendChild(categoryBox);
   }
+
+  /* Remove old extra links and unwanted menu items */
+  siteNav.replaceChildren(categoryBox);
+
+  /* Ensure category buttons remain visible */
+  categoryBox.style.setProperty("display", "flex", "important");
+  categoryBox.style.setProperty("flex-wrap", "wrap", "important");
+  categoryBox.style.setProperty("gap", "8px", "important");
+  categoryBox.style.setProperty("width", "100%", "important");
 
   categoryBox.replaceChildren();
 
@@ -182,29 +192,40 @@ function setupCategories() {
   allButton.dataset.category = "All";
   categoryBox.appendChild(allButton);
 
-  categories.forEach((category) => {
-    const button = document.createElement("button");
-    button.type = "button";
-    button.className = "category-button";
-    button.textContent = category;
-    button.dataset.category = category;
-    categoryBox.appendChild(button);
-  });
+  /* Movies4u is deliberately excluded */
+  categories
+    .filter((category) => category !== "Movies4u")
+    .forEach((category) => {
+      const button = document.createElement("button");
+
+      button.type = "button";
+      button.className = "category-button";
+      button.textContent = category;
+      button.dataset.category = category;
+
+      categoryBox.appendChild(button);
+    });
 
   categoryBox.addEventListener("click", (event) => {
     const button = event.target.closest("button[data-category]");
+
     if (!button) return;
 
     activeCategory = button.dataset.category;
 
     categoryBox.querySelectorAll(".category-button").forEach((item) => {
       const active = item.dataset.category === activeCategory;
+
       item.classList.toggle("active", active);
       item.setAttribute("aria-pressed", String(active));
     });
 
     applyFilters();
-    setMenuOpen(false);
+
+    /* Close menu after selecting a category on mobile */
+    if (window.matchMedia("(max-width: 600px)").matches) {
+      setMenuOpen(false);
+    }
 
     $("latest")?.scrollIntoView({ behavior: "smooth" });
   });
@@ -213,13 +234,26 @@ function setupCategories() {
   allButton.setAttribute("aria-pressed", "true");
 }
 
-/* MENU open and close */
+/* MENU: desktop always shows categories; mobile uses MENU button */
 function setMenuOpen(open) {
   if (!menuToggle || !siteNav) return;
 
-  menuToggle.setAttribute("aria-expanded", String(open));
-  siteNav.hidden = !open;
-  siteNav.classList.toggle("open", open);
+  const isMobile = window.matchMedia("(max-width: 600px)").matches;
+  const shouldShow = !isMobile || open;
+
+  menuToggle.setAttribute("aria-expanded", String(isMobile && open));
+
+  siteNav.classList.toggle("open", isMobile && open);
+  siteNav.hidden = !shouldShow;
+
+  /* Override conflicting old CSS rules */
+  siteNav.style.setProperty(
+    "display",
+    shouldShow ? "block" : "none",
+    "important"
+  );
+
+  siteNav.style.setProperty("width", "100%", "important");
 }
 
 function setupMenu() {
@@ -231,20 +265,41 @@ function setupMenu() {
   menuToggle.type = "button";
   menuToggle.setAttribute("aria-controls", "siteNav");
 
+  /* Initial state: desktop open, mobile closed */
   setMenuOpen(false);
 
   menuToggle.addEventListener("click", (event) => {
     event.preventDefault();
+
+    if (!window.matchMedia("(max-width: 600px)").matches) {
+      setMenuOpen(false);
+      return;
+    }
 
     const isOpen =
       menuToggle.getAttribute("aria-expanded") === "true";
 
     setMenuOpen(!isOpen);
   });
+
+  /* Correct the menu when screen size changes */
+  window.addEventListener("resize", () => {
+    const isMobile = window.matchMedia("(max-width: 600px)").matches;
+
+    if (isMobile) {
+      setMenuOpen(
+        menuToggle.getAttribute("aria-expanded") === "true"
+      );
+    } else {
+      setMenuOpen(false);
+    }
+  });
 }
 
+/* MOVIE CARDS */
 function renderCard(movie) {
   const card = document.createElement("a");
+
   card.className = "movie-card";
   card.href = `movie.html?id=${encodeURIComponent(movie.id)}`;
 
@@ -260,6 +315,7 @@ function renderCard(movie) {
 
   if (posterURL) {
     const image = document.createElement("img");
+
     image.className = "poster";
     image.alt = movie.title || "Movie poster";
     image.loading = "lazy";
@@ -302,6 +358,7 @@ function renderCard(movie) {
   return card;
 }
 
+/* SEARCH AND FILTERS */
 function getSearchText() {
   return ($("searchInput")?.value || "").trim().toLowerCase();
 }
@@ -309,10 +366,12 @@ function getSearchText() {
 function getFilterValue(ids) {
   for (const id of ids) {
     const element = $(id);
+
     if (element?.value && element.value !== "all") {
       return element.value.trim().toLowerCase();
     }
   }
+
   return "";
 }
 
@@ -320,6 +379,7 @@ function applyFilters() {
   const queryText = getSearchText();
   const genre = getFilterValue(["genreFilter", "genreSelect"]);
   const language = getFilterValue(["languageFilter", "languageSelect"]);
+
   const type = getFilterValue([
     "typeFilter", "contentTypeFilter", "typeSelect"
   ]);
@@ -327,13 +387,25 @@ function applyFilters() {
   filteredMovies = allMovies.filter((movie) => {
     const searchable = movieText(movie);
 
-    if (queryText && !searchable.includes(normalize(queryText))) return false;
-    if (genre && !normalize(movie.genre).includes(genre)) return false;
-    if (language && !normalize(movie.language).includes(language)) return false;
+    if (queryText && !searchable.includes(normalize(queryText))) {
+      return false;
+    }
+
+    if (genre && !normalize(movie.genre).includes(genre)) {
+      return false;
+    }
+
+    if (language && !normalize(movie.language).includes(language)) {
+      return false;
+    }
+
     if (type && !normalize(movie.contentType || movie.type).includes(type)) {
       return false;
     }
-    if (!matchesCategory(movie, activeCategory)) return false;
+
+    if (!matchesCategory(movie, activeCategory)) {
+      return false;
+    }
 
     return true;
   });
@@ -342,6 +414,7 @@ function applyFilters() {
   renderMovies();
 }
 
+/* PAGINATION AND MOVIE DISPLAY */
 function renderMovies() {
   if (!grid) return;
 
@@ -349,11 +422,13 @@ function renderMovies() {
 
   const total = filteredMovies.length;
   const totalPages = Math.ceil(total / pageSize);
+
   currentPage = Math.max(1, Math.min(currentPage, totalPages || 1));
 
   const start = (currentPage - 1) * pageSize;
 
-  filteredMovies.slice(start, start + pageSize)
+  filteredMovies
+    .slice(start, start + pageSize)
     .forEach((movie) => grid.appendChild(renderCard(movie)));
 
   if (count) {
@@ -370,10 +445,12 @@ function renderMovies() {
   if (!pagination) return;
 
   pagination.replaceChildren();
+
   if (totalPages <= 1) return;
 
   function makeButton(label, page, disabled) {
     const button = document.createElement("button");
+
     button.type = "button";
     button.className = "page-btn";
     button.textContent = label;
@@ -395,6 +472,7 @@ function renderMovies() {
   const label = document.createElement("span");
   label.className = "page-info";
   label.textContent = `Page ${currentPage} of ${totalPages}`;
+
   pagination.appendChild(label);
 
   pagination.appendChild(
@@ -402,6 +480,7 @@ function renderMovies() {
   );
 }
 
+/* SEARCH FORM */
 function setupFilters() {
   $("searchForm")?.addEventListener("submit", (event) => {
     event.preventDefault();
@@ -411,13 +490,19 @@ function setupFilters() {
   $("searchInput")?.addEventListener("input", applyFilters);
 
   [
-    "genreFilter", "genreSelect", "languageFilter",
-    "languageSelect", "typeFilter", "contentTypeFilter", "typeSelect"
+    "genreFilter",
+    "genreSelect",
+    "languageFilter",
+    "languageSelect",
+    "typeFilter",
+    "contentTypeFilter",
+    "typeSelect"
   ].forEach((id) => {
     $(id)?.addEventListener("change", applyFilters);
   });
 }
 
+/* LOAD PUBLISHED MOVIES FROM FIRESTORE */
 async function loadMovies() {
   if (!grid) return;
 
@@ -437,6 +522,7 @@ async function loadMovies() {
       .sort((a, b) => {
         const timeA = a.createdAt?.toMillis?.() || 0;
         const timeB = b.createdAt?.toMillis?.() || 0;
+
         return timeB - timeA;
       });
 
@@ -456,6 +542,7 @@ async function loadMovies() {
   }
 }
 
+/* START WEBSITE */
 setupMenu();
 setupCategories();
 setupFilters();
