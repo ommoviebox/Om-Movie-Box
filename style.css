@@ -648,3 +648,9 @@ body {
     font-size: 13px !important;
   }
 }
+.poster-wrap,
+.poster,
+.poster-placeholder,
+.movie-card {
+  border-radius: 0 !important;
+}
