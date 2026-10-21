@@ -46,7 +46,7 @@
       width: 100%;
     }
 
-    /* MENU button */
+    /* MENU BUTTON */
     #menuToggle {
       display: inline-flex !important;
       visibility: visible !important;
@@ -67,7 +67,7 @@
       z-index: 100;
     }
 
-    /* Telegram button */
+    /* TELEGRAM BUTTON */
     .telegram-button {
       display: inline-flex !important;
       align-items: center;
@@ -84,9 +84,9 @@
       text-decoration: none;
     }
 
-    /* Category panel */
+    /* CATEGORY PANEL */
     #siteNav {
-      display: none !important;
+      display: none;
       width: 100%;
       box-sizing: border-box;
       margin-top: 8px;
@@ -102,47 +102,53 @@
       display: block !important;
     }
 
-    /* Hide Movies4u and extra links only */
+    /* HIDE MOVIES4U AND EXTRA LINKS */
     #siteNav .category-button[data-category="Movies4u"],
     #siteNav a {
       display: none !important;
     }
 
-    /* Show category buttons */
+    /* CATEGORY BUTTON LAYOUT */
     #siteNav .category-buttons {
       display: flex !important;
-      flex-wrap: wrap;
+      flex-wrap: wrap !important;
       align-items: center;
       justify-content: center;
       gap: 9px;
       width: 100%;
     }
 
-    /* Original dark theme button colors */
-    #siteNav .category-button {
+    /* BRIGHT LIME GREEN BUTTONS WITH BLACK TEXT */
+    #siteNav .category-button,
+    #siteNav .category-buttons .category-button {
       display: inline-flex !important;
       align-items: center;
       justify-content: center;
       padding: 10px 13px;
       min-height: 40px;
-      border: 1px solid var(--border) !important;
+      border: 1px solid #c6ff00 !important;
       border-radius: 8px;
-      background: var(--panel-light) !important;
-      color: var(--text) !important;
+      background: #c6ff00 !important;
+      color: #000000 !important;
       font-size: 13px;
-      font-weight: 700;
+      font-weight: 900 !important;
       cursor: pointer;
+      box-shadow: none !important;
+      opacity: 1 !important;
+      visibility: visible !important;
     }
 
     #siteNav .category-button:hover,
-    #siteNav .category-button.active {
-      background: var(--pink) !important;
-      border-color: var(--pink) !important;
-      color: #ffffff !important;
-      box-shadow: none !important;
+    #siteNav .category-button.active,
+    #siteNav .category-buttons .category-button:hover,
+    #siteNav .category-buttons .category-button.active {
+      background: #c6ff00 !important;
+      border-color: #c6ff00 !important;
+      color: #000000 !important;
+      box-shadow: 0 0 8px rgba(198, 255, 0, 0.4) !important;
     }
 
-    /* Search bar */
+    /* SEARCH BAR */
     .searchbar {
       display: flex !important;
       align-items: stretch;
@@ -184,7 +190,7 @@
       cursor: pointer;
     }
 
-    /* Logo */
+    /* LOGO */
     header.hero a.brand.image-logo {
       display: block !important;
       width: 100%;
@@ -207,7 +213,7 @@
       background: transparent;
     }
 
-    /* Pagination */
+    /* PAGINATION */
     #pagination {
       display: flex;
       justify-content: center;
@@ -217,24 +223,26 @@
       margin: 24px 0;
     }
 
-    /* DESKTOP: categories are always visible */
+    /* DESKTOP: SHOW CATEGORIES DIRECTLY */
     @media (min-width: 601px) {
       #menuToggle {
         display: inline-flex !important;
       }
 
       #siteNav,
-      #siteNav.open,
       #siteNav[hidden] {
         display: block !important;
+        visibility: visible !important;
+        opacity: 1 !important;
       }
 
       #siteNav .category-buttons {
+        display: flex !important;
         justify-content: center;
       }
     }
 
-    /* MOBILE: categories open with MENU */
+    /* MOBILE: OPEN CATEGORIES WITH MENU */
     @media (max-width: 600px) {
       .hero {
         padding: 25px 13px;
@@ -366,6 +374,12 @@
   if (menuToggle && siteNav) {
     menuToggle.addEventListener("click", function (event) {
       event.stopImmediatePropagation();
+
+      const isMobile = window.matchMedia("(max-width: 600px)").matches;
+
+      if (!isMobile) {
+        return;
+      }
 
       const isOpen =
         menuToggle.getAttribute("aria-expanded") !== "true";
