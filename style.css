@@ -648,9 +648,50 @@ body {
     font-size: 13px !important;
   }
 }
-.poster-wrap,
-.poster,
-.poster-placeholder,
-.movie-card {
+/* OM MOVIE BOX - SQUARE CORNERS FIX */
+
+/* Movie cards: sharp 90-degree corners */
+html body #movieGrid .movie-card,
+html body .movie-grid .movie-card {
   border-radius: 0 !important;
+  overflow: hidden !important;
+}
+
+/* Poster frame */
+html body #movieGrid .poster-wrap,
+html body #movieGrid .movie-poster-link,
+html body #movieGrid .poster-placeholder {
+  border-radius: 0 !important;
+}
+
+/* Poster images */
+html body #movieGrid img,
+html body #movieGrid .poster,
+html body #movieGrid .movie-poster,
+html body .movie-poster-link img {
+  border-radius: 0 !important;
+}
+
+/* Keep neon border and existing colors */
+html body #movieGrid .movie-card {
+  border: 2px solid transparent !important;
+  background:
+    linear-gradient(#000000, #000000) padding-box,
+    linear-gradient(
+      135deg,
+      #d8ff00,
+      #65ff00,
+      #00eaff,
+      #3988ff,
+      #ff00d9,
+      #d8ff00
+    ) border-box !important;
+}
+
+/* Do not change poster dimensions */
+html body #movieGrid .poster-wrap,
+html body #movieGrid .poster,
+html body #movieGrid .movie-poster-link > img {
+  aspect-ratio: 2 / 3;
+  object-fit: cover;
 }
