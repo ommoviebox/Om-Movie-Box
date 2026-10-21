@@ -46,6 +46,7 @@
       width: 100%;
     }
 
+    /* MENU button */
     #menuToggle {
       display: inline-flex !important;
       visibility: visible !important;
@@ -54,19 +55,19 @@
       justify-content: center;
       min-height: 54px;
       padding: 12px 20px;
-      border: 1px solid #c6ff00 !important;
+      border: 1px solid var(--border) !important;
       border-radius: 12px;
-      background: #c6ff00 !important;
-      color: #000000 !important;
+      background: var(--panel) !important;
+      color: var(--text) !important;
       font-size: 16px;
       font-weight: 900;
       cursor: pointer;
       touch-action: manipulation;
       position: relative;
       z-index: 100;
-      pointer-events: auto;
     }
 
+    /* Telegram button */
     .telegram-button {
       display: inline-flex !important;
       align-items: center;
@@ -83,16 +84,16 @@
       text-decoration: none;
     }
 
-    /* MENU panel */
+    /* Category panel */
     #siteNav {
       display: none !important;
       width: 100%;
       box-sizing: border-box;
       margin-top: 8px;
       padding: 12px;
-      border: 1px solid #c6ff00;
+      border: 1px solid var(--border);
       border-radius: 12px;
-      background: #100615 !important;
+      background: var(--panel) !important;
       position: relative;
       z-index: 50;
     }
@@ -101,49 +102,47 @@
       display: block !important;
     }
 
-    /* Hide only Movies4u and unnecessary links */
+    /* Hide Movies4u and extra links only */
     #siteNav .category-button[data-category="Movies4u"],
     #siteNav a {
       display: none !important;
     }
 
-    /* Show the other category buttons */
+    /* Show category buttons */
     #siteNav .category-buttons {
       display: flex !important;
       flex-wrap: wrap;
       align-items: center;
-      gap: 8px;
+      justify-content: center;
+      gap: 9px;
       width: 100%;
     }
 
+    /* Original dark theme button colors */
     #siteNav .category-button {
       display: inline-flex !important;
       align-items: center;
       justify-content: center;
-      padding: 10px 12px;
-      border: 1px solid #c6ff00;
+      padding: 10px 13px;
+      min-height: 40px;
+      border: 1px solid var(--border) !important;
       border-radius: 8px;
-      background: #222222;
-      color: #ffffff;
+      background: var(--panel-light) !important;
+      color: var(--text) !important;
       font-size: 13px;
       font-weight: 700;
       cursor: pointer;
     }
 
+    #siteNav .category-button:hover,
     #siteNav .category-button.active {
-      background: #c6ff00;
-      color: #000000;
+      background: var(--pink) !important;
+      border-color: var(--pink) !important;
+      color: #ffffff !important;
+      box-shadow: none !important;
     }
 
-    #pagination {
-      display: flex;
-      justify-content: center;
-      align-items: center;
-      gap: 8px;
-      flex-wrap: wrap;
-      margin: 24px 0;
-    }
-
+    /* Search bar */
     .searchbar {
       display: flex !important;
       align-items: stretch;
@@ -185,6 +184,7 @@
       cursor: pointer;
     }
 
+    /* Logo */
     header.hero a.brand.image-logo {
       display: block !important;
       width: 100%;
@@ -207,6 +207,34 @@
       background: transparent;
     }
 
+    /* Pagination */
+    #pagination {
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      gap: 8px;
+      flex-wrap: wrap;
+      margin: 24px 0;
+    }
+
+    /* DESKTOP: categories are always visible */
+    @media (min-width: 601px) {
+      #menuToggle {
+        display: inline-flex !important;
+      }
+
+      #siteNav,
+      #siteNav.open,
+      #siteNav[hidden] {
+        display: block !important;
+      }
+
+      #siteNav .category-buttons {
+        justify-content: center;
+      }
+    }
+
+    /* MOBILE: categories open with MENU */
     @media (max-width: 600px) {
       .hero {
         padding: 25px 13px;
@@ -234,8 +262,23 @@
         font-size: 13px;
       }
 
+      #siteNav,
+      #siteNav[hidden] {
+        display: none !important;
+      }
+
+      #siteNav.open {
+        display: block !important;
+      }
+
+      #siteNav .category-buttons {
+        justify-content: flex-start;
+        gap: 8px;
+      }
+
       #siteNav .category-button {
         padding: 9px 10px;
+        min-height: 38px;
         font-size: 12px;
       }
     }
@@ -322,10 +365,10 @@
 
   if (menuToggle && siteNav) {
     menuToggle.addEventListener("click", function (event) {
-      /* Prevent the second MENU listener in app.js from cancelling this one */
       event.stopImmediatePropagation();
 
-      const isOpen = menuToggle.getAttribute("aria-expanded") !== "true";
+      const isOpen =
+        menuToggle.getAttribute("aria-expanded") !== "true";
 
       menuToggle.setAttribute("aria-expanded", String(isOpen));
       siteNav.classList.toggle("open", isOpen);
