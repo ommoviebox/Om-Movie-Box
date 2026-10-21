@@ -16,14 +16,6 @@
   <meta property="og:description" content="Explore movie information, web series details, and authorized viewing links.">
   <meta property="og:url" content="https://ommoviebox.online/">
 
-  <script async src="https://www.googletagmanager.com/gtag/js?id=G-22FK01RTWM"></script>
-  <script>
-    window.dataLayer = window.dataLayer || [];
-    function gtag(){dataLayer.push(arguments);}
-    gtag('js', new Date());
-    gtag('config', 'G-22FK01RTWM');
-  </script>
-
   <link rel="stylesheet" href="style.css">
 
   <style>
@@ -64,9 +56,9 @@
       text-decoration: none;
     }
 
-    /* MENU button: bright green with black text */
+    /* MENU button */
     #menuToggle {
-      display: inline-flex;
+      display: inline-flex !important;
       align-items: center;
       justify-content: center;
       min-height: 54px;
@@ -78,6 +70,10 @@
       font-size: 16px;
       font-weight: 900;
       cursor: pointer;
+      touch-action: manipulation;
+      position: relative;
+      z-index: 20;
+      pointer-events: auto;
     }
 
     #menuToggle:hover {
@@ -86,7 +82,7 @@
       filter: brightness(1.08);
     }
 
-    /* JOIN TELEGRAM button */
+    /* Telegram button */
     .home-top-links .telegram-button {
       min-height: 58px;
       padding: 14px 25px;
@@ -104,34 +100,32 @@
       color: #000000 !important;
     }
 
-    /* Menu contents */
+    /* Mobile-friendly menu panel */
     #siteNav {
-      display: none;
+      display: none !important;
       width: 100%;
+      box-sizing: border-box;
       flex-direction: column;
       gap: 10px;
-      padding: 12px 0;
+      padding: 12px;
+      margin-top: 8px;
+      border: 1px solid #c6ff00;
+      border-radius: 12px;
+      background: #100615 !important;
+      position: relative;
+      z-index: 10;
     }
 
     #siteNav.open {
-      display: flex;
+      display: flex !important;
     }
 
-    #siteNav a {
-      display: block;
-      width: 100%;
-      padding: 13px 16px;
-      border: 1px solid #c6ff00;
-      border-radius: 10px;
-      background: #c6ff00 !important;
-      color: #000000 !important;
-      font-size: 16px;
-      font-weight: 900;
+    .menu-message {
+      margin: 0;
+      padding: 8px;
+      color: #c6ff00;
       text-align: center;
-    }
-
-    #siteNav a:hover {
-      filter: brightness(1.08);
+      font-weight: 700;
     }
 
     #pagination {
@@ -185,7 +179,7 @@
       cursor: pointer;
     }
 
-    /* RGB logo video */
+    /* RGB logo */
     header.hero a.brand.image-logo {
       display: block !important;
       width: 100%;
@@ -281,10 +275,8 @@
     >JOIN TELEGRAM</a>
   </div>
 
-  <nav id="siteNav" aria-label="Main menu">
-    <a href="https://ommoviebox.online/" target="_blank" rel="noopener noreferrer">
-      OM MOVIE BOX
-    </a>
+  <nav id="siteNav" aria-label="Main menu" hidden>
+    <p class="menu-message">OM MOVIE BOX MENU</p>
   </nav>
 </div>
 
@@ -308,6 +300,7 @@
 
 <script>
   const yearElement = document.getElementById("year");
+
   if (yearElement) {
     yearElement.textContent = new Date().getFullYear();
   }
@@ -316,9 +309,12 @@
   const siteNav = document.getElementById("siteNav");
 
   if (menuToggle && siteNav) {
-    menuToggle.addEventListener("click", () => {
-      const isOpen = siteNav.classList.toggle("open");
+    menuToggle.addEventListener("click", function () {
+      const isOpen = menuToggle.getAttribute("aria-expanded") !== "true";
+
       menuToggle.setAttribute("aria-expanded", String(isOpen));
+      siteNav.classList.toggle("open", isOpen);
+      siteNav.hidden = !isOpen;
     });
   }
 </script>
