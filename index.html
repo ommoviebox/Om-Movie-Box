@@ -1,17 +1,24 @@
 <!doctype html>
-
 <html lang="en">
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <meta name="theme-color" content="#000000">  <title>Om Movie Box</title>
+  <meta name="theme-color" content="#000000">
+
+  <title>Om Movie Box</title>
   <meta name="description" content="Om Movie Box - Explore movie information, web series details, and authorized viewing links.">
   <meta name="robots" content="index, follow">
-  <link rel="canonical" href="https://ommoviebox.online/">  <meta property="og:type" content="website">
+  <link rel="canonical" href="https://ommoviebox.online/">
+
+  <meta property="og:type" content="website">
   <meta property="og:site_name" content="Om Movie Box">
   <meta property="og:title" content="Om Movie Box">
   <meta property="og:description" content="Explore movie information, web series details, and authorized viewing links.">
-  <meta property="og:url" content="https://ommoviebox.online/">  <link rel="stylesheet" href="style.css">  <style>
+  <meta property="og:url" content="https://ommoviebox.online/">
+
+  <link rel="stylesheet" href="style.css">
+
+  <style>
     html, body {
       background: #000 !important;
     }
@@ -38,7 +45,7 @@
       width: 100%;
     }
 
-    /* MENU BUTTON - LIME GREEN */
+    /* LARGE LIME GREEN MENU BUTTON */
     #menuToggle {
       display: inline-flex !important;
       visibility: visible !important;
@@ -48,15 +55,15 @@
       flex: 1 1 0;
       width: 0;
       min-width: 0;
-      min-height: 42px !important;
-      padding: 8px 12px !important;
+      min-height: 58px !important;
+      padding: 14px 20px !important;
       box-sizing: border-box;
-      border: 0 !important;
+      border: none !important;
       border-radius: 24px !important;
       background: #c6ff00 !important;
       background-image: none !important;
       color: #000000 !important;
-      font-size: 13px !important;
+      font-size: 22px !important;
       font-weight: 900 !important;
       line-height: 1.2 !important;
       text-align: center;
@@ -65,9 +72,10 @@
       position: relative;
       z-index: 100;
       box-shadow: none !important;
+      text-shadow: none !important;
     }
 
-    /* TELEGRAM BUTTON - ORIGINAL DESIGN */
+    /* TELEGRAM BUTTON - KEEP BLUE */
     .telegram-button {
       display: inline-flex !important;
       align-items: center;
@@ -264,14 +272,16 @@
         font-size: 13px;
       }
 
+      /* BIG MENU BUTTON ON MOBILE */
       #menuToggle {
         flex: 1 1 0;
         width: 0;
         min-width: 0;
-        min-height: 40px !important;
-        padding: 7px 10px !important;
-        font-size: 12px !important;
-        border-radius: 24px !important;
+        min-height: 58px !important;
+        padding: 12px 14px !important;
+        font-size: 19px !important;
+        font-weight: 900 !important;
+        border-radius: 20px !important;
         background: #c6ff00 !important;
         color: #000000 !important;
       }
@@ -307,58 +317,78 @@
         line-height: 1.2 !important;
       }
     }
-  </style></head><body>
-<header class="hero">
-  <a class="brand image-logo" href="./" aria-label="OM MOVIE BOX Home">
-    <video
-      class="rgb-logo-video"
-      autoplay muted loop playsinline webkit-playsinline
-      preload="auto"
-      aria-label="OM MOVIE BOX RGB Logo"
-    >
-      <source src="./om-rgb-logo-transparent-mobile.webm" type="video/webm">
-      Your browser does not support the video.
-    </video>
-  </a>  <form class="searchbar" id="searchForm">
-    <input
-      id="searchInput"
-      type="search"
-      placeholder="Search Movies..."
-      aria-label="Search titles"
-    >
-    <button type="submit">SEARCH</button>
-  </form>
-</header><div class="menu-strip">
-  <div class="home-top-links">
-    <button
-      id="menuToggle"
-      class="menu-toggle"
-      aria-expanded="false"
-      aria-controls="siteNav"
-      type="button"
-    >☰ MENU</button><a
-  class="pill telegram-button"
-  href="https://t.me/+jjwnXEeKgbJkNGE1"
-  target="_blank"
-  rel="noopener noreferrer"
->JOIN TELEGRAM</a>
+  </style>
+</head>
 
-  </div>  <nav id="siteNav" aria-label="Main menu" hidden></nav>
-</div><main class="page-wrap">
-  <section id="latest" class="catalog-section">
-    <div id="movieGrid" class="movie-grid" aria-live="polite"></div><p id="emptyState" class="empty-state" hidden>
-  No titles match your search.
-</p>
+<body>
+  <header class="hero">
+    <a class="brand image-logo" href="./" aria-label="OM MOVIE BOX Home">
+      <video
+        class="rgb-logo-video"
+        autoplay muted loop playsinline webkit-playsinline
+        preload="auto"
+        aria-label="OM MOVIE BOX RGB Logo"
+      >
+        <source src="./om-rgb-logo-transparent-mobile.webm" type="video/webm">
+        Your browser does not support the video.
+      </video>
+    </a>
 
-<div id="pagination"></div>
+    <form class="searchbar" id="searchForm">
+      <input
+        id="searchInput"
+        type="search"
+        placeholder="Search Movies..."
+        aria-label="Search titles"
+      >
+      <button type="submit">SEARCH</button>
+    </form>
+  </header>
 
-  </section>
-</main><footer class="footer">
-  <a class="footer-brand" href="./">OM MOVIE BOX</a>
-  <p>Movie information and authorized viewing links.</p>
-  <span>© <span id="year"></span> Om Movie Box</span>
-</footer><script>
-  document.getElementById("year").textContent =
-    new Date().getFullYear();
-</script><script type="module" src="app.js"></script></body>
+  <div class="menu-strip">
+    <div class="home-top-links">
+      <button
+        id="menuToggle"
+        class="menu-toggle"
+        aria-expanded="false"
+        aria-controls="siteNav"
+        type="button"
+      >☰ MENU</button>
+
+      <a
+        class="pill telegram-button"
+        href="https://t.me/+jjwnXEeKgbJkNGE1"
+        target="_blank"
+        rel="noopener noreferrer"
+      >JOIN TELEGRAM</a>
+    </div>
+
+    <nav id="siteNav" aria-label="Main menu" hidden></nav>
+  </div>
+
+  <main class="page-wrap">
+    <section id="latest" class="catalog-section">
+      <div id="movieGrid" class="movie-grid" aria-live="polite"></div>
+
+      <p id="emptyState" class="empty-state" hidden>
+        No titles match your search.
+      </p>
+
+      <div id="pagination"></div>
+    </section>
+  </main>
+
+  <footer class="footer">
+    <a class="footer-brand" href="./">OM MOVIE BOX</a>
+    <p>Movie information and authorized viewing links.</p>
+    <span>© <span id="year"></span> Om Movie Box</span>
+  </footer>
+
+  <script>
+    document.getElementById("year").textContent =
+      new Date().getFullYear();
+  </script>
+
+  <script type="module" src="app.js"></script>
+</body>
 </html>
