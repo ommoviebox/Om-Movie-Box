@@ -30,7 +30,6 @@ let activeCategory = "All";
 const pageSize = 30;
 
 const categories = [
-  "Movies4u",
   "18+ [Adult]",
   "Action",
   "Anime / Animation",
@@ -70,9 +69,7 @@ function safeURL(value) {
 
   try {
     const url = new URL(String(value).trim());
-
     if (!["https:", "http:"].includes(url.protocol)) return "";
-
     return url.href;
   } catch {
     return "";
@@ -116,8 +113,7 @@ function matchesCategory(movie, category) {
   ];
 
   if (languages.includes(category)) {
-    return normalize(movie.language).includes(cat) ||
-      text.includes(cat);
+    return normalize(movie.language).includes(cat) || text.includes(cat);
   }
 
   if (category === "WEB-Series" || category === "TV-Shows") {
@@ -157,10 +153,6 @@ function matchesCategory(movie, category) {
     return /18\+|adult/.test(text);
   }
 
-  if (category === "Movies4u") {
-    return /movies4u/.test(text);
-  }
-
   if (category === "Ullu Web Series") {
     return /ullu/.test(text);
   }
@@ -168,7 +160,7 @@ function matchesCategory(movie, category) {
   return text.includes(cat);
 }
 
-/* Create category buttons inside the existing MENU */
+/* Create category buttons */
 function setupCategories() {
   if (!siteNav) return;
 
@@ -192,12 +184,10 @@ function setupCategories() {
 
   categories.forEach((category) => {
     const button = document.createElement("button");
-
     button.type = "button";
     button.className = "category-button";
     button.textContent = category;
     button.dataset.category = category;
-
     categoryBox.appendChild(button);
   });
 
@@ -208,22 +198,13 @@ function setupCategories() {
     activeCategory = button.dataset.category;
 
     categoryBox.querySelectorAll(".category-button").forEach((item) => {
-      item.classList.toggle(
-        "active",
-        item.dataset.category === activeCategory
-      );
-      item.setAttribute(
-        "aria-pressed",
-        String(item.dataset.category === activeCategory)
-      );
+      const active = item.dataset.category === activeCategory;
+      item.classList.toggle("active", active);
+      item.setAttribute("aria-pressed", String(active));
     });
 
     applyFilters();
-
-    if (window.innerWidth <= 600 && siteNav) {
-      siteNav.classList.remove("open");
-      menuToggle?.setAttribute("aria-expanded", "false");
-    }
+    setMenuOpen(false);
 
     $("latest")?.scrollIntoView({ behavior: "smooth" });
   });
@@ -232,13 +213,33 @@ function setupCategories() {
   allButton.setAttribute("aria-pressed", "true");
 }
 
-/* Mobile MENU open and close */
-function setupMenu() {
+/* MENU open and close */
+function setMenuOpen(open) {
   if (!menuToggle || !siteNav) return;
 
-  menuToggle.addEventListener("click", () => {
-    const isOpen = siteNav.classList.toggle("open");
-    menuToggle.setAttribute("aria-expanded", String(isOpen));
+  menuToggle.setAttribute("aria-expanded", String(open));
+  siteNav.hidden = !open;
+  siteNav.classList.toggle("open", open);
+}
+
+function setupMenu() {
+  if (!menuToggle || !siteNav) {
+    console.error("MENU button ya siteNav nahi mila.");
+    return;
+  }
+
+  menuToggle.type = "button";
+  menuToggle.setAttribute("aria-controls", "siteNav");
+
+  setMenuOpen(false);
+
+  menuToggle.addEventListener("click", (event) => {
+    event.preventDefault();
+
+    const isOpen =
+      menuToggle.getAttribute("aria-expanded") === "true";
+
+    setMenuOpen(!isOpen);
   });
 }
 
@@ -247,7 +248,6 @@ function renderCard(movie) {
   card.className = "movie-card";
   card.href = `movie.html?id=${encodeURIComponent(movie.id)}`;
 
-  const posterURL = safeURL(movie.poster);
   const posterWrap = document.createElement("div");
   posterWrap.className = "poster-wrap";
 
@@ -256,9 +256,10 @@ function renderCard(movie) {
   placeholder.textContent = "OM";
   placeholder.style.display = "none";
 
+  const posterURL = safeURL(movie.poster);
+
   if (posterURL) {
     const image = document.createElement("img");
-
     image.className = "poster";
     image.alt = movie.title || "Movie poster";
     image.loading = "lazy";
@@ -308,12 +309,10 @@ function getSearchText() {
 function getFilterValue(ids) {
   for (const id of ids) {
     const element = $(id);
-
     if (element?.value && element.value !== "all") {
       return element.value.trim().toLowerCase();
     }
   }
-
   return "";
 }
 
@@ -322,33 +321,18 @@ function applyFilters() {
   const genre = getFilterValue(["genreFilter", "genreSelect"]);
   const language = getFilterValue(["languageFilter", "languageSelect"]);
   const type = getFilterValue([
-    "typeFilter",
-    "contentTypeFilter",
-    "typeSelect"
+    "typeFilter", "contentTypeFilter", "typeSelect"
   ]);
 
   filteredMovies = allMovies.filter((movie) => {
     const searchable = movieText(movie);
 
-    if (queryText && !searchable.includes(normalize(queryText))) {
+    if (queryText && !searchable.includes(normalize(queryText))) return false;
+    if (genre && !normalize(movie.genre).includes(genre)) return false;
+    if (language && !normalize(movie.language).includes(language)) return false;
+    if (type && !normalize(movie.contentType || movie.type).includes(type)) {
       return false;
     }
-
-    if (
-      genre &&
-      !normalize(movie.genre).includes(genre)
-    ) return false;
-
-    if (
-      language &&
-      !normalize(movie.language).includes(language)
-    ) return false;
-
-    if (
-      type &&
-      !normalize(movie.contentType || movie.type).includes(type)
-    ) return false;
-
     if (!matchesCategory(movie, activeCategory)) return false;
 
     return true;
@@ -365,7 +349,6 @@ function renderMovies() {
 
   const total = filteredMovies.length;
   const totalPages = Math.ceil(total / pageSize);
-
   currentPage = Math.max(1, Math.min(currentPage, totalPages || 1));
 
   const start = (currentPage - 1) * pageSize;
@@ -387,12 +370,10 @@ function renderMovies() {
   if (!pagination) return;
 
   pagination.replaceChildren();
-
   if (totalPages <= 1) return;
 
   function makeButton(label, page, disabled) {
     const button = document.createElement("button");
-
     button.type = "button";
     button.className = "page-btn";
     button.textContent = label;
