@@ -695,3 +695,33 @@ html body #movieGrid .movie-poster-link > img {
   aspect-ratio: 2 / 3;
   object-fit: cover;
 }
+/* RGB NEON BORDER - SLIGHTLY THICKER */
+html body #movieGrid .movie-card,
+html body .movie-grid .movie-card {
+  border: 3px solid transparent !important;
+  border-radius: 0 !important;
+  background:
+    linear-gradient(#000000, #000000) padding-box,
+    linear-gradient(
+      135deg,
+      #d8ff00,
+      #65ff00,
+      #00eaff,
+      #3988ff,
+      #ff00d9,
+      #d8ff00
+    ) border-box !important;
+  box-shadow:
+    0 0 7px #00eaff80,
+    0 0 13px #ff00d940 !important;
+  overflow: hidden !important;
+}
+
+/* Keep poster corners square */
+html body #movieGrid .poster-wrap,
+html body #movieGrid .poster,
+html body #movieGrid .movie-poster-link,
+html body #movieGrid .movie-poster-link img,
+html body #movieGrid .poster-placeholder {
+  border-radius: 0 !important;
+}
