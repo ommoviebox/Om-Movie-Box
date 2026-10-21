@@ -3,7 +3,8 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <meta name="theme-color" content="#100615">
+  <meta name="theme-color" content="#000000">
+
   <title>Om Movie Box</title>
   <meta name="description" content="Om Movie Box - Explore movie information, web series details, and authorized viewing links.">
   <meta name="robots" content="index, follow">
@@ -26,6 +27,21 @@
   <link rel="stylesheet" href="style.css">
 
   <style>
+    /* Black header and background */
+    html,
+    body {
+      background: #000000 !important;
+    }
+
+    .hero,
+    .menu-strip,
+    .page-wrap,
+    .footer {
+      background: #000000 !important;
+      background-image: none !important;
+    }
+
+    /* Home navigation */
     .menu-strip {
       display: flex;
       align-items: center;
@@ -46,10 +62,27 @@
       display: inline-flex;
       align-items: center;
       justify-content: center;
-      text-decoration: none;
-      min-height: 42px;
-      padding: 10px 18px;
       box-sizing: border-box;
+      text-decoration: none;
+    }
+
+    /* Telegram button - reference style */
+    .home-top-links .telegram-button {
+      min-height: 58px;
+      padding: 14px 25px;
+      border: 0;
+      border-radius: 24px;
+      background: #079fe0 !important;
+      color: #000000 !important;
+      font-size: 16px;
+      font-weight: 900;
+      text-align: center;
+    }
+
+    .home-top-links .telegram-button:hover {
+      background: #079fe0 !important;
+      color: #000000 !important;
+      filter: brightness(1.08);
     }
 
     #siteNav {
@@ -63,6 +96,48 @@
       gap: 8px;
       flex-wrap: wrap;
       margin: 24px 0;
+    }
+
+    /* Search bar - reference style */
+    .searchbar {
+      display: flex;
+      align-items: stretch;
+      width: min(650px, 100%);
+      margin: 0 auto 20px;
+      padding: 0;
+      overflow: hidden;
+      background: #ffffff !important;
+      border: 0;
+      border-radius: 28px;
+    }
+
+    .searchbar input {
+      flex: 1;
+      width: 100%;
+      min-width: 0;
+      padding: 16px 20px;
+      background: #ffffff !important;
+      color: #000000 !important;
+      border: 0;
+      outline: 0;
+      font-size: 18px;
+    }
+
+    .searchbar input::placeholder {
+      color: #777777 !important;
+      opacity: 1;
+    }
+
+    .searchbar button {
+      flex-shrink: 0;
+      padding: 16px 24px;
+      border: 0;
+      border-radius: 0;
+      background: #c6ff00 !important;
+      color: #000000 !important;
+      font-size: 17px;
+      font-weight: 900;
+      cursor: pointer;
     }
 
     /* RGB logo video */
@@ -86,6 +161,25 @@
       object-fit: contain;
       margin: 0 auto;
       background: transparent;
+    }
+
+    /* Mobile adjustments */
+    @media (max-width: 600px) {
+      .searchbar input {
+        padding: 14px 15px;
+        font-size: 16px;
+      }
+
+      .searchbar button {
+        padding: 14px 16px;
+        font-size: 14px;
+      }
+
+      .home-top-links .telegram-button {
+        min-height: 54px;
+        padding: 12px 18px;
+        font-size: 14px;
+      }
     }
   </style>
 </head>
@@ -114,7 +208,7 @@
     <input
       id="searchInput"
       type="search"
-      placeholder="Search movies or web series..."
+      placeholder="Search Movies..."
       aria-label="Search titles"
     >
     <button type="submit">SEARCH</button>
@@ -132,11 +226,11 @@
     >☰ MENU</button>
 
     <a
-      class="pill green"
+      class="pill telegram-button"
       href="https://t.me/+jjwnXEeKgbJkNGE1"
       target="_blank"
       rel="noopener noreferrer"
-    >TELEGRAM</a>
+    >JOIN TELEGRAM</a>
   </div>
 
   <nav id="siteNav">
