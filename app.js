@@ -120,9 +120,9 @@ categoryBox.className = "category-buttons";
 Object.assign(categoryBox.style, {
 display: "flex",
 flexWrap: "wrap",
-gap: "4px",
+gap: "6px",
 width: "100%",
-justifyContent: "flex-start"
+justifyContent: "center"
 });
 
 siteNav.replaceChildren(categoryBox);
@@ -130,42 +130,37 @@ siteNav.replaceChildren(categoryBox);
 function addCategoryButton(category) {
 const button = document.createElement("button");
 
-button.type = "button";
-button.className = "category-button";
-button.textContent = category;
-button.dataset.category = category;
-button.setAttribute("aria-pressed", "false");
+button.type = "button";  
+button.className = "category-button";  
+button.textContent = category;  
+button.dataset.category = category;  
+button.setAttribute("aria-pressed", "false");  
 
-button.style.setProperty("background-color", "#c6ff00", "important");
-button.style.setProperty("background-image", "none", "important");
-button.style.setProperty("color", "#000000", "important");
-button.style.setProperty("border", "1px solid #c6ff00", "important");
-button.style.setProperty("border-radius", "5px", "important");
-button.style.setProperty("font-family", "Arial, Helvetica, sans-serif", "important");
-
-button.style.setProperty(
-  "font-size",
-  window.matchMedia("(max-width: 600px)").matches ? "10px" : "17px",
-  "important"
-);
-
-button.style.setProperty("font-weight", "500", "important");
-button.style.setProperty("letter-spacing", "0px", "important");
-button.style.setProperty("line-height", "1.1", "important");
-button.style.setProperty("box-shadow", "none", "important");
-button.style.setProperty("text-shadow", "none", "important");
-button.style.setProperty("padding", "3px 5px", "important");
-button.style.setProperty("min-height", "0px", "important");
-button.style.setProperty("margin", "0px", "important");
-button.style.setProperty("cursor", "pointer", "important");
-button.style.setProperty("touch-action", "manipulation", "important");
+button.style.setProperty("background-color", "#c6ff00", "important");  
+button.style.setProperty("background-image", "none", "important");  
+button.style.setProperty("color", "#000000", "important");  
+button.style.setProperty("border", "1px solid #c6ff00", "important");  
+button.style.setProperty("border-radius", "8px", "important");  
+button.style.setProperty("font-family", "Arial, Helvetica, sans-serif", "important");  
+button.style.setProperty(  
+  "font-size",  
+  window.matchMedia("(max-width: 600px)").matches ? "15px" : "19px",  
+  "important"  
+);  
+button.style.setProperty("font-weight", "500", "important");  
+button.style.setProperty("letter-spacing", "0px", "important");  
+button.style.setProperty("line-height", "1.2", "important");  
+button.style.setProperty("box-shadow", "none", "important");  
+button.style.setProperty("text-shadow", "none", "important");  
+button.style.setProperty("padding", "5px 8px", "important");  
+button.style.setProperty("min-height", "30px", "important");  
+button.style.setProperty("cursor", "pointer", "important");  
 
 categoryBox.appendChild(button);
 
 }
 
 addCategoryButton("All");
-
 categories
 .filter((category) => category !== "Movies4u")
 .forEach(addCategoryButton);
@@ -174,21 +169,21 @@ categoryBox.addEventListener("click", (event) => {
 const button = event.target.closest("button[data-category]");
 if (!button) return;
 
-activeCategory = button.dataset.category;
+activeCategory = button.dataset.category;  
 
-categoryBox.querySelectorAll(".category-button").forEach((item) => {
-  const active = item.dataset.category === activeCategory;
-  item.classList.toggle("active", active);
-  item.setAttribute("aria-pressed", String(active));
-});
+categoryBox.querySelectorAll(".category-button").forEach((item) => {  
+  const active = item.dataset.category === activeCategory;  
+  item.classList.toggle("active", active);  
+  item.setAttribute("aria-pressed", String(active));  
+});  
 
-applyFilters();
+applyFilters();  
 
-if (window.matchMedia("(max-width: 600px)").matches) {
-  setMenuOpen(false);
-}
+if (window.matchMedia("(max-width: 600px)").matches) {  
+  setMenuOpen(false);  
+}  
 
-$("latest")?.scrollIntoView({ behavior: "auto", block: "start" });
+$("latest")?.scrollIntoView({ behavior: "smooth" });
 
 });
 
@@ -197,24 +192,22 @@ allButton?.classList.add("active");
 allButton?.setAttribute("aria-pressed", "true");
 }
 
-/* MOBILE MENU */
+/* MENU: SINGLE CLICK HANDLER */
 function setMenuOpen(open) {
 if (!menuToggle || !siteNav) return;
 
 const isMobile = window.matchMedia("(max-width: 600px)").matches;
+const shouldShow = !isMobile || open;
 
-if (!isMobile) {
-siteNav.classList.remove("open");
-siteNav.hidden = false;
-siteNav.style.removeProperty("display");
-menuToggle.setAttribute("aria-expanded", "false");
-return;
-}
+menuToggle.setAttribute("aria-expanded", String(isMobile && open));
+siteNav.classList.toggle("open", isMobile && open);
+siteNav.hidden = !shouldShow;
 
-siteNav.classList.toggle("open", open);
-siteNav.hidden = !open;
-siteNav.style.setProperty("display", open ? "block" : "none", "important");
-menuToggle.setAttribute("aria-expanded", String(open));
+siteNav.style.setProperty(
+"display",
+shouldShow ? "block" : "none",
+"important"
+);
 }
 
 function setupMenu() {
@@ -228,16 +221,19 @@ setMenuOpen(false);
 menuToggle.addEventListener("click", (event) => {
 event.preventDefault();
 
-const isOpen = menuToggle.getAttribute("aria-expanded") === "true";
+if (!window.matchMedia("(max-width: 600px)").matches) return;  
+
+const isOpen = menuToggle.getAttribute("aria-expanded") === "true";  
 setMenuOpen(!isOpen);
 
 });
 
 window.addEventListener("resize", () => {
-setMenuOpen(
-window.matchMedia("(max-width: 600px)").matches &&
-menuToggle.getAttribute("aria-expanded") === "true"
-);
+if (window.matchMedia("(max-width: 600px)").matches) {
+setMenuOpen(menuToggle.getAttribute("aria-expanded") === "true");
+} else {
+setMenuOpen(false);
+}
 });
 }
 
@@ -245,7 +241,7 @@ menuToggle.getAttribute("aria-expanded") === "true"
 function renderCard(movie) {
 const card = document.createElement("a");
 card.className = "movie-card";
-card.href = "movie.html?id=${encodeURIComponent(movie.id)}";
+card.href = movie.html?id=${encodeURIComponent(movie.id)};
 
 const posterWrap = document.createElement("div");
 posterWrap.className = "poster-wrap";
@@ -265,10 +261,10 @@ image.loading = "lazy";
 image.decoding = "async";
 image.src = posterURL;
 
-image.addEventListener("error", () => {
-  image.style.display = "none";
-  placeholder.style.display = "grid";
-}, { once: true });
+image.addEventListener("error", () => {  
+  image.style.display = "none";  
+  placeholder.style.display = "grid";  
+}, { once: true });  
 
 posterWrap.append(image, placeholder);
 
@@ -326,11 +322,11 @@ const type = getFilterValue(["typeFilter", "contentTypeFilter", "typeSelect"]);
 filteredMovies = allMovies.filter((movie) => {
 const searchable = movieText(movie);
 
-if (queryText && !searchable.includes(normalize(queryText))) return false;
-if (genre && !normalize(movie.genre).includes(genre)) return false;
-if (language && !normalize(movie.language).includes(language)) return false;
-if (type && !normalize(movie.contentType || movie.type).includes(type)) return false;
-if (!matchesCategory(movie, activeCategory)) return false;
+if (queryText && !searchable.includes(normalize(queryText))) return false;  
+if (genre && !normalize(movie.genre).includes(genre)) return false;  
+if (language && !normalize(movie.language).includes(language)) return false;  
+if (type && !normalize(movie.contentType || movie.type).includes(type)) return false;  
+if (!matchesCategory(movie, activeCategory)) return false;  
 
 return true;
 
@@ -352,12 +348,11 @@ const totalPages = Math.ceil(total / pageSize);
 currentPage = Math.max(1, Math.min(currentPage, totalPages || 1));
 
 const start = (currentPage - 1) * pageSize;
-
 filteredMovies.slice(start, start + pageSize)
 .forEach((movie) => grid.appendChild(renderCard(movie)));
 
 if (count) {
-count.textContent = "${total} ${total === 1 ? "title" : "titles"}";
+count.textContent = ${total} ${total === 1 ? "title" : "titles"};
 }
 
 if (empty) {
@@ -379,11 +374,11 @@ button.className = "page-btn";
 button.textContent = label;
 button.disabled = disabled;
 
-button.addEventListener("click", () => {
-  currentPage = page;
-  renderMovies();
-  window.scrollTo({ top: 0, behavior: "auto" });
-});
+button.addEventListener("click", () => {  
+  currentPage = page;  
+  renderMovies();  
+  window.scrollTo({ top: 0, behavior: "smooth" });  
+});  
 
 return button;
 
@@ -395,7 +390,7 @@ makeButton("← Previous", currentPage - 1, currentPage === 1)
 
 const label = document.createElement("span");
 label.className = "page-info";
-label.textContent = "Page ${currentPage} of ${totalPages}";
+label.textContent = Page ${currentPage} of ${totalPages};
 pagination.appendChild(label);
 
 pagination.appendChild(
@@ -431,28 +426,28 @@ collection(db, "titles"),
 where("published", "==", true)
 );
 
-const snapshot = await getDocs(publishedMoviesQuery);
+const snapshot = await getDocs(publishedMoviesQuery);  
 
-allMovies = snapshot.docs
-  .map((item) => ({ id: item.id, ...item.data() }))
-  .sort((a, b) => {
-    const timeA = a.createdAt?.toMillis?.() || 0;
-    const timeB = b.createdAt?.toMillis?.() || 0;
-    return timeB - timeA;
-  });
+allMovies = snapshot.docs  
+  .map((item) => ({ id: item.id, ...item.data() }))  
+  .sort((a, b) => {  
+    const timeA = a.createdAt?.toMillis?.() || 0;  
+    const timeB = b.createdAt?.toMillis?.() || 0;  
+    return timeB - timeA;  
+  });  
 
 applyFilters();
 
 } catch (error) {
 console.error("Homepage movie loading error:", error);
 
-if (count) count.textContent = "Load failed";
+if (count) count.textContent = "Load failed";  
 
-if (empty) {
-  empty.hidden = false;
-  empty.textContent =
-    "Movies load nahi hui. Internet aur Firestore Rules check karein.";
-}
+if (empty) {  
+  empty.hidden = false;  
+  empty.textContent =  
+    "Movies load nahi hui. Internet aur Firestore Rules check karein.";  
+}  
 
 if (pagination) pagination.replaceChildren();
 
