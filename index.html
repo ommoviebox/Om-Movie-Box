@@ -19,46 +19,36 @@
   <link rel="stylesheet" href="style.css">
 
   <style>
-    html,
-    body {
+    html, body {
       background: #000000 !important;
     }
 
-    .hero,
-    .menu-strip,
-    .page-wrap,
-    .footer {
+    .hero, .menu-strip, .page-wrap, .footer {
       background: #000000 !important;
       background-image: none !important;
     }
 
     .menu-strip {
-      display: flex;
+      display: flex !important;
+      flex-wrap: wrap;
       align-items: center;
       justify-content: space-between;
       gap: 12px;
-      flex-wrap: wrap;
+      padding: 12px;
     }
 
     .home-top-links {
-      display: flex;
+      display: flex !important;
       align-items: center;
       justify-content: space-between;
       gap: 12px;
       width: 100%;
     }
 
-    .home-top-links .pill {
-      display: inline-flex;
-      align-items: center;
-      justify-content: center;
-      box-sizing: border-box;
-      text-decoration: none;
-    }
-
-    /* MENU button */
     #menuToggle {
       display: inline-flex !important;
+      visibility: visible !important;
+      opacity: 1 !important;
       align-items: center;
       justify-content: center;
       min-height: 54px;
@@ -72,60 +62,48 @@
       cursor: pointer;
       touch-action: manipulation;
       position: relative;
-      z-index: 20;
+      z-index: 100;
       pointer-events: auto;
     }
 
-    #menuToggle:hover {
-      background: #c6ff00 !important;
-      color: #000000 !important;
-      filter: brightness(1.08);
-    }
-
-    /* Telegram button */
-    .home-top-links .telegram-button {
-      min-height: 58px;
-      padding: 14px 25px;
-      border: 0;
+    .telegram-button {
+      display: inline-flex !important;
+      align-items: center;
+      justify-content: center;
+      min-height: 54px;
+      padding: 12px 20px;
+      border: 0 !important;
       border-radius: 24px;
       background: #079fe0 !important;
       color: #000000 !important;
-      font-size: 16px;
+      font-size: 15px;
       font-weight: 900;
       text-align: center;
+      text-decoration: none;
     }
 
-    .home-top-links .telegram-button:hover {
-      background: #079fe0 !important;
-      color: #000000 !important;
-    }
-
-    /* Mobile-friendly menu panel */
+    /* Empty menu panel: no Movies4u or OM MOVIE BOX links */
     #siteNav {
       display: none !important;
       width: 100%;
       box-sizing: border-box;
-      flex-direction: column;
-      gap: 10px;
-      padding: 12px;
       margin-top: 8px;
+      padding: 12px;
       border: 1px solid #c6ff00;
       border-radius: 12px;
       background: #100615 !important;
       position: relative;
-      z-index: 10;
+      z-index: 50;
     }
 
     #siteNav.open {
-      display: flex !important;
+      display: block !important;
     }
 
-    .menu-message {
-      margin: 0;
-      padding: 8px;
-      color: #c6ff00;
-      text-align: center;
-      font-weight: 700;
+    #siteNav .category-buttons,
+    #siteNav .category-button,
+    #siteNav a {
+      display: none !important;
     }
 
     #pagination {
@@ -137,17 +115,16 @@
       margin: 24px 0;
     }
 
-    /* Search box */
     .searchbar {
-      display: flex;
+      display: flex !important;
       align-items: stretch;
       width: min(650px, 100%);
       margin: 0 auto 20px;
-      padding: 0;
+      padding: 0 !important;
       overflow: hidden;
       background: #ffffff !important;
-      border: 0;
-      border-radius: 28px;
+      border: 0 !important;
+      border-radius: 28px !important;
     }
 
     .searchbar input {
@@ -169,17 +146,16 @@
 
     .searchbar button {
       flex-shrink: 0;
-      padding: 16px 24px;
-      border: 0;
-      border-radius: 0;
+      padding: 14px 20px;
+      border: 0 !important;
+      border-radius: 0 !important;
       background: #c6ff00 !important;
       color: #000000 !important;
-      font-size: 17px;
+      font-size: 15px;
       font-weight: 900;
       cursor: pointer;
     }
 
-    /* RGB logo */
     header.hero a.brand.image-logo {
       display: block !important;
       width: 100%;
@@ -203,6 +179,10 @@
     }
 
     @media (max-width: 600px) {
+      .hero {
+        padding: 25px 13px;
+      }
+
       .searchbar input {
         padding: 14px 15px;
         font-size: 16px;
@@ -219,10 +199,10 @@
         font-size: 15px;
       }
 
-      .home-top-links .telegram-button {
+      .telegram-button {
         min-height: 54px;
-        padding: 12px 18px;
-        font-size: 14px;
+        padding: 12px 16px;
+        font-size: 13px;
       }
     }
   </style>
@@ -275,9 +255,7 @@
     >JOIN TELEGRAM</a>
   </div>
 
-  <nav id="siteNav" aria-label="Main menu" hidden>
-    <p class="menu-message">OM MOVIE BOX MENU</p>
-  </nav>
+  <nav id="siteNav" aria-label="Main menu" hidden></nav>
 </div>
 
 <main class="page-wrap">
@@ -299,8 +277,8 @@
 </footer>
 
 <script>
+(function () {
   const yearElement = document.getElementById("year");
-
   if (yearElement) {
     yearElement.textContent = new Date().getFullYear();
   }
@@ -317,6 +295,7 @@
       siteNav.hidden = !isOpen;
     });
   }
+})();
 </script>
 
 <script type="module" src="app.js"></script>
