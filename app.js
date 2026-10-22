@@ -1,4 +1,3 @@
-
 import { initializeApp, getApps, getApp } from "https://www.gstatic.com/firebasejs/10.14.1/firebase-app.js";
 
 import {
@@ -68,6 +67,7 @@ function movieText(movie) {
     movie.type,
     movie.description,
     movie.quality,
+    movie.badge,
     movie.category,
     movie.categories,
     movie.audio,
@@ -264,8 +264,6 @@ function setupMenu() {
 function renderCard(movie) {
   const card = document.createElement("a");
   card.className = "movie-card";
-
-  // FIX: Correct movie details page link
   card.href = `./movie.html?id=${encodeURIComponent(movie.id)}`;
 
   const posterWrap = document.createElement("div");
@@ -295,6 +293,37 @@ function renderCard(movie) {
   } else {
     placeholder.style.display = "grid";
     posterWrap.appendChild(placeholder);
+  }
+
+  /* NEW: POSTER QUALITY BADGE */
+  const badgeValue = String(movie.badge || "None").trim();
+
+  if (badgeValue && badgeValue.toLowerCase() !== "none") {
+    const badge = document.createElement("span");
+    badge.className = "poster-quality-badge";
+    badge.textContent = badgeValue;
+
+    Object.assign(badge.style, {
+      position: "absolute",
+      top: "7px",
+      left: "7px",
+      zIndex: "2",
+      display: "inline-block",
+      padding: "4px 7px",
+      borderRadius: "4px",
+      background: "linear-gradient(120deg, #ff1493, #7b2cff, #00cfff)",
+      color: "#ffffff",
+      fontSize: "10px",
+      fontWeight: "800",
+      lineHeight: "1.2",
+      letterSpacing: "0.3px",
+      textTransform: "uppercase",
+      boxShadow: "0 2px 8px rgba(0,0,0,.45)",
+      pointerEvents: "none"
+    });
+
+    posterWrap.style.position = "relative";
+    posterWrap.appendChild(badge);
   }
 
   const info = document.createElement("div");
@@ -376,7 +405,6 @@ function renderMovies() {
     .slice(start, start + pageSize)
     .forEach((movie) => grid.appendChild(renderCard(movie)));
 
-  // FIX: Correct movie count text
   if (count) {
     count.textContent = `${total} ${total === 1 ? "title" : "titles"}`;
   }
@@ -415,10 +443,7 @@ function renderMovies() {
 
   const label = document.createElement("span");
   label.className = "page-info";
-
-  // FIX: Correct pagination label
   label.textContent = `Page ${currentPage} of ${totalPages}`;
-
   pagination.appendChild(label);
 
   pagination.appendChild(
