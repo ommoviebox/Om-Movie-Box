@@ -831,3 +831,13 @@ html body #siteNav .category-button[aria-pressed="true"] {
   border: 1px solid #c6ff00 !important;
   box-shadow: none !important;
 }
+/* FULL CATEGORY BOX - DARK BLACK */
+html body #siteNav,
+html body #siteNav.open,
+html body #siteNav .category-buttons {
+  background: #000000 !important;
+  background-color: #000000 !important;
+  background-image: none !important;
+  border-color: #000000 !important;
+  box-shadow: none !important;
+}
