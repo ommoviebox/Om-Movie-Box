@@ -750,3 +750,19 @@ html body #movieGrid .poster-placeholder {
     gap: 10px !important;
   }
 }
+/* CATEGORY BUTTONS - BLACK BACKGROUND */
+#siteNav .category-button {
+  background: #000000 !important;
+  color: #ffffff !important;
+  border: 1px solid #c6ff00 !important;
+  box-shadow: none !important;
+}
+
+/* Hover and active category buttons */
+#siteNav .category-button:hover,
+#siteNav .category-button.active {
+  background: #000000 !important;
+  color: #c6ff00 !important;
+  border-color: #c6ff00 !important;
+  box-shadow: 0 0 7px #c6ff0060 !important;
+}
