@@ -1,4 +1,3 @@
-
 import {
   initializeApp,
   getApps,
@@ -25,15 +24,10 @@ import {
 
 import { firebaseConfig } from "./firebase-config.js";
 
-const app = getApps().length
-  ? getApp()
-  : initializeApp(firebaseConfig);
-
+const app = getApps().length ? getApp() : initializeApp(firebaseConfig);
 const auth = getAuth(app);
 const db = getFirestore(app);
-
 const ADMIN_UID = "psgRupW3EfRUe61pcJzjqo36dNc2";
-
 const $ = (id) => document.getElementById(id);
 
 const loginPanel = $("loginPanel");
@@ -42,8 +36,6 @@ const dashboard = $("dashboard");
 const authMessage = $("authMessage");
 const saveMessage = $("saveMessage");
 const titleForm = $("titleForm");
-
-// FIX: admin.html mein Existing Titles ka ID adminTitles hai.
 const list = $("adminTitles") || $("titleList") || $("list");
 
 let editId = null;
@@ -56,38 +48,34 @@ const fields = [
   ["genreInput", "genre"],
   ["languageInput", "language"],
   ["qualityInput", "quality"],
+  ["badgeInput", "badge"],
   ["posterInput", "poster"],
   ["descriptionInput", "description"],
   ["officialUrlInput", "officialUrl"],
-
   ["watch480Input", "watch480"],
   ["download480Input", "download480"],
   ["watch480TextInput", "watch480Text"],
   ["watch480SizeInput", "watch480Size"],
   ["download480TextInput", "download480Text"],
   ["download480SizeInput", "download480Size"],
-
   ["watch720Input", "watch720"],
   ["download720Input", "download720"],
   ["watch720TextInput", "watch720Text"],
   ["watch720SizeInput", "watch720Size"],
   ["download720TextInput", "download720Text"],
   ["download720SizeInput", "download720Size"],
-
   ["watch1080Input", "watch1080"],
   ["download1080Input", "download1080"],
   ["watch1080TextInput", "watch1080Text"],
   ["watch1080SizeInput", "watch1080Size"],
   ["download1080TextInput", "download1080Text"],
   ["download1080SizeInput", "download1080Size"],
-
   ["watch2160Input", "watch2160"],
   ["download2160Input", "download2160"],
   ["watch2160TextInput", "watch2160Text"],
   ["watch2160SizeInput", "watch2160Size"],
   ["download2160TextInput", "download2160Text"],
   ["download2160SizeInput", "download2160Size"],
-
   ["screenshot1Input", "screenshot1"],
   ["tutorialUrlInput", "tutorialUrl"]
 ];
@@ -114,14 +102,12 @@ function valueOf(id) {
 
 function showMessage(element, message, isError = false) {
   if (!element) return;
-
   element.textContent = message;
   element.style.color = isError ? "#ff6b6b" : "#55e6a5";
 }
 
 function resetForm(clearMessage = true) {
   if (titleForm) titleForm.reset();
-
   editId = null;
 
   const year = $("yearInput");
@@ -129,6 +115,9 @@ function resetForm(clearMessage = true) {
 
   const quality = $("qualityInput");
   if (quality) quality.value = "HD";
+
+  const badge = $("badgeInput");
+  if (badge) badge.value = "None";
 
   const submitButton = titleForm?.querySelector(
     'button[type="submit"], input[type="submit"]'
@@ -150,20 +139,15 @@ function getPayload() {
 
   for (const [inputId, fieldName] of fields) {
     const element = $(inputId);
-
-    if (element) {
-      payload[fieldName] = element.value.trim();
-    }
+    if (element) payload[fieldName] = element.value.trim();
   }
 
   for (const fieldName of urlFields) {
     const url = payload[fieldName];
-
     if (!url) continue;
 
     try {
       const parsed = new URL(url);
-
       if (!["http:", "https:"].includes(parsed.protocol)) {
         throw new Error("Invalid URL");
       }
@@ -179,15 +163,14 @@ function getPayload() {
 
   if (yearValue) {
     const yearNumber = Number(yearValue);
-
     if (!Number.isFinite(yearNumber)) {
       throw new Error("Movie ka year sahi daalein.");
     }
-
     payload.year = yearNumber;
   }
 
   payload.quality = valueOf("qualityInput") || "HD";
+  payload.badge = valueOf("badgeInput") || "None";
 
   const publishedInput = $("publishedInput") || $("published");
   payload.published = publishedInput
@@ -222,6 +205,7 @@ function renderTitleCard(id, data) {
   const year = escapeHTML(data.year || "");
   const type = escapeHTML(data.type || data.contentType || "Movie");
   const poster = escapeHTML(data.poster || "");
+  const badge = escapeHTML(data.badge || "None");
   const status = data.published === false
     ? "Unpublished"
     : "Published";
@@ -231,27 +215,21 @@ function renderTitleCard(id, data) {
       style="display:flex;gap:12px;align-items:center;padding:12px;
       margin:10px 0;border:1px solid #493651;border-radius:12px;">
 
-      ${
-        poster
-          ? `<img src="${poster}" alt=""
-              style="width:65px;height:90px;object-fit:cover;border-radius:8px;"
-              onerror="this.style.display='none'">`
-          : ""
-      }
+      ${poster ? `<img src="${poster}" alt=""
+        style="width:65px;height:90px;object-fit:cover;border-radius:8px;"
+        onerror="this.style.display='none'">` : ""}
 
       <div style="flex:1;min-width:0;">
         <strong>${title}</strong>
         <div>${type} ${year ? "• " + year : ""}</div>
-        <small>${status}</small>
+        <small>${status} · Badge: ${badge}</small>
 
         <div style="display:flex;gap:8px;flex-wrap:wrap;margin-top:8px;">
-          <button type="button" data-action="edit" data-id="${escapeHTML(id)}">
-            Edit
-          </button>
+          <button type="button" data-action="edit"
+            data-id="${escapeHTML(id)}">Edit</button>
 
-          <button type="button" data-action="delete" data-id="${escapeHTML(id)}">
-            Delete
-          </button>
+          <button type="button" data-action="delete"
+            data-id="${escapeHTML(id)}">Delete</button>
         </div>
       </div>
     </article>
@@ -306,11 +284,11 @@ function fillForm(data, id) {
 
   for (const [inputId, fieldName] of fields) {
     const element = $(inputId);
-
-    if (element) {
-      element.value = data[fieldName] ?? "";
-    }
+    if (element) element.value = data[fieldName] ?? "";
   }
+
+  const badge = $("badgeInput");
+  if (badge) badge.value = data.badge || "None";
 
   const publishedInput = $("publishedInput") || $("published");
 
@@ -391,20 +369,15 @@ if (titleForm) {
 
     try {
       const payload = getPayload();
-
       showMessage(saveMessage, "Movie save ho rahi hai...");
 
       if (editId) {
         await updateDoc(doc(db, "titles", editId), payload);
-
         resetForm(false);
         showMessage(saveMessage, "Movie successfully update ho gayi!");
-
       } else {
         payload.createdAt = serverTimestamp();
-
         await addDoc(collection(db, "titles"), payload);
-
         resetForm(false);
         showMessage(saveMessage, "Movie successfully upload ho gayi!");
       }
@@ -426,12 +399,10 @@ if (titleForm) {
 if (list) {
   list.addEventListener("click", async (event) => {
     const button = event.target.closest("button[data-action]");
-
     if (!button) return;
 
     const id = button.dataset.id;
     const action = button.dataset.action;
-
     if (!id) return;
 
     if (action === "edit") {
@@ -466,9 +437,7 @@ if (list) {
 
       try {
         await deleteDoc(doc(db, "titles", id));
-
         showMessage(saveMessage, "Movie delete ho gayi.");
-
         await loadTitles();
 
       } catch (error) {
@@ -515,11 +484,9 @@ onAuthStateChanged(auth, async (user) => {
   if (dashboard) dashboard.hidden = false;
 
   showMessage(authMessage, "");
-
   await loadTitles();
 });
 
-// FIX: aapke admin.html mein button ka ID resetForm hai.
 const resetButton =
   $("resetForm") || $("resetBtn") || $("clearFormBtn");
 
