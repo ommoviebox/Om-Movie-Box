@@ -788,3 +788,6 @@ html body #siteNav .category-button[aria-pressed="true"] {
   color: #c6ff00 !important;
   border-color: #c6ff00 !important;
 }
+#siteNav .category-button {
+  background: #000000 !important;
+}
