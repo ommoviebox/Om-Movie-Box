@@ -856,3 +856,7 @@ html body #movieGrid .movie-info .movie-title {
   max-height: 6em !important;
   overflow-wrap: anywhere !important;
 }
+/* Hide year, language and movie type below titles only */
+#movieGrid .movie-meta {
+  display: none !important;
+}
