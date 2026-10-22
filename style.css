@@ -791,3 +791,10 @@ html body #siteNav .category-button[aria-pressed="true"] {
 #siteNav .category-button {
   background: #000000 !important;
 }
+#siteNav .category-buttons .category-button,
+#siteNav button.category-button,
+#siteNav .category-buttons button {
+  background: #000000 !important;
+  background-color: #000000 !important;
+  background-image: none !important;
+}
