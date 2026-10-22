@@ -135,7 +135,7 @@ function matchesCategory(movie, category) {
   return text.includes(cat);
 }
 
-/* CATEGORY BUTTONS - BLACK BACKGROUND */
+/* CATEGORY BUTTONS */
 function setupCategories() {
   if (!siteNav) return;
 
@@ -162,13 +162,13 @@ function setupCategories() {
     button.dataset.category = category;
     button.setAttribute("aria-pressed", "false");
 
-    /* ONLY BACKGROUND AND BORDER CHANGED TO BLACK */
-    button.style.setProperty("background", "#000000", "important");
+    /* ONLY BACKGROUND COLOR CHANGED */
     button.style.setProperty("background-color", "#000000", "important");
+
+    /* All other button styling stays the same */
     button.style.setProperty("background-image", "none", "important");
     button.style.setProperty("color", "#000000", "important");
-    button.style.setProperty("border", "1px solid #000000", "important");
-
+    button.style.setProperty("border", "1px solid #c6ff00", "important");
     button.style.setProperty("border-radius", "8px", "important");
     button.style.setProperty("font-family", "Arial, Helvetica, sans-serif", "important");
     button.style.setProperty(
