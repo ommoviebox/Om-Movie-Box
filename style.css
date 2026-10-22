@@ -725,3 +725,28 @@ html body #movieGrid .movie-poster-link img,
 html body #movieGrid .poster-placeholder {
   border-radius: 0 !important;
 }
+/* OM MOVIE BOX - RESPONSIVE MOVIE GRID */
+
+/* Laptop: 5 movies per row */
+@media (min-width: 901px) {
+  html body #movieGrid {
+    grid-template-columns: repeat(5, minmax(0, 1fr)) !important;
+    gap: 14px !important;
+  }
+}
+
+/* Tablet: 4 movies per row */
+@media (min-width: 601px) and (max-width: 900px) {
+  html body #movieGrid {
+    grid-template-columns: repeat(4, minmax(0, 1fr)) !important;
+    gap: 12px !important;
+  }
+}
+
+/* Phone: 2 movies per row */
+@media (max-width: 600px) {
+  html body #movieGrid {
+    grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+    gap: 10px !important;
+  }
+}
