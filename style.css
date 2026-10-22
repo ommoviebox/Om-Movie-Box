@@ -766,3 +766,25 @@ html body #movieGrid .poster-placeholder {
   border-color: #c6ff00 !important;
   box-shadow: 0 0 7px #c6ff0060 !important;
 }
+/* FORCE BLACK CATEGORY BUTTONS */
+html body #siteNav .category-buttons button,
+html body #siteNav button.category-button,
+html body #siteNav .category-button,
+html body #siteNav a.category-button,
+html body #siteNav .category-buttons > * {
+  background-color: #000000 !important;
+  background-image: none !important;
+  color: #ffffff !important;
+  border: 1px solid #c6ff00 !important;
+  box-shadow: none !important;
+}
+
+/* Hover / selected button */
+html body #siteNav .category-button:hover,
+html body #siteNav .category-button.active,
+html body #siteNav .category-button[aria-pressed="true"] {
+  background-color: #000000 !important;
+  background-image: none !important;
+  color: #c6ff00 !important;
+  border-color: #c6ff00 !important;
+}
