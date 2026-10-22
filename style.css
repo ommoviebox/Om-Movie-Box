@@ -856,7 +856,29 @@ html body #movieGrid .movie-info .movie-title {
   max-height: 6em !important;
   overflow-wrap: anywhere !important;
 }
-/* Hide year, language and movie type below titles only */
+
+/* Hide movie metadata but keep the frame size unchanged */
+#movieGrid .movie-card {
+  display: flex !important;
+  flex-direction: column !important;
+}
+
+#movieGrid .movie-info {
+  display: flex !important;
+  flex-direction: column !important;
+  flex: 1 1 auto !important;
+}
+
 #movieGrid .movie-meta {
   display: none !important;
 }
+
+#movieGrid .movie-title {
+  display: -webkit-box !important;
+  -webkit-box-orient: vertical !important;
+  -webkit-line-clamp: 4 !important;
+  overflow: hidden !important;
+  text-overflow: ellipsis !important;
+  text-align: center !important;
+}
+
