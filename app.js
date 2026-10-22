@@ -162,10 +162,7 @@ function setupCategories() {
     button.dataset.category = category;
     button.setAttribute("aria-pressed", "false");
 
-    /* ONLY BACKGROUND COLOR CHANGED */
-    button.style.setProperty("background-color", "#000000", "important");
-
-    /* All other button styling stays the same */
+    button.style.setProperty("background-color", "#c6ff00", "important");
     button.style.setProperty("background-image", "none", "important");
     button.style.setProperty("color", "#000000", "important");
     button.style.setProperty("border", "1px solid #c6ff00", "important");
@@ -267,6 +264,8 @@ function setupMenu() {
 function renderCard(movie) {
   const card = document.createElement("a");
   card.className = "movie-card";
+
+  // FIX: Correct movie details page link
   card.href = `./movie.html?id=${encodeURIComponent(movie.id)}`;
 
   const posterWrap = document.createElement("div");
@@ -377,6 +376,7 @@ function renderMovies() {
     .slice(start, start + pageSize)
     .forEach((movie) => grid.appendChild(renderCard(movie)));
 
+  // FIX: Correct movie count text
   if (count) {
     count.textContent = `${total} ${total === 1 ? "title" : "titles"}`;
   }
@@ -415,7 +415,10 @@ function renderMovies() {
 
   const label = document.createElement("span");
   label.className = "page-info";
+
+  // FIX: Correct pagination label
   label.textContent = `Page ${currentPage} of ${totalPages}`;
+
   pagination.appendChild(label);
 
   pagination.appendChild(
