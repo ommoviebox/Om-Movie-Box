@@ -841,3 +841,18 @@ html body #siteNav .category-buttons {
   border-color: #000000 !important;
   box-shadow: none !important;
 }
+/* MOVIE TITLE: CENTER + MAX 4 LINES */
+html body #movieGrid .movie-info .movie-title {
+  display: -webkit-box !important;
+  -webkit-box-orient: vertical !important;
+  -webkit-line-clamp: 4 !important;
+  overflow: hidden !important;
+  text-overflow: ellipsis !important;
+  text-align: center !important;
+  font-family: Arial, Helvetica, sans-serif !important;
+  font-size: 16px !important;
+  font-weight: 400 !important;
+  line-height: 1.5 !important;
+  max-height: 6em !important;
+  overflow-wrap: anywhere !important;
+}
