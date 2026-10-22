@@ -162,7 +162,7 @@ function setupCategories() {
     button.dataset.category = category;
     button.setAttribute("aria-pressed", "false");
 
-    button.style.setProperty("background-color", "#c6ff00", "important");
+    button.style.setProperty("background-color", "#000000", "important");
     button.style.setProperty("background-image", "none", "important");
     button.style.setProperty("color", "#000000", "important");
     button.style.setProperty("border", "1px solid #c6ff00", "important");
