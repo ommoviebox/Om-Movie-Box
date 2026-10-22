@@ -46,7 +46,7 @@
       width: 100%;
     }
 
-    /* MENU BUTTON - WIDTH FITS TEXT */
+    /* MENU BUTTON - UNCHANGED */
     #menuToggle {
       display: inline-flex !important;
       visibility: visible !important;
@@ -78,7 +78,7 @@
       text-shadow: none !important;
     }
 
-    /* TELEGRAM BUTTON - BLUE */
+    /* TELEGRAM BUTTON - UNCHANGED */
     .telegram-button {
       display: inline-flex !important;
       align-items: center;
@@ -100,7 +100,7 @@
       white-space: nowrap;
     }
 
-    /* CATEGORY PANEL */
+    /* CATEGORY PANEL - UNCHANGED */
     #siteNav {
       display: none;
       width: 100%;
@@ -123,7 +123,7 @@
       display: none !important;
     }
 
-    /* CATEGORY BUTTONS - BLACK BACKGROUND ONLY */
+    /* CATEGORY BUTTONS */
     #siteNav .category-buttons {
       display: flex !important;
       flex-wrap: wrap !important;
@@ -143,6 +143,7 @@
       border: 1px solid #c6ff00 !important;
       border-radius: 7px !important;
       background: #000000 !important;
+      background-color: #000000 !important;
       background-image: none !important;
       color: #000 !important;
       font-family: Arial, Helvetica, sans-serif !important;
@@ -160,11 +161,13 @@
     #siteNav .category-button:hover,
     #siteNav .category-button.active {
       background: #000000 !important;
+      background-color: #000000 !important;
+      background-image: none !important;
       border-color: #c6ff00 !important;
       color: #000 !important;
     }
 
-    /* SEARCH BAR */
+    /* SEARCH BAR - UNCHANGED */
     .searchbar {
       display: flex !important;
       align-items: stretch;
@@ -206,7 +209,7 @@
       cursor: pointer;
     }
 
-    /* LOGO */
+    /* LOGO - UNCHANGED */
     header.hero a.brand.image-logo {
       display: block !important;
       width: 100%;
@@ -229,7 +232,7 @@
       background: transparent;
     }
 
-    /* PAGINATION */
+    /* PAGINATION - UNCHANGED */
     #pagination {
       display: flex;
       justify-content: center;
@@ -276,7 +279,7 @@
         font-size: 13px;
       }
 
-      /* MENU WIDTH FITS TEXT ON MOBILE TOO */
+      /* MENU - UNCHANGED */
       #menuToggle {
         flex: 0 0 auto !important;
         width: max-content !important;
@@ -321,6 +324,16 @@
         font-size: 12px !important;
         line-height: 1.2 !important;
       }
+    }
+
+    /* FINAL OVERRIDE: ONLY CATEGORY BUTTON BACKGROUNDS */
+    #siteNav .category-button,
+    #siteNav .category-buttons .category-button,
+    #siteNav .category-button:hover,
+    #siteNav .category-button.active {
+      background: #000000 !important;
+      background-color: #000000 !important;
+      background-image: none !important;
     }
   </style>
 </head>
