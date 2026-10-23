@@ -1,3 +1,4 @@
+
 import { initializeApp, getApps, getApp } from "https://www.gstatic.com/firebasejs/10.14.1/firebase-app.js";
 
 import {
@@ -91,8 +92,12 @@ function matchesCategory(movie, category) {
     return normalize(movie.language).includes(cat) || text.includes(cat);
   }
 
-  if (category === "WEB-Series" || category === "TV-Shows") {
-    return /web[\s-]*series|series|tv[\s-]*shows|television/.test(text);
+  if (category === "WEB-Series") {
+    return /web[\s-]*series|series/.test(text);
+  }
+
+  if (category === "TV-Shows") {
+    return /tv[\s-]*shows|television|tvshow|tv show/.test(text);
   }
 
   if (category === "Bollywood Movies") {
@@ -135,6 +140,53 @@ function matchesCategory(movie, category) {
   return text.includes(cat);
 }
 
+/* LATEST RELEASE HEADING */
+function setupLatestHeading() {
+  if (!siteNav || !siteNav.parentNode) return;
+
+  let heading = $("latestReleaseHeading");
+
+  if (!heading) {
+    heading = document.createElement("div");
+    heading.id = "latestReleaseHeading";
+    heading.className = "latest-release-heading";
+    heading.textContent = "🔥 Latest Movies & Web Series Releases";
+
+    Object.assign(heading.style, {
+      display: "block",
+      width: "100%",
+      boxSizing: "border-box",
+      margin: "14px 0 22px",
+      padding: "16px 20px",
+      background: "#222222",
+      color: "#ffffff",
+      borderRadius: "8px",
+      fontFamily: "Arial, Helvetica, sans-serif",
+      fontSize: "22px",
+      fontWeight: "800",
+      lineHeight: "1.4",
+      textAlign: "left"
+    });
+
+    siteNav.insertAdjacentElement("afterend", heading);
+  }
+
+  function updateHeadingLayout() {
+    const isMobile = window.matchMedia("(max-width: 600px)").matches;
+
+    Object.assign(heading.style, {
+      margin: isMobile ? "12px 10px 20px" : "14px 0 22px",
+      width: isMobile ? "calc(100% - 20px)" : "100%",
+      padding: isMobile ? "12px" : "16px 20px",
+      fontSize: isMobile ? "16px" : "22px"
+    });
+  }
+
+  updateHeadingLayout();
+
+  window.addEventListener("resize", updateHeadingLayout);
+}
+
 /* CATEGORY BUTTONS */
 function setupCategories() {
   if (!siteNav) return;
@@ -162,15 +214,15 @@ function setupCategories() {
     button.dataset.category = category;
     button.setAttribute("aria-pressed", "false");
 
-    button.style.setProperty("background-color", "#c6ff00", "important");
+    button.style.setProperty("background-color", "#000000", "important");
     button.style.setProperty("background-image", "none", "important");
-    button.style.setProperty("color", "#000000", "important");
+    button.style.setProperty("color", "#ffffff", "important");
     button.style.setProperty("border", "1px solid #c6ff00", "important");
     button.style.setProperty("border-radius", "8px", "important");
     button.style.setProperty("font-family", "Arial, Helvetica, sans-serif", "important");
     button.style.setProperty(
       "font-size",
-      window.matchMedia("(max-width: 600px)").matches ? "15px" : "19px",
+      window.matchMedia("(max-width: 600px)").matches ? "12px" : "17px",
       "important"
     );
     button.style.setProperty("font-weight", "500", "important");
@@ -295,7 +347,7 @@ function renderCard(movie) {
     posterWrap.appendChild(placeholder);
   }
 
-  /* NEW: POSTER QUALITY BADGE */
+  /* POSTER QUALITY BADGE */
   const badgeValue = String(movie.badge || "None").trim();
 
   if (badgeValue && badgeValue.toLowerCase() !== "none") {
@@ -326,6 +378,35 @@ function renderCard(movie) {
     posterWrap.appendChild(badge);
   }
 
+  /* OPTIONAL NEW / TRENDING POSTER LABEL */
+  const trendValue = String(movie.trendBadge || "None").trim();
+
+  if (trendValue && trendValue.toLowerCase() !== "none") {
+    const trend = document.createElement("span");
+    trend.className = "poster-trend-badge";
+    trend.textContent = trendValue;
+
+    Object.assign(trend.style, {
+      position: "absolute",
+      top: "7px",
+      right: "7px",
+      zIndex: "3",
+      display: "inline-block",
+      padding: "4px 6px",
+      borderRadius: "4px",
+      background: trendValue.toUpperCase() === "NEW" ? "#c6ff00" : "#ff3d9a",
+      color: "#000000",
+      fontSize: "10px",
+      fontWeight: "900",
+      lineHeight: "1.2",
+      textTransform: "uppercase",
+      pointerEvents: "none"
+    });
+
+    posterWrap.style.position = "relative";
+    posterWrap.appendChild(trend);
+  }
+
   const info = document.createElement("div");
   info.className = "movie-info";
 
@@ -336,7 +417,9 @@ function renderCard(movie) {
   const meta = document.createElement("div");
   meta.className = "movie-meta";
 
-  [movie.year, movie.language, movie.contentType || "Movie"]
+  const contentType = movie.contentType || movie.type || "Movie";
+
+  [movie.year, movie.language, contentType]
     .filter(Boolean)
     .forEach((value) => {
       const span = document.createElement("span");
@@ -508,5 +591,6 @@ async function loadMovies() {
 /* START WEBSITE */
 setupMenu();
 setupCategories();
+setupLatestHeading();
 setupFilters();
 loadMovies();
