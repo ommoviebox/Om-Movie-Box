@@ -7,11 +7,9 @@
   <meta name="theme-color" content="#000000">
 
   <title>Om Movie Box</title>
-  <meta name="description" content="Om Movie Box - Free Latest movies available for download in various resolutions including 480p, 720p, 1080p, and even 2160p 4K">
+  <meta name="description" content="Om Movie Box - Explore movie information, web series details, and authorized viewing links.">
   <meta name="robots" content="index, follow">
   <link rel="canonical" href="https://ommoviebox.online/">
-
-  <!-- Website favicon -->
   <link rel="icon" type="image/png" href="/favicon.png">
 
   <meta property="og:type" content="website">
@@ -107,6 +105,7 @@
     #siteNav {
       display: none;
       width: 100%;
+      flex: 0 0 100%;
       box-sizing: border-box;
       margin-top: 6px;
       padding: 8px;
@@ -148,7 +147,7 @@
       background: #000000 !important;
       background-color: #000000 !important;
       background-image: none !important;
-      color: #000 !important;
+      color: #ffffff !important;
       font-family: Arial, Helvetica, sans-serif !important;
       font-size: 14px !important;
       font-weight: 500 !important;
@@ -167,7 +166,25 @@
       background-color: #000000 !important;
       background-image: none !important;
       border-color: #c6ff00 !important;
-      color: #000 !important;
+      color: #ffffff !important;
+    }
+
+    /* LATEST RELEASE HEADING */
+    #latestReleaseHeading {
+      display: block !important;
+      flex: 0 0 100%;
+      width: 100%;
+      box-sizing: border-box;
+      margin: 14px 0 22px;
+      padding: 16px 20px;
+      border-radius: 8px;
+      background: #222222 !important;
+      color: #ffffff !important;
+      font-family: Arial, Helvetica, sans-serif;
+      font-size: 22px;
+      font-weight: 800;
+      line-height: 1.4;
+      text-align: left;
     }
 
     /* SEARCH BAR */
@@ -264,6 +281,11 @@
         font-size: 17px !important;
         padding: 6px 10px !important;
       }
+
+      #latestReleaseHeading {
+        margin-top: 14px;
+        font-size: 22px;
+      }
     }
 
     /* MOBILE */
@@ -326,6 +348,13 @@
         font-size: 12px !important;
         line-height: 1.2 !important;
       }
+
+      #latestReleaseHeading {
+        margin: 12px 10px 20px;
+        width: calc(100% - 20px);
+        padding: 12px;
+        font-size: 16px;
+      }
     }
 
     /* CATEGORY BACKGROUNDS */
@@ -336,6 +365,7 @@
       background: #000000 !important;
       background-color: #000000 !important;
       background-image: none !important;
+      color: #ffffff !important;
     }
   </style>
 </head>
