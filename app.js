@@ -27,7 +27,7 @@ let filteredMovies = [];
 let currentPage = 1;
 let activeCategory = "All";
 
-const pageSize = 30;
+const pageSize = 50;
 
 const categories = [
   "18+ [Adult]", "Action", "Anime / Animation", "Bengali",
@@ -142,7 +142,7 @@ function setupLatestHeading() {
   window.addEventListener("resize", updateHeadingLayout);
 }
 
-/* CATEGORY BUTTONS - GREEN COLOR RESTORED */
+/* CATEGORY BUTTONS */
 function setupCategories() {
   if (!siteNav) return;
 
@@ -207,7 +207,6 @@ function setupCategories() {
       item.classList.toggle("active", active);
       item.setAttribute("aria-pressed", String(active));
 
-      /* Keep every category button lime green, even when selected */
       item.style.setProperty("background", "#c6ff00", "important");
       item.style.setProperty("background-color", "#c6ff00", "important");
       item.style.setProperty("color", "#000000", "important");
@@ -510,6 +509,13 @@ async function loadMovies() {
     allMovies = snapshot.docs
       .map((item) => ({ id: item.id, ...item.data() }))
       .sort((a, b) => {
+        const latestA = String(a.moviePosition || "").toLowerCase() === "latest release";
+        const latestB = String(b.moviePosition || "").toLowerCase() === "latest release";
+
+        if (latestA !== latestB) {
+          return latestA ? -1 : 1;
+        }
+
         const timeA = a.createdAt?.toMillis?.() || 0;
         const timeB = b.createdAt?.toMillis?.() || 0;
         return timeB - timeA;
