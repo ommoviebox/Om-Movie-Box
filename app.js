@@ -42,7 +42,6 @@ const categories = [
 
 function safeURL(value) {
   if (!value) return "";
-
   try {
     const url = new URL(String(value).trim());
     return ["https:", "http:"].includes(url.protocol) ? url.href : "";
@@ -60,19 +59,9 @@ function normalize(value) {
 
 function movieText(movie) {
   return normalize([
-    movie.title,
-    movie.genre,
-    movie.language,
-    movie.year,
-    movie.contentType,
-    movie.type,
-    movie.description,
-    movie.quality,
-    movie.badge,
-    movie.category,
-    movie.categories,
-    movie.audio,
-    movie.tags
+    movie.title, movie.genre, movie.language, movie.year,
+    movie.contentType, movie.type, movie.description, movie.quality,
+    movie.badge, movie.category, movie.categories, movie.audio, movie.tags
   ].flat().join(" "));
 }
 
@@ -92,50 +81,17 @@ function matchesCategory(movie, category) {
     return normalize(movie.language).includes(cat) || text.includes(cat);
   }
 
-  if (category === "WEB-Series") {
-    return /web[\s-]*series|series/.test(text);
-  }
-
-  if (category === "TV-Shows") {
-    return /tv[\s-]*shows|television|tvshow|tv show/.test(text);
-  }
-
-  if (category === "Bollywood Movies") {
-    return /bollywood|hindi/.test(text);
-  }
-
-  if (category === "Hollywood Movies" || category === "English Movies") {
-    return /hollywood|english/.test(text);
-  }
-
-  if (category === "South Hindi Movies") {
-    return /south|tamil|telugu|malayalam|kannada/.test(text) &&
-      /hindi/.test(text);
-  }
-
-  if (category === "Hindi Dubbed" || category === "UnOfficial Dubbed") {
-    return /hindi dubbed|dubbed|unofficial dubbed/.test(text);
-  }
-
-  if (category === "Anime / Animation") {
-    return /anime|animation|animated/.test(text);
-  }
-
-  if (category === "Dual Audio") {
-    return /dual audio|dual language|multi audio/.test(text);
-  }
-
-  if (category === "K-Drama") {
-    return /k drama|korean drama/.test(text);
-  }
-
-  if (category === "18+ [Adult]") {
-    return /18|adult/.test(text);
-  }
-
-  if (category === "Ullu Web Series") {
-    return /ullu/.test(text);
-  }
+  if (category === "WEB-Series") return /web[\s-]*series|series/.test(text);
+  if (category === "TV-Shows") return /tv[\s-]*shows|television|tvshow|tv show/.test(text);
+  if (category === "Bollywood Movies") return /bollywood|hindi/.test(text);
+  if (category === "Hollywood Movies" || category === "English Movies") return /hollywood|english/.test(text);
+  if (category === "South Hindi Movies") return /south|tamil|telugu|malayalam|kannada/.test(text) && /hindi/.test(text);
+  if (category === "Hindi Dubbed" || category === "UnOfficial Dubbed") return /hindi dubbed|dubbed|unofficial dubbed/.test(text);
+  if (category === "Anime / Animation") return /anime|animation|animated/.test(text);
+  if (category === "Dual Audio") return /dual audio|dual language|multi audio/.test(text);
+  if (category === "K-Drama") return /k drama|korean drama/.test(text);
+  if (category === "18+ [Adult]") return /18|adult/.test(text);
+  if (category === "Ullu Web Series") return /ullu/.test(text);
 
   return text.includes(cat);
 }
@@ -183,11 +139,10 @@ function setupLatestHeading() {
   }
 
   updateHeadingLayout();
-
   window.addEventListener("resize", updateHeadingLayout);
 }
 
-/* CATEGORY BUTTONS */
+/* CATEGORY BUTTONS - GREEN COLOR RESTORED */
 function setupCategories() {
   if (!siteNav) return;
 
@@ -214,9 +169,10 @@ function setupCategories() {
     button.dataset.category = category;
     button.setAttribute("aria-pressed", "false");
 
-    button.style.setProperty("background-color", "#000000", "important");
+    button.style.setProperty("background", "#c6ff00", "important");
+    button.style.setProperty("background-color", "#c6ff00", "important");
     button.style.setProperty("background-image", "none", "important");
-    button.style.setProperty("color", "#ffffff", "important");
+    button.style.setProperty("color", "#000000", "important");
     button.style.setProperty("border", "1px solid #c6ff00", "important");
     button.style.setProperty("border-radius", "8px", "important");
     button.style.setProperty("font-family", "Arial, Helvetica, sans-serif", "important");
@@ -238,9 +194,7 @@ function setupCategories() {
   }
 
   addCategoryButton("All");
-  categories
-    .filter((category) => category !== "Movies4u")
-    .forEach(addCategoryButton);
+  categories.forEach(addCategoryButton);
 
   categoryBox.addEventListener("click", (event) => {
     const button = event.target.closest("button[data-category]");
@@ -252,6 +206,12 @@ function setupCategories() {
       const active = item.dataset.category === activeCategory;
       item.classList.toggle("active", active);
       item.setAttribute("aria-pressed", String(active));
+
+      /* Keep every category button lime green, even when selected */
+      item.style.setProperty("background", "#c6ff00", "important");
+      item.style.setProperty("background-color", "#c6ff00", "important");
+      item.style.setProperty("color", "#000000", "important");
+      item.style.setProperty("border-color", "#c6ff00", "important");
     });
 
     applyFilters();
@@ -279,11 +239,7 @@ function setMenuOpen(open) {
   siteNav.classList.toggle("open", isMobile && open);
   siteNav.hidden = !shouldShow;
 
-  siteNav.style.setProperty(
-    "display",
-    shouldShow ? "block" : "none",
-    "important"
-  );
+  siteNav.style.setProperty("display", shouldShow ? "block" : "none", "important");
 }
 
 function setupMenu() {
@@ -296,7 +252,6 @@ function setupMenu() {
 
   menuToggle.addEventListener("click", (event) => {
     event.preventDefault();
-
     if (!window.matchMedia("(max-width: 600px)").matches) return;
 
     const isOpen = menuToggle.getAttribute("aria-expanded") === "true";
@@ -347,7 +302,6 @@ function renderCard(movie) {
     posterWrap.appendChild(placeholder);
   }
 
-  /* POSTER QUALITY BADGE */
   const badgeValue = String(movie.badge || "None").trim();
 
   if (badgeValue && badgeValue.toLowerCase() !== "none") {
@@ -378,7 +332,6 @@ function renderCard(movie) {
     posterWrap.appendChild(badge);
   }
 
-  /* OPTIONAL NEW / TRENDING POSTER LABEL */
   const trendValue = String(movie.trendBadge || "None").trim();
 
   if (trendValue && trendValue.toLowerCase() !== "none") {
@@ -419,14 +372,12 @@ function renderCard(movie) {
 
   const contentType = movie.contentType || movie.type || "Movie";
 
-  [movie.year, movie.language, contentType]
-    .filter(Boolean)
-    .forEach((value) => {
-      const span = document.createElement("span");
-      span.textContent = value;
-      span.style.marginRight = "5px";
-      meta.appendChild(span);
-    });
+  [movie.year, movie.language, contentType].filter(Boolean).forEach((value) => {
+    const span = document.createElement("span");
+    span.textContent = value;
+    span.style.marginRight = "5px";
+    meta.appendChild(span);
+  });
 
   info.append(title, meta);
   card.append(posterWrap, info);
@@ -442,9 +393,7 @@ function getSearchText() {
 function getFilterValue(ids) {
   for (const id of ids) {
     const element = $(id);
-    if (element?.value && element.value !== "all") {
-      return element.value.trim().toLowerCase();
-    }
+    if (element?.value && element.value !== "all") return element.value.trim().toLowerCase();
   }
   return "";
 }
@@ -484,13 +433,11 @@ function renderMovies() {
 
   const start = (currentPage - 1) * pageSize;
 
-  filteredMovies
-    .slice(start, start + pageSize)
-    .forEach((movie) => grid.appendChild(renderCard(movie)));
+  filteredMovies.slice(start, start + pageSize).forEach((movie) => {
+    grid.appendChild(renderCard(movie));
+  });
 
-  if (count) {
-    count.textContent = `${total} ${total === 1 ? "title" : "titles"}`;
-  }
+  if (count) count.textContent = `${total} ${total === 1 ? "title" : "titles"}`;
 
   if (empty) {
     empty.hidden = total !== 0;
@@ -520,18 +467,14 @@ function renderMovies() {
     return button;
   }
 
-  pagination.appendChild(
-    makeButton("← Previous", currentPage - 1, currentPage === 1)
-  );
+  pagination.appendChild(makeButton("← Previous", currentPage - 1, currentPage === 1));
 
   const label = document.createElement("span");
   label.className = "page-info";
   label.textContent = `Page ${currentPage} of ${totalPages}`;
   pagination.appendChild(label);
 
-  pagination.appendChild(
-    makeButton("Next →", currentPage + 1, currentPage === totalPages)
-  );
+  pagination.appendChild(makeButton("Next →", currentPage + 1, currentPage === totalPages));
 }
 
 /* SEARCH FORM */
@@ -580,8 +523,7 @@ async function loadMovies() {
 
     if (empty) {
       empty.hidden = false;
-      empty.textContent =
-        "Movies load nahi hui. Internet aur Firestore Rules check karein.";
+      empty.textContent = "Movies load nahi hui. Internet aur Firestore Rules check karein.";
     }
 
     if (pagination) pagination.replaceChildren();
