@@ -28,8 +28,8 @@ import { firebaseConfig } from "./firebase-config.js";
 const app = getApps().length ? getApp() : initializeApp(firebaseConfig);
 const auth = getAuth(app);
 const db = getFirestore(app);
-
 const ADMIN_UID = "psgRupW3EfRUe61pcJzjqo36dNc2";
+
 const $ = id => document.getElementById(id);
 
 const loginPanel = $("loginPanel");
@@ -52,6 +52,7 @@ const fields = [
   ["qualityInput", "quality"],
   ["badgeInput", "badge"],
   ["trendBadgeInput", "trendBadge"],
+  ["moviePositionInput", "moviePosition"],
   ["posterInput", "poster"],
   ["descriptionInput", "description"],
   ["officialUrlInput", "officialUrl"],
@@ -136,6 +137,9 @@ function resetForm(clearMessage = true) {
   const trendBadge = $("trendBadgeInput");
   if (trendBadge) trendBadge.value = "None";
 
+  const moviePosition = $("moviePositionInput");
+  if (moviePosition) moviePosition.value = "None";
+
   const customType = $("customButtonTypeInput");
   if (customType) customType.value = "download";
 
@@ -208,6 +212,7 @@ function getPayload() {
   payload.quality = valueOf("qualityInput") || "HD";
   payload.badge = valueOf("badgeInput") || "None";
   payload.trendBadge = valueOf("trendBadgeInput") || "None";
+  payload.moviePosition = valueOf("moviePositionInput") || "None";
 
   const customName = valueOf("customButtonNameInput");
   const customUrl = valueOf("customButtonUrlInput");
@@ -259,6 +264,7 @@ function renderTitleCard(id, data) {
   const poster = escapeHTML(data.poster || "");
   const badge = escapeHTML(data.badge || "None");
   const trendBadge = escapeHTML(data.trendBadge || "None");
+  const moviePosition = escapeHTML(data.moviePosition || "None");
   const status = data.published === false ? "Unpublished" : "Published";
 
   return `
@@ -273,7 +279,10 @@ function renderTitleCard(id, data) {
       <div style="flex:1;min-width:0;">
         <strong>${title}</strong>
         <div>${type} ${year ? "• " + year : ""}</div>
-        <small>${status} · Quality: ${badge} · Highlight: ${trendBadge}</small>
+        <small>
+          ${status} · Quality: ${badge} · Highlight: ${trendBadge}
+          · Position: ${moviePosition}
+        </small>
 
         <div style="display:flex;gap:8px;flex-wrap:wrap;margin-top:8px;">
           <button type="button" data-action="edit"
@@ -342,6 +351,14 @@ function fillForm(data, id) {
 
   const trendBadge = $("trendBadgeInput");
   if (trendBadge) trendBadge.value = data.trendBadge || "None";
+
+  const moviePosition = $("moviePositionInput");
+  if (moviePosition) {
+    moviePosition.value =
+      data.moviePosition === "Latest Release"
+        ? "Latest Release"
+        : "None";
+  }
 
   const customType = $("customButtonTypeInput");
   if (customType) {
